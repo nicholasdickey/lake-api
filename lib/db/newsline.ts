@@ -1,6 +1,6 @@
 import { l, chalk, microtime, js, ds } from "../common";
 import { dbGetQuery, dbLog } from "../db";
-import {Newsline,NewslineDefinition,Tag,Publications} from "../types/newsline"
+import {Newsline,NewslineDefinition,Tag,Publications,TagDefinition} from "../types/newsline"
 
 export const getNewslineDefaultTags = async ({
     threadid,
@@ -161,4 +161,19 @@ export const updateDefaultNewsline = async ({
         await query(`INSERT into pov_v30_newsline_default_tags (newsline,tag) VALUES (?,?}')`, [newsline,tag]);
         l(chalk.green(sql));
     })
+}
+export const getTagDefinition = async ({
+    threadid,  
+    tag
+}: {
+    threadid: number,
+    tag: string
+}):Promise<TagDefinition> => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT shortname as tag, text as name, icon, description from pov_categories where shortname='${tag}'`;
+    rows = await query(`SELECT shortname as tag, text as name, icon, description from pov_categories where shortname=?'`, [tag]);
+    l(chalk.green(sql,rows[0]))
+    return rows[0];
 }

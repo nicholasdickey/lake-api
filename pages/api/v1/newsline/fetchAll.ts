@@ -4,10 +4,9 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, updateDefaultNewsline, getTagDefinition } from "../../../../lib/db/newsline"
+import { getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, getNewslinePublications, updateDefaultNewsline, getTagDefinition } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import { RedisKey } from 'ioredis';
-import { stringify } from 'querystring';
 import { Newsline, NewslineDefinition, ExplorerPublication, Publications, NewslineDefinitionItem, TagDefinition } from "../../../../lib/types/newsline"
 
 
@@ -22,7 +21,7 @@ export default async function handler(
 
     // console.log("inside fetchExplore handler",req.body)
     const body = req.body;
-    let { sessionid, userslug, newsline, update }: { sessionid?: string, userslug?: string, newsline: string,  update?: number } = body;
+    let { sessionid, userslug, newsline, filter, q }: { sessionid?: string, userslug?: string, newsline: string, filter: string[], q?: string} = body;
 
     const id = userslug || sessionid;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -56,10 +55,7 @@ export default async function handler(
                 await redis.sadd(defaultNewslineKey, defaultNewsline)
             }
         }
-        else if (update == 1) { // for migrating from existing channel newslines (V10)
-            const defaultNewsline: Newsline = defaultNewslineDefinition.map(d => d.tag);
-            await updateDefaultNewsline({ threadid, newsline, defaultNewsline }); // note, db has only default newslines, newslineDefinitions are derived by combining with publications
-        }
+       
         const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
         let userNewslineModified = false;
         let newslineObjectRaw = await redis.get(userNewslineKey);
@@ -85,7 +81,7 @@ export default async function handler(
             }
 
             if (!userNewsline) {
-                return res.status(200).json({
+                res.status(200).json({
                     success: false,
                     msg: "Can't get newsline"
                 });
@@ -94,10 +90,35 @@ export default async function handler(
 
         }
 
+        let allPublicationsRaw: string | null = null, allPublications: Publications;
+        let newslineCategoriesKey: RedisKey = `all-publications-${newsline}`
+        if (!filter && !q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
+            allPublicationsRaw = await redis.get(newslineCategoriesKey);
+        }
+
+        if (allPublicationsRaw) {
+            allPublications = JSON.parse(allPublicationsRaw);
+        }
+        else {
+            //get from db
+            allPublications = await getNewslinePublications({ threadid, newsline, filter, q }); //array of {name, icon,tag, description, category_tag, category_name}
+            if (allPublications) {
+                if (!filter && !q) {
+                    allPublicationsRaw = JSON.stringify(allPublications);
+                    await redis.setex(newslineCategoriesKey, 7 * 24 * 3600, allPublicationsRaw);
+                }
+            }
+            else {
+                return res.status(200).json({
+                    success: false,
+                    msg: "Can't get publications for newsline and filter"
+                })
+            }
+        }
 
         // overlay private newsline over the default newsline
 
-
+        //  for (let i = 0; i < defaultNewsline.length; i++) {
 
         const defaultOverlayNewslineDefinition: Publications = defaultNewslineDefinition?.map(n => {
 
@@ -125,9 +146,24 @@ export default async function handler(
         defaultOverlayNewslineDefinition.sort((a: ExplorerPublication, b: ExplorerPublication) => a.name && b.name && a.name > b.name ? 1 : a.name && b.name && a.name < b.name ? 1 : 0);
 
 
+        //overlay combined newsline over selection of publications for explore tab
+        for (let i = 0; i < allPublications.length; i++) {
+            let n = allPublications[i];
+            const f = defaultOverlayNewslineDefinition.find((f: any) => f.tag == n.tag);
+            if (f) {
+                n.default = f.default;
+                n.switch = f.switch;
+            }
+            else {
+                n.default = false;
+                n.switch = 'off';
+            }
+        }
+        //fill in the details from catJson.
+
         //fill-in the details from catJson
 
-        const promises = defaultOverlayNewslineDefinition.map(f => {
+        const promises = allPublications.map(f => {
             return new Promise(async (resolve, reject) => {
                 const key: RedisKey = `catJson-${f.tag}`;
                 let catJson = await redis.get(key);
@@ -149,16 +185,16 @@ export default async function handler(
 
         return res.status(200).json({
             success: true,
-            newsline: defaultOverlayNewslineDefinition
+            publications: allPublications,
         })
+
     }
     catch (x) {
         l(chalk.red.bold("Exception in fetchExplore", x));
         return res.status(500).json({})
     }
-    finally{
+    finally {
         dbEnd(threadid);
         redis.quit();
     }
-
 }

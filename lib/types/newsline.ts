@@ -3,7 +3,6 @@
  */
 export interface NewslineDefinitionItem {
     tag:string;
-    default?:boolean;
     switch?:string;
 };
 export interface NewslineDefinition extends Array<NewslineDefinitionItem>{};
@@ -12,9 +11,9 @@ export interface NewslineDefinition extends Array<NewslineDefinitionItem>{};
  */
 export interface ExplorerPublication {
     tag:string;
-    name:string;
-    icon:string;
-    description:string;
+    name?:string;
+    icon?:string;
+    description?:string;
     default?:boolean;
     switch?:string;
 };
@@ -23,3 +22,10 @@ export interface Publications extends Array<ExplorerPublication>{};
 export type Tag=string;
 
 export interface Newsline extends Array<Tag>{};
+
+export interface TagDefinition {  // a.k.a category from V51 and defined_tags from V10
+    tag:string; //a.k.a shortname
+    name:string;
+    description:string;
+    icon:string;
+}
