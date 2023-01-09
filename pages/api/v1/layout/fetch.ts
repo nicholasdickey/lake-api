@@ -20,7 +20,7 @@ export default async function handler(
      });
 
     let { channel, sessionid, userslug, pageType, thick, dense, layoutNumber } = req.query;
-    l(chalk.blue("layoutNumber",layoutNumber))
+   // l(chalk.blue("layoutNumber",layoutNumber))
     let userConfigKey = null;
     let userLayout = null;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -57,14 +57,14 @@ export default async function handler(
         }
         const channelConfigKey = `channel-${channel}-config`;
         let channelConfig = await redis.get(channelConfigKey);
-        l(chalk.green("channelConfig from redis",channelConfigKey,channelConfig))
+      //  l(chalk.green("channelConfig from redis",channelConfigKey,channelConfig))
         let jsonChannelConfig;
         if (!channelConfig) {
             l(chalk.red("NO channel layout, calling db"))
             jsonChannelConfig = await getChannelConfig({ threadid, channel })
             jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
             channelConfig=JSON.stringify(jsonChannelConfig);
-            l("return from db",channelConfig)
+           // l("return from db",channelConfig)
             if(channelConfig)
             redis?.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
         }
@@ -73,7 +73,7 @@ export default async function handler(
         }
         if(!jsonChannelConfig)
             return res.status(500).json({msg:"Unable to parse channel config"})
-        l(chalk.yellow("got layout",js(jsonChannelConfig.config.layout)))
+      //  l(chalk.yellow("got layout",js(jsonChannelConfig.config.layout)))
         const channelLayout =jsonChannelConfig.config.layout;
         if (!thick)
             thick = "0";
@@ -81,9 +81,9 @@ export default async function handler(
             dense = "0";
 
         let density = +thick ? +dense ? "dense" : "thick" : "normal";
-        l(chalk.green.bold("call processLayout",js({channelLayout})))
+        //l(chalk.green.bold("call processLayout",js({channelLayout})))
         const layout = processLayout({ channelLayout, userLayout, pageType, density, layoutNumber })
-        l(chalk.yellow.bold(js({outputPayout:layout})))
+       // l(chalk.yellow.bold(js({outputPayout:layout})))
         res.status(200).json(layout)
     }
 

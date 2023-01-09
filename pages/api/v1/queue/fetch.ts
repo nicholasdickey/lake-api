@@ -31,7 +31,7 @@ export default async function handler(
     try {
 
         const ret=await fetchQueue({type,newsline,forum,tag,lastid,firstid:0,page,sessionid,countonly,userslug,test})
-        l(chalk.magenta.bold(js(ret)))
+        //l(chalk.magenta.bold(js(ret)))
         res.status(200).json(ret)
     }
 

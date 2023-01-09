@@ -3,7 +3,8 @@
  */
 export interface NewslineDefinitionItem {
     tag:string;
-    switch?:string;
+    switch?:'off'|'on';
+    description?:string;
 };
 export interface NewslineDefinition extends Array<NewslineDefinitionItem>{};
 /**
@@ -15,7 +16,7 @@ export interface ExplorerPublication {
     icon?:string;
     description?:string;
     default?:boolean;
-    switch?:string;
+    switch?:'off'|'on';
 };
 export interface Publications extends Array<ExplorerPublication>{};
 

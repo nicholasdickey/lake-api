@@ -14,10 +14,13 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    if (req.method !== 'POST') {
-        res.status(405).send({ message: 'Only POST requests allowed' });
-        return;
-    }
+    await NextCors(req, res, {
+        // Options
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+        origin: '*',
+        optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    });
+
 
     // console.log("inside fetchExplore handler",req.body)
     const body = req.body;
@@ -26,7 +29,7 @@ export default async function handler(
     const id = userslug || sessionid;
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-
+    l(chalk.cyan.bold("allPublications", js({filter})))
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
     try {
@@ -92,7 +95,7 @@ export default async function handler(
 
         let allPublicationsRaw: string | null = null, allPublications: Publications;
         let newslineCategoriesKey: RedisKey = `all-publications-${newsline}`
-        if (!filter && !q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
+        if ((!filter||!filter.length) && !q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
             allPublicationsRaw = await redis.get(newslineCategoriesKey);
         }
 
@@ -176,7 +179,7 @@ export default async function handler(
                 }
                 f.icon = cat.icon;
                 f.description = cat.description;
-                f.name = cat.name;
+                f.name = cat.text;
                 return resolve(true);
             });
         });
@@ -194,6 +197,7 @@ export default async function handler(
         return res.status(500).json({})
     }
     finally {
+        l("end of allPublications")
         dbEnd(threadid);
         redis.quit();
     }

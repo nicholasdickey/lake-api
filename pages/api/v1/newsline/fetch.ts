@@ -15,10 +15,13 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    if (req.method !== 'POST') {
-        res.status(405).send({ message: 'Only POST requests allowed' });
-        return;
-    }
+    await NextCors(req, res, {
+        // Options
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+        origin: '*',
+        optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    });
+
 
     // console.log("inside fetchExplore handler",req.body)
     const body = req.body;
@@ -138,9 +141,10 @@ export default async function handler(
                     catJson = JSON.stringify(cat);
                     await redis.set(key, catJson);
                 }
+                console.log(chalk.red.bold("==========================================================filling in details",js(f),js(cat)));
                 f.icon = cat.icon;
-                f.description = cat.description;
-                f.name = cat.name;
+                //f.description = cat.description;
+                //f.name = cat.text;
                 return resolve(true);
             });
         });

@@ -30,16 +30,16 @@ export default async function handler(
     try {
 
         const channelConfigKey = `channel-${slug}-config`;
-        console.log("redis.get",channelConfigKey)
+      //  console.log("redis.get",channelConfigKey)
         let channelConfig = await redis.get(channelConfigKey);
-        console.log("redis.get",channelConfigKey,channelConfig)
+      //  console.log("redis.get",channelConfigKey,channelConfig)
         let jsonChannelConfig;
         if (!channelConfig) {
-            l(chalk.red("CHANNEL CONFIG FETCH NO channel layout, calling db"))
+           // l(chalk.red("CHANNEL CONFIG FETCH NO channel layout, calling db"))
             jsonChannelConfig = await getChannelConfig({ threadid, channel:slug })
             jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
             channelConfig=JSON.stringify(jsonChannelConfig);
-            l("return from db",channelConfig)
+           // l("return from db",channelConfig)
             if(channelConfig)
             redis.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
         }
@@ -49,7 +49,7 @@ export default async function handler(
        
         if (!jsonChannelConfig)
             return res.status(500).json({msg:"Unable to parse channel config"});
-        console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
+       // console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
         const channelDetails={
             comment:jsonChannelConfig.config.comment,
             displayName:jsonChannelConfig.config.displayName,
@@ -68,7 +68,7 @@ export default async function handler(
             newsline,
             channelSlug:jsonChannelConfig.channelSlug
         }
-        l(chalk.magenta.bold(js(ret)))
+      //  l(chalk.magenta.bold(js(ret)))
         res.status(200).json(ret)
     }
 
