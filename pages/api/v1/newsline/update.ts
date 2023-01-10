@@ -6,18 +6,22 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { updateSessionNewsline, updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
-
+import fetchNewsline from '../../../../lib/fetchNewsline';
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    if (req.method !== 'POST'&&req.method !== 'PATCH') {
-        res.status(405).send({ message: 'Only POST and PATCH requests allowed' });
-        return;
-    }
+    await NextCors(req, res, {
+        // Options
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+        origin: '*',
+        optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    });
 
-    // console.log("inside fetchExplore handler",req.body)
+   
+
+    console.log("===*** &&& === inside newsline update handler",req.body)
     const body = req.body;
     let { sessionid, userslug, newsline, switch: switchParam, tag }: { sessionid?: string, userslug?: string, newsline: string, switch: 'on' | 'off', tag: string } = body;
 
@@ -42,11 +46,20 @@ export default async function handler(
         }
 
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
-
+        const myNewsline=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update:0})
+        l(chalk.yellow.bold("((((((((((((((((((((((((((((((( Result myNewsline:", js(myNewsline)));
+        return res.status(200).json({
+            success: true,
+            newsline: myNewsline
+        })
     }
     catch (x) {
-        l(chalk.red.bold("Exception in fetchExplore", x));
+        l(chalk.red.bold("Exception in ipdate", x));
         return res.status(500).json({})
+    }
+    finally {
+        dbEnd(threadid);
+        redis.quit();
     }
 
     res.status(200).json({})

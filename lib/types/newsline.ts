@@ -25,8 +25,8 @@ export type Tag=string;
 export interface Newsline extends Array<Tag>{};
 
 export interface TagDefinition {  // a.k.a category from V51 and defined_tags from V10
-    tag:string; //a.k.a shortname
-    name:string;
+    shortname:string; //a.k.a tag
+    text:string;
     description:string;
     icon:string;
 }

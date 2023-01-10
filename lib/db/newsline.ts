@@ -51,29 +51,30 @@ export const getSessionNewslineTags = async ({
 export const getNewslinePublications = async ({
     threadid,
     newsline,
-    filter,
+    filters,
     q
 }: {
     threadid: number,
     newsline: string,
-    filter?: string[],
+    filters?: string[],
     q?: string
 }):Promise<Publications> => {
     let sql, rows;
     /// l("fetchSubroots");
-    let inStr = "('"+filter?.join("','")+"')";
+    let inStr = "('"+filters?.join("','")+"')";
     console.log("insStr",inStr)
     let query = await dbGetQuery("povdb", threadid);
-    if (filter&&filter.length>0 && !q) {
+    if (filters&&filters.length>0 && !q) {
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr}'and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}'  order by cc.text asc `;
         l(chalk.green(sql))
         rows = await query(`SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline=? and p.category_tag=c.tag and p.newsline=? order by cc.text asc `, [newsline, newsline]);
     }
-    else  if(filter&&filter.length>0 &&q) {
-        sql = `SELECT cc.text as name, cc.icon,p.tag, p.description,c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in '${inStr}' and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}' and c.text like '%${q}%'order by cc.text asc `;
-        rows = await query(`SELECT cc.text as name, cc.icon, p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in '${inStr}' and c.newsline=? and p.category_tag=c.tag and p.newsline=? and cc.text like '%${q}%' order by cc.text asc `, [newsline, newsline]);
+    else  if(filters&&filters.length>0 &&q) {
+        sql = `SELECT cc.text as name, cc.icon,p.tag, p.description,c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}' and c.text like '%${q}%' order by cc.text asc `;
+        l(chalk.green(sql))
+        rows = await query(`SELECT cc.text as name, cc.icon, p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline=? and p.category_tag=c.tag and p.newsline=? and cc.text like '%${q}%' order by cc.text asc `, [newsline, newsline]);
     }
-    else if((!filter||!filter.length) && q){
+    else if((!filters||!filters.length) && q){
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline='${newsline}'  and p.category_tag=c.tag and p.newsline='${newsline}' and p.name like '%${q}%'order by cc.text asc `;
         rows = await query(`SELECT cc.text as name, cc.icon, p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline=?  and p.category_tag=c.tag and p.newsline=? and p.name like '%${q}%' order by cc.text asc `, [newsline, newsline]);
     }
@@ -101,17 +102,20 @@ export const updateSessionNewsline = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
      
-    sql=`SELECT xid from pov_v30_session_tags where key='${key}'`;
-    rows=await query (`SELECT xid from pov_v30_session_tags where key=?`,[key])
+    sql=`SELECT xid from pov_v30_session_tags where \`key\`='${key}'`;
+    l(chalk.green("!!!",sql))
+    rows=await query (`SELECT xid from pov_v30_session_tags where \`key\`=?`,[key])
     l(chalk.green(sql,rows))
     if(rows&&rows.length>0){
-        sql=`UPDATE pov_v30_session_tags set \`switch\`='${switchParam}' where key='${key}'`;
-        rows=await query(`UPDATE pov_v30_session_tags set \`switch\`=? where key=?`,[switchParam,key])
+        sql=`UPDATE pov_v30_session_tags set \`switch\`='${switchParam}' where \`key\`='${key}'`;
+        l(chalk.green(sql))
+        rows=await query(`UPDATE pov_v30_session_tags set \`switch\`=? where \`key\`=?`,[switchParam,key])
         l(chalk.green(sql,rows))
     }
     else {
-        sql=`INSERT into pov_v30_session_tags (sessionid,key,\`switch\`,tag) VALUES ('${sessionid}','${key}','${switchParam}','${tag}')`;
-        rows=await query(`INSERT into pov_v30_session_tags (sessionid,key,\`switch\`,tag) VALUES (?,?,?,?)`,[sessionid,key,switchParam,tag])
+        sql=`INSERT into pov_v30_session_tags (sessionid,\`key\`,\`switch\`,tag) VALUES ('${sessionid}','${key}','${switchParam}','${tag}')`;
+        l(chalk.green(sql))
+        rows=await query(`INSERT into pov_v30_session_tags (sessionid,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`,[sessionid,key,switchParam,tag])
         l(chalk.green(sql,rows))
     }  
 }
