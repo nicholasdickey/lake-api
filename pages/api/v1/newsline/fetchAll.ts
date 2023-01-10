@@ -4,10 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, getNewslinePublications, updateDefaultNewsline, getTagDefinition } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
-import { RedisKey } from 'ioredis';
-import { Newsline, NewslineDefinition, ExplorerPublication, Publications, NewslineDefinitionItem, TagDefinition } from "../../../../lib/types/newsline"
 import fetchAll from "../../../../lib/fetchAll"
 
 export default async function handler(
@@ -29,7 +26,7 @@ export default async function handler(
    
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-    l(chalk.cyan.bold("allPublications", q,js({filter})))
+    l(chalk.cyan.bold("allPublications", q,js({filters})))
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
     try {
