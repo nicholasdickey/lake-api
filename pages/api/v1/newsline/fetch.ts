@@ -28,7 +28,7 @@ export default async function handler(
     const redis = await getRedisClient({});
 
     if (!redis)
-        return res.status(500).json({ msg: "Unable to create redis" })
+        return res.status(500).json({ msg: "Unable to create redis" });
     try {
         const defaultOverlayNewslineDefinition=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update});
        console.log("========================================== fetch newsline end:",sessionid,js(defaultOverlayNewslineDefinition))
