@@ -35,7 +35,7 @@ export default async function handler(
         return res.status(200).json({ success: false, msg: "userslug or sessionid is missing" })
     try {
 
-        const userNewslineKey = `newsline-${newsline}-${id}`;
+        const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
 
         if (userslug) {
             await updateUserNewsline({ threadid, key: `${newsline}-${userslug}`, tag, switchParam, userslug })
@@ -44,8 +44,9 @@ export default async function handler(
         else if (sessionid) {
             await updateSessionNewsline({ threadid, key: `${newsline}-${sessionid}`, tag, switchParam, sessionid })
         }
-
+        l(chalk.magenta("after update DB, delete from redis"))
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
+        l(chalk.magenta("after  delete from redis key:",userNewslineKey,'result:',await redis.get(userNewslineKey)))
         const myNewsline=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update:0})
         l(chalk.yellow.bold("((((((((((((((((((((((((((((((( Result myNewsline:", js(myNewsline)));
         return res.status(200).json({

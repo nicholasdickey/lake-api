@@ -40,30 +40,36 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
         await updateDefaultNewsline({ threadid, newsline, defaultNewsline }); // note, db has only default newslines, newslineDefinitions are derived by combining with publications
     }
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
+  //  l(chalk.cyan.bold("fetchNewsline start",js({ sessionid, userslug, newsline, update,defaultNewslineDefinitionKey,userNewslineKey })))
+  
     let userNewslineModified = false;
     let newslineObjectRaw = await redis.get(userNewslineKey);
 
 
     let userNewsline: any;
     if (newslineObjectRaw) {
+       // console.log("has User Newsline ",newslineObjectRaw)
         userNewsline = JSON.parse(newslineObjectRaw)
     }
     else {
         //get from db and populate redis
-
+       // js(chalk.yellow("-- get from db"))
         if (userslug) {
             userNewsline = await getUserNewslineTags({ threadid, key: `${newsline}-${userslug}` })
-            if (userNewsline)
+            if (userNewsline){
                 await redis.setex(userNewslineKey, 7 * 24 * 3600, JSON.stringify(userNewsline));
+            }
 
         }
         else if (sessionid) {
+            l("get from sessionNewslineTags")
             userNewsline = await getSessionNewslineTags({ threadid, key: `${newsline}-${sessionid}` })
-            if (userNewsline)
+            l(chalk.green("from db:",js(userNewsline)));
+            if (userNewsline){
                 await redis.setex(userNewslineKey, 7 * 24 * 3600, JSON.stringify(userNewsline));
+            }
         }
 
-        
         userNewslineModified = true;
 
     }
@@ -112,7 +118,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
                 catJson = JSON.stringify(cat);
                 await redis.set(key, catJson);
             }
-            console.log(chalk.red.bold("==========================================================filling in details", js(f), js(cat)));
+          //  console.log(chalk.red.bold("==========================================================filling in details", js(f), js(cat)));
             f.icon = cat.icon;
             f.description = cat.description;
             //f.name = cat.text;
@@ -121,6 +127,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
     });
 
     await Promise.all(promises);
+   // l(chalk.magenta.bold("fetchNewslines end:",js(defaultOverlayNewslineDefinition)))
     return defaultOverlayNewslineDefinition;
 
 }

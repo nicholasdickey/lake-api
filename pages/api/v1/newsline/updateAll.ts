@@ -35,7 +35,7 @@ export default async function handler(
         return res.status(200).json({ success: false, msg: "userslug or sessionid is missing" })
     try {
 
-        const userNewslineKey = `newsline-${newsline}-${id}`;
+        const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
 
         if (userslug) {
             await updateUserNewsline({ threadid, key: `${newsline}-${userslug}`, tag, switchParam, userslug })

@@ -19,14 +19,14 @@ export default async function handler(
     });
 
 
-    // console.log("inside fetchExplore handler",req.body)
+    console.log("inside fetchEAll handler",req.body)
     const body = req.body;
     let { sessionid, userslug, newsline, filters, q }: { sessionid?: string, userslug?: string, newsline: string, filters: string[], q?: string} = body;
 
    
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-    l(chalk.cyan.bold("allPublications", q,js({filters})))
+    l(chalk.cyan.bold("allPublications",sessionid, q,js({filters})))
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
     try {

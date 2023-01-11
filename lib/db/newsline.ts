@@ -41,7 +41,7 @@ export const getSessionNewslineTags = async ({
 }):Promise<NewslineDefinition> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-
+    l("getSessionNewslineTags")
     sql = `SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key='${key}' order by c.text`;
     rows = await query(`SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]);
     l(chalk.green(sql,rows))
@@ -101,16 +101,30 @@ export const updateSessionNewsline = async ({
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-     
-    sql=`SELECT xid from pov_v30_session_tags where \`key\`='${key}'`;
+    console.log("UPDATE SESSION NEWSLINE ",js(({
+        threadid,
+        sessionid,
+        key,
+        switchParam,
+        tag
+    }))); 
+    sql=`SELECT xid from pov_v30_session_tags where \`key\`='${key}' and tag='${tag}'`;
     l(chalk.green("!!!",sql))
-    rows=await query (`SELECT xid from pov_v30_session_tags where \`key\`=?`,[key])
+    rows=await query (`SELECT xid from pov_v30_session_tags where \`key\`=? and tag=?`,[key,tag])
     l(chalk.green(sql,rows))
     if(rows&&rows.length>0){
-        sql=`UPDATE pov_v30_session_tags set \`switch\`='${switchParam}' where \`key\`='${key}'`;
-        l(chalk.green(sql))
-        rows=await query(`UPDATE pov_v30_session_tags set \`switch\`=? where \`key\`=?`,[switchParam,key])
-        l(chalk.green(sql,rows))
+        if(switchParam='off'){
+            sql=`DELETE from  pov_v30_session_tags where \`key\`='${key}' and tag='${tag}'`;
+            l(chalk.green(sql))
+            rows=await query(`DELETE from  pov_v30_session_tags  where \`key\`=? and tag=?`,[key,tag])
+            l(chalk.green(sql,rows));
+        }
+        else {
+            sql=`UPDATE pov_v30_session_tags set \`switch\`='${switchParam}' where \`key\`='${key}' and tag='${tag}'`;
+            l(chalk.green(sql))
+            rows=await query(`UPDATE pov_v30_session_tags set \`switch\`=? where \`key\`=? and tag=?'`,[switchParam,key,tag])
+            l(chalk.green(sql,rows))
+        }
     }
     else {
         sql=`INSERT into pov_v30_session_tags (sessionid,\`key\`,\`switch\`,tag) VALUES ('${sessionid}','${key}','${switchParam}','${tag}')`;
