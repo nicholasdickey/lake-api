@@ -68,7 +68,7 @@ export default async function handler(
             newsline,
             channelSlug:jsonChannelConfig.channelSlug
         }
-      //  l(chalk.magenta.bold(js(ret)))
+        l(chalk.magenta.bold(js(ret)))
         res.status(200).json(ret)
     }
 

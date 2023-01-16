@@ -5,6 +5,7 @@ export interface NewslineDefinitionItem {
     tag:string;
     switch?:'off'|'on';
     description?:string;
+    default?:boolean;
 };
 export interface NewslineDefinition extends Array<NewslineDefinitionItem>{};
 /**

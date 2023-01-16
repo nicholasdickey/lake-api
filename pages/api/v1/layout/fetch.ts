@@ -60,7 +60,7 @@ export default async function handler(
       //  l(chalk.green("channelConfig from redis",channelConfigKey,channelConfig))
         let jsonChannelConfig;
         if (!channelConfig) {
-            l(chalk.red("NO channel layout, calling db"))
+           // l(chalk.red("NO channel layout, calling db"))
             jsonChannelConfig = await getChannelConfig({ threadid, channel })
             jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
             channelConfig=JSON.stringify(jsonChannelConfig);

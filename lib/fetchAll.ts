@@ -35,7 +35,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
     let userNewslineModified = false;
     let newslineObjectRaw = await redis.get(userNewslineKey);
-    l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
+   // l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
 
     let userNewsline: any;
     if (newslineObjectRaw) {
@@ -141,7 +141,8 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
                 await redis.set(key, catJson);
             }
             f.icon = cat.icon;
-            f.description = cat.description;
+            if(!f.description)
+             f.description =  cat.description;
             //f.name = cat.text;
             return resolve(true);
         });

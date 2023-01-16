@@ -19,7 +19,7 @@ export default async function handler(
     });
 
 
-    console.log("inside fetchEAll handler",req.body)
+   // console.log("inside fetchEAll handler",req.body)
     const body = req.body;
     let { sessionid, userslug, newsline, filters, q }: { sessionid?: string, userslug?: string, newsline: string, filters: string[], q?: string} = body;
 

@@ -62,7 +62,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
 
         }
         else if (sessionid) {
-            l("get from sessionNewslineTags")
+           // l("get from sessionNewslineTags")
             userNewsline = await getSessionNewslineTags({ threadid, key: `${newsline}-${sessionid}` })
             l(chalk.green("from db:",js(userNewsline)));
             if (userNewsline){
@@ -89,6 +89,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
             n.switch = 'on';
 
         }
+        n.default=true;
         return n;
         // defaultNewsline[i] = n;
     });
@@ -102,7 +103,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
         f.default = false;
         defaultOverlayNewslineDefinition.push(f);
     }
-    defaultOverlayNewslineDefinition.sort((a: ExplorerPublication, b: ExplorerPublication) => a.name && b.name && a.name > b.name ? 1 : a.name && b.name && a.name < b.name ? 1 : 0);
+    defaultOverlayNewslineDefinition.sort((a: ExplorerPublication, b: ExplorerPublication) => a.name && b.name && a.name > b.name ? 1 : a.name && b.name && a.name < b.name ? -1 : 0);
 
 
     //fill-in the details from catJson
