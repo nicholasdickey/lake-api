@@ -30,7 +30,7 @@ export default async function handler(
         return res.status(500).json({ msg: "Unable to create redis" })
 
     try {
-     l(chalk.magenta.bold("fetchQueue", type, tag))
+     l(chalk.magenta.bold("fetchQueue", js({lastid,type, tag,countonly})))
         let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page, sessionid, countonly, userslug, test })
         if (!countonly) {
             const items = ret.items;
@@ -78,6 +78,9 @@ export default async function handler(
         }
        // if (type == 'tag')
         //    l(chalk.magenta.bold(js(ret)))
+        if(countonly){
+            console.log('count:',ret.newItems)
+        }
         res.status(200).json(ret)
     }
 
