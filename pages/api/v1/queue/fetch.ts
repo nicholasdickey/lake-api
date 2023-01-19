@@ -9,6 +9,7 @@ import { dbLog, dbEnd } from "../../../../lib/db"
 import { processLayout } from "../../../../lib/layout"
 import { fetchQueue } from "../../../../lib/fetchQueue"
 import { Commissioner } from '@next/font/google';
+import { isImportEqualsDeclaration } from 'typescript';
 type Data = any
 
 export default async function handler(
@@ -22,20 +23,29 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid, page, test } = req.query;
-
+    let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid,tail, page, test,qwiketid,size,solo,debug } = req.query;
+    if(!countonly)
+    countonly='0';
+    if(!tail)
+    tail='0';
+   
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
 
+
+    const countOnlyParam=+countonly;
+    const tailParam=+tail;    
+    const pageParam=+page;
     try {
-     l(chalk.magenta.bold("fetchQueue", js({lastid,type, tag,countonly})))
-        let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page, sessionid, countonly, userslug, test })
-        if (!countonly) {
+     l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
+        let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page:pageParam, sessionid, countonly:countOnlyParam, userslug,tail:tailParam,qwiketid,size,solo,test,debug })
+        if (!countonly||(countonly =='0')) {
             const items = ret.items;
            // if(type=='mix')
-           // l("ret:", ret.items.map(r=>r.item))
+          l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
+          // l("ret:", ret.items.map(r=>r.item))
             const newItems = items.map(({ item }: any) => {
                /* if (!item.catIcon) {
                     l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
