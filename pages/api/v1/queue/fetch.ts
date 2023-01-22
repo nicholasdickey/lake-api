@@ -39,12 +39,12 @@ export default async function handler(
     const tailParam=+tail;    
     const pageParam=+page;
     try {
-     l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
+    // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
         let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page:pageParam, sessionid, countonly:countOnlyParam, userslug,tail:tailParam,qwiketid,size,solo,test,debug })
         if (!countonly||(countonly =='0')) {
             const items = ret.items;
            // if(type=='mix')
-          l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
+         // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
           // l("ret:", ret.items.map(r=>r.item))
             const newItems = items.map(({ item }: any) => {
                /* if (!item.catIcon) {
@@ -89,7 +89,7 @@ export default async function handler(
        // if (type == 'tag')
         //    l(chalk.magenta.bold(js(ret)))
         if(countonly){
-            console.log('count:',ret.newItems)
+           // console.log('count:',ret.newItems)
         }
         res.status(200).json(ret)
     }

@@ -2,7 +2,7 @@ import cheerio from "whacko"
 import { l, chalk, js } from "./common";
 
 export function processBody({ body }) {
-    l("PROCESS BODY", body)
+   // l("PROCESS BODY", body)
     if (body) {
 
         const blocks = body.blocks;
@@ -13,7 +13,7 @@ export function processBody({ body }) {
                 html = b.html;
             }
             if (html) {
-                l(chalk.magenta.bold("UNPROCESSED HTML", html))
+               // l(chalk.magenta.bold("UNPROCESSED HTML", html))
                 html = html.replace(/\s\s+/g, ' ');
                 //html=html.replace('&nbsp;',"");
                 let $ = cheerio.load(html, {
@@ -98,11 +98,11 @@ export function processBody({ body }) {
                 });
 
                 b.html = $('body').html();
-                l(chalk.yellow.bold("HTML assigning back to b.html", b.html));
+               // l(chalk.yellow.bold("HTML assigning back to b.html", b.html));
                 $('body').children().each(function (i) {
                     const tagName = $(this)[0].name;
                     const outerHtml: string = $(this).html();
-                    l(chalk.green.bold("TAG:", tagName, $(this)));
+                   // l(chalk.green.bold("TAG:", tagName, $(this)));
                     let block: {
                         type: string;
                         content: string;
@@ -126,15 +126,15 @@ export function processBody({ body }) {
                                     // console.log("each:", this)
                                      const link = $(this).attr('href');
                                      if (link) {
-                                         console.log("twitter link:", link)
+                                        // console.log("twitter link:", link)
                                          const t = link.split('status/');
-                                         console.log("SPLIT:", t)
+                                       // console.log("SPLIT:", t)
                                          if (t.length > 1) {
-                                             console.log('t.length', t.length)
+                                            // console.log('t.length', t.length)
                                              const tid = t[1].split('?')[0];
                                              block.id=tid;
                                              block.content='';
-                                             console.log("Twitter id:", tid)
+                                            // console.log("Twitter id:", tid)
                                             /* $(this).parents('.twitter-tweet').replaceWith(`<twittertweetembed rel='twitter' tweetid='${tid}'/
                                          ></twittertweetembed>`);*/
                  
@@ -161,7 +161,7 @@ export function processBody({ body }) {
                     htmlBlocks.push(block);
 
                 })
-                l(chalk.green("new html blocks:",js(htmlBlocks)))
+             //   l(chalk.green("new html blocks:",js(htmlBlocks)))
 
             }
 

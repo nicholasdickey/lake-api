@@ -19,8 +19,8 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
      });
 
-    let { channel, sessionid, userslug, pageType, thick, dense, layoutNumber } = req.query;
-   // l(chalk.blue("layoutNumber",layoutNumber))
+    let { channel, sessionid, userslug, pageType, thick, dense, layoutNumber,leftOverride } = req.query;
+    //l(chalk.blue("layoutNumber",layoutNumber))
     let userConfigKey = null;
     let userLayout = null;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -73,7 +73,7 @@ export default async function handler(
         }
         if(!jsonChannelConfig)
             return res.status(500).json({msg:"Unable to parse channel config"})
-      //  l(chalk.yellow("got layout",js(jsonChannelConfig.config.layout)))
+        //l(chalk.yellow("got layout",js(jsonChannelConfig.config.layout)))
         const channelLayout =jsonChannelConfig.config.layout;
         if (!thick)
             thick = "0";
@@ -81,8 +81,8 @@ export default async function handler(
             dense = "0";
 
         let density = +thick ? +dense ? "dense" : "thick" : "normal";
-        //l(chalk.green.bold("call processLayout",js({channelLayout})))
-        const layout = processLayout({ channelLayout, userLayout, pageType, density, layoutNumber })
+       // l(chalk.green.bold("call processLayout",js({channelLayout})))
+        const layout = processLayout({ channelLayout, userLayout, pageType, density, layoutNumber,leftOverride })
        // l(chalk.yellow.bold(js({outputPayout:layout})))
         res.status(200).json(layout)
     }
