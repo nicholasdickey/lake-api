@@ -37,9 +37,11 @@ export default async function handler(
         if (!channelConfig) {
            // l(chalk.red("CHANNEL CONFIG FETCH NO channel layout, calling db"))
             jsonChannelConfig = await getChannelConfig({ threadid, channel:slug })
+            l("return from db",jsonChannelConfig)
             jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
+          
             channelConfig=JSON.stringify(jsonChannelConfig);
-           // l("return from db",channelConfig)
+            l("return from db",channelConfig)
             if(channelConfig)
             redis.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
         }
@@ -49,7 +51,7 @@ export default async function handler(
        
         if (!jsonChannelConfig)
             return res.status(500).json({msg:"Unable to parse channel config"});
-       // console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
+       console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
         const channelDetails={
             comment:jsonChannelConfig.config.comment,
             displayName:jsonChannelConfig.config.displayName,
@@ -60,7 +62,9 @@ export default async function handler(
             logo:jsonChannelConfig.config.logo,
             lacantinaName:jsonChannelConfig.config.lacantinaName,
             lacantinaSlug:jsonChannelConfig.config.lacantinaSlug,
-            lowline:jsonChannelConfig.config.lowline
+            lowline:jsonChannelConfig.config.lowline,
+            topline:jsonChannelConfig.config.topline,
+            mobileLayouts:jsonChannelConfig.config.mobileLayouts
         }
         const newsline=jsonChannelConfig.newsline;
         const ret={
