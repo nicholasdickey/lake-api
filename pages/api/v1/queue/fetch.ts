@@ -49,6 +49,7 @@ export default async function handler(
             // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
             // l("ret:", ret.items.map(r=>r.item))
             const newItems = items.map(({ item }: any) => {
+                //l(item)
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
@@ -73,7 +74,7 @@ export default async function handler(
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;
                     common['author_name'] = item.author_name;
-                    common['thread_title'] = item.thread_title;
+                    common['thread_title'] = item.title;
                     common['thread_url'] = item.thread_url;
                     common['thread_image'] = item.thread_image;
                     common['thread_author'] = item.thread_author;
@@ -89,7 +90,7 @@ export default async function handler(
             // l(chalk.green.bold("return from fetchQueue", js(ret)))
         }
         // if (type == 'tag')
-        //    l(chalk.magenta.bold(js(ret)))
+       // l(chalk.magenta.bold(js(ret)))
         if (countonly) {
             // console.log('count:',ret.newItems)
         }
@@ -98,6 +99,9 @@ export default async function handler(
 
     catch (x) {
         l(chalk.red.bold(x))
+        res.status(501).json(x);
+    }
+    finally{
         redis.quit();
         dbEnd(threadid);
     }

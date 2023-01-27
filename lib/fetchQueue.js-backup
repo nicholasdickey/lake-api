@@ -1,6 +1,5 @@
-
+import { createImportSpecifier } from "typescript";
 import { getRedisClient } from "./redis.js"
-import innerFunctionMix2 from "./innerFunctionMix";
 const { l, chalk, apiUrl, logTime, logEnter, proxyParams } = require('./lib');
 /*
 type,
@@ -455,7 +454,7 @@ export async function fetchQueue({
                 // console.log("inside--- , key=", key);
                 let l2 = await redis.zcard(key);
                 // console.log("card then")
-                 l2 = 0; // to fix temporarity
+               // l2 = 0; // to fix temporarity
                 if (!l2) {
                     // console.log("l2 0")
                     //create queue for this newsline for the first time by mergin all (userCats) and store it for the future use in a zset for one day
@@ -484,8 +483,7 @@ export async function fetchQueue({
                     return await innerFunctionNewsline(key, "", forum);
                 } else {
                     // console.log("l2")
-                    return await innerFunctionMix2({newslineKey:key,lastid,forum,redis,page,size,tail,countonly})
-                    //return innerFunctionMix(key, "", forum);
+                    return innerFunctionMix(key, "", forum);
                 }
             } catch (x) {
                 console.log("EXCEPTION", x);
@@ -698,16 +696,10 @@ export async function fetchQueue({
     }
 
     async function innerFunctionMix(key, debugStr, forum) {
-        /**
-         * New code
-         */
-
-
-
         let lastCommentTime = "+inf";
         size = 4;
         let start = !lastid ? page * size : 0;
-         console.log("innerFunctionMix entry", {
+        /* console.log("innerFunctionMix entry", {
              key,
              lastid,
              start,
@@ -718,7 +710,7 @@ export async function fetchQueue({
              tail,
              countonly,
              lastCommentTime,
-         });
+         });*/
 
         if (!debugStr) debugStr = '"nodebug"';
 

@@ -88,7 +88,10 @@ export default async function handler(
     }
 
     catch (x) {
-        l(chalk.red.bold(x))
+        l(chalk.red.bold(x)); 
+        res.status(501).json(x);      
+    }
+    finally{
         redis?.quit();
         dbEnd(threadid);
     }

@@ -6,6 +6,7 @@ import { getRedisClient } from "../../../../lib/redis";
 import { dbLog, dbEnd } from "../../../../lib/db";
 import { getQwiket } from "../../../../lib/db/qwiket";
 import { processBody } from "../../../../lib/processBody";
+import {Qwiket} from "../../../../lib/types/qwiket";
 type Data = any
 
 interface Query {
@@ -55,11 +56,11 @@ export default async function handler(
             }
         }
         const item=json;
-        let common:any={
+        let common:Qwiket={
             catName: item.catName,
             catIcon: item.catIcon,
             postBody:'',
-            qpostid:'',
+            qpostid:0,
             published_time: item.published_time,
             shared_time: item.shared_time,
             slug: item.threadid,
@@ -78,7 +79,10 @@ export default async function handler(
     }
 
     catch (x) {
-        l(chalk.red.bold(x))
+        l(chalk.red.bold(x));
+        res.status(501).json(x);
+    }
+    finally{
         redis?.quit();
         dbEnd(threadid);
     }
