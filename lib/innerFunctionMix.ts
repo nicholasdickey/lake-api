@@ -18,7 +18,7 @@ const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, red
     }
     else {
         const ntJson = await getNtJson({ xid: lastXid, redis });
-        l(chalk.green.bold(`ifm: got last ntJson`, js(ntJson)))
+       // l(chalk.green.bold(`ifm: got last ntJson`, js(ntJson)))
         if (ntJson)
             lastTime = + ntJson.shared_time;
     }
