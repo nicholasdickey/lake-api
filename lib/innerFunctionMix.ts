@@ -3,7 +3,7 @@ import { l, chalk, js } from "./common";
 import { Qwiket } from "./types/qwiket";
 
 const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, redis }: { newslineKey: string, forum: string, commentsKey: string, lastXid: number, tail: number, redis: any }) => {
-    l(chalk.green.bold(`ifm: getNewCount`, js({ lastXid, tail })))
+    //l(chalk.green.bold(`ifm: getNewCount`, js({ lastXid, tail })))
     if (!lastXid)
         return {
             success: false,
@@ -31,7 +31,7 @@ const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, red
     const minTime = lastTime + 1;
     const newComments = await redis.zcount(commentsKey, minTime, '+inf');
     const newItems = await redis.zcount(newslineKey, minTime, '+inf');
-    l(chalk.green.bold(`ifm: got lasTime`, minTime, commentsKey, newslineKey, newItems, newComments))
+   // l(chalk.green.bold(`ifm: got lasTime`, minTime, commentsKey, newslineKey, newItems, newComments))
     return {
         success: true,
         newItems: newItems + newComments
@@ -70,7 +70,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
 
 const getPJson = async ({ qpostid, forum, redis }: { qpostid: number, forum: string, redis: any }) => {
     const commentKey = `pjson-${forum}-${qpostid}`;
-    l(chalk.yellow.bold(js({commentKey})))
+    //l(chalk.yellow.bold(js({commentKey})))
     const pJsonRaw = await redis.get(commentKey);
     let pJson: Qwiket | null = null;
     if (!pJsonRaw) {

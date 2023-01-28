@@ -15,6 +15,7 @@ export interface Qwiket{
     catIcon?: string,
     postBody?:string,
     qpostid?:number,
+    id?:number,
     published_time:number,
     shared_time: number,
     slug: string,

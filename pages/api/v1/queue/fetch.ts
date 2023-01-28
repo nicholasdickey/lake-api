@@ -80,6 +80,7 @@ export default async function handler(
                     common['thread_author'] = item.thread_author;
                     common['createdat'] = item.createdat;
                     common['subscr_status'] = item.subscr_status;
+                    common['id']=item.id;
 
                 }
                 return common;
