@@ -47,7 +47,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
         const qpostid = comments[i++];
         const createdAt = comments[i];
         if (!trigger) {
-            console.log("NO TRIGGER",tail,qpostid)
+           // console.log("NO TRIGGER",tail,qpostid)
             if (tail == qpostid)
                 trigger = true;
         }
@@ -56,15 +56,15 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
             l(chalk.yellow.bold(js({pJson})))
             if (pJson) {
                 prepends.push({item:pJson});
-                l(chalk.red.bold("CHECKING FOR NEW TAIL",tail,i,qpostid))
+               // l(chalk.red.bold("CHECKING FOR NEW TAIL",tail,i,qpostid))
                 if (!tail && i == 1){
-                    l(chalk.whiteBright.bgBlue(`NEW TAIL`,tail,qpostid))
+                    //l(chalk.whiteBright.bgBlue(`NEW TAIL`,tail,qpostid))
                     tail = qpostid;
                 }
             }
         }
     }
-    l(`returning${js({tail})}`)
+   // l(`returning${js({tail})}`)
     return {tail,prepends};
 }
 
@@ -162,7 +162,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             pageJson.unshift(...prepends); // prepend all the new comments in the descending order
            // console.log("ifm: adding prepends existing page:", js({ newTail,prepends }))
         }
-        console.log(`T3 END Time:`,Date.now()-t1,tail)
+      //  console.log(`T3 END Time:`,Date.now()-t1,tail)
         return {
             success: true,
             items: pageJson,
@@ -215,7 +215,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     //  let xids = new Array<{ xid: number, shared_time: number }>;
     let lastCreatedAt = prevCreatedAt; // 0 when page==0 and no lastid or lastid still first item;
    // l(chalk.cyan.bold("ifm: lastCreatedAt", lastCreatedAt))
-    console.log('t7 Time:',Date.now()-t1)
+   // console.log('t7 Time:',Date.now()-t1)
     for (let i = 0; i < newslineAll.length; i++) {
         const xid = newslineAll[i++];
 
@@ -228,18 +228,18 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         let commentsBefore =[];
         if(lastCreatedAt) {
             commentsBefore=await redis.zrevrangebyscore(commentsKey, lastCreatedAt,shared_time );
-            console.log(`t5-${i} Time:`,Date.now()-t1)
+          //  console.log(`t5-${i} Time:`,Date.now()-t1)
           //  l(chalk.yellow(`ifm: commentsBefore`, js({ commentsKey, lastCreatedAt, shared_time, commentsBefore })))
         } 
        
         lastCreatedAt = shared_time;//i == 0 ? shared_time : commentsBefore[1]; //0 is id, q - createdat
 
         if (commentsBefore) {
-            l(chalk.yellow("commentsBefore",js(commentsBefore)))  
+            //l(chalk.yellow("commentsBefore",js(commentsBefore)))  
             for (let j = 0; j < commentsBefore.length; j++) {
                 const qpostid = commentsBefore[j];
                 const pJson = await getPJson({ qpostid, forum, redis });
-                console.log(`t4-${i} Time:`,Date.now()-t1)
+               // console.log(`t4-${i} Time:`,Date.now()-t1)
                 pageJson.push({ item: pJson });
             }
         }
@@ -292,7 +292,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         return item.shared_time;
     })
     l(chalk.bgBlue.whiteBright(`times: ${js(times)}`))*/
-    console.log('End Time:',Date.now()-t1)
+   // console.log('End Time:',Date.now()-t1)
     if (page == 0 && pageJson[0]) {// will need to prepend fresh comments from tail   
         const item = pageJson[0].item;
         if (item) {
@@ -305,7 +305,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             pageJson.unshift(...prepends); // prepend all the new comments in the descending order
         }
     }
-    console.log('End Time:',Date.now()-t1)
+ //   console.log('End Time:',Date.now()-t1)
     const ret = {
         success: true,
         type: "mix",

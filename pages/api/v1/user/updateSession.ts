@@ -20,7 +20,8 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { userslug, options } = req.query;
+    const body = req.body;
+    let { userslug, options } =body;
 
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});

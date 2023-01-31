@@ -51,7 +51,7 @@ export default async function handler(
        
         if (!jsonChannelConfig)
             return res.status(500).json({msg:"Unable to parse channel config"});
-       console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
+      // console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
         const channelDetails={
             comment:jsonChannelConfig.config.comment,
             displayName:jsonChannelConfig.config.displayName,
@@ -72,7 +72,7 @@ export default async function handler(
             newsline,
             channelSlug:jsonChannelConfig.channelSlug
         }
-        l(chalk.magenta.bold(js(ret)))
+      //  l(chalk.magenta.bold(js(ret)))
         res.status(200).json(ret)
     }
 

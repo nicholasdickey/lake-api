@@ -19,7 +19,7 @@ export default async function handler(
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
-
+    l(chalk.yellow("fetch user"));
     let { userslug } = req.query;
 
     let threadid = Math.floor(Math.random() * 100000000)
