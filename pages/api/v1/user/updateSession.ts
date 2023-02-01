@@ -32,7 +32,7 @@ export default async function handler(
 
     try {
         const userKey = `user-options-${userslug}`;
-        const userSession = options as string;
+        const userSession = JSON.stringify(options);
         await saveUserSession({ threadid, userslug: userslug as string, options: userSession });
         redis.setex(userKey, 365 * 24 * 3600, userSession);
 

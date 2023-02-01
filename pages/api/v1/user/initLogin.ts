@@ -57,7 +57,7 @@ export default async function handler(
 
         if (!userSession)
             return res.status(501).json({ msg: "Unable to parse user" });
-
+        console.log("initLogin returning",userSession)
         res.status(200).json({ success: true, userSession })
     }
 
