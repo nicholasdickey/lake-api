@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { updateSessionNewsline, updateUserNewsline } from "../../../../lib/db/newsline"
+import {  updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import fetchNewsline from '../../../../lib/fetchNewsline';
 
@@ -36,14 +36,9 @@ export default async function handler(
     try {
 
         const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
+      
+        await updateUserNewsline({type:userslug?'user':'session',sessionid,userslug,newsline, threadid, key: `${newsline}-${userslug}`, tag, switchParam })
 
-        if (userslug) {
-            await updateUserNewsline({ threadid, key: `${newsline}-${userslug}`, tag, switchParam, userslug })
-
-        }
-        else if (sessionid) {
-            await updateSessionNewsline({ threadid, key: `${newsline}-${sessionid}`, tag, switchParam, sessionid })
-        }
         l(chalk.magenta("after update DB, delete from redis"))
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
         l(chalk.magenta("after  delete from redis key:",userNewslineKey,'result:',await redis.get(userNewslineKey)))

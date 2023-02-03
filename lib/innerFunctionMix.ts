@@ -53,7 +53,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
         }
         if (trigger) {
             const pJson = await getPJson({ qpostid, forum, redis });
-            l(chalk.yellow.bold(js({pJson})))
+            //l(chalk.yellow.bold(js({pJson})))
             if (pJson) {
                 prepends.push({item:pJson});
                // l(chalk.red.bold("CHECKING FOR NEW TAIL",tail,i,qpostid))

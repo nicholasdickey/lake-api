@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { updateSessionNewsline, updateUserNewsline } from "../../../../lib/db/newsline"
+import { updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import fetchAll from '../../../../lib/fetchAll';
 
@@ -36,15 +36,11 @@ export default async function handler(
     try {
 
         const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
+        l(chalk.green.bold(js({userNewslineKey,userslug,sessionid,id})));
+       
+        await updateUserNewsline({type:userslug?'user':'session',newsline,sessionid,userslug, threadid, key: `${newsline}-${userslug}`, tag, switchParam })
 
-        if (userslug) {
-            await updateUserNewsline({ threadid, key: `${newsline}-${userslug}`, tag, switchParam, userslug })
-
-        }
-        else if (sessionid) {
-            await updateSessionNewsline({ threadid, key: `${newsline}-${sessionid}`, tag, switchParam, sessionid })
-        }
-
+       
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
         const publications=await fetchAll({redis,threadid,sessionid,userslug,newsline,filters,q})
         l(chalk.yellow.bold("================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Result myNewsline:", js(publications)));

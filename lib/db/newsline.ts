@@ -14,6 +14,24 @@ export const getNewslineDefaultTags = async ({
 
     sql = `SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c  on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag  where n.newsline='${newsline}' order by c.text`;
     rows = await query(`SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag where n.newsline=? order by c.text`, [newsline]);
+   // l(chalk.green(sql,js(rows)))
+    return rows;
+}
+export const getUserTags = async ({
+    type,
+    threadid,  
+    key
+}: {
+    type:string,
+    threadid: number,
+    key: string
+}) => {
+    const table=`pov_v30_${type}_tags`;
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT tag,switch as switchParam from ${table} where \`key\`='${key}' `;
+    rows = await query(`SELECT tag,switch as switchParam from ${table} where \`key\`=?`, [key]);
     l(chalk.green(sql,rows))
     return rows;
 }
@@ -32,6 +50,7 @@ export const getUserNewslineTags = async ({
     l(chalk.green(sql,rows))
     return rows;
 }
+
 export const getSessionNewslineTags = async ({
     threadid,  
     key
@@ -86,84 +105,79 @@ export const getNewslinePublications = async ({
     l(chalk.green(sql, rows))
     return rows;
 }
-export const updateSessionNewsline = async ({
+export const updateUserNewsline = async ({
+    type,
     threadid,
     sessionid,
+    userslug,
     key,
     switchParam,
-    tag
+    tag,
+    newsline,
 }: {
+    type:string,
     threadid: number,
-    sessionid:string,
+    sessionid?:string,
+    userslug?:string,
     key: string,
     switchParam:'on'|'off',
-    tag:Tag
+    tag:Tag,
+    newsline:string
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    console.log("UPDATE SESSION NEWSLINE ",js(({
+    const table=`pov_v30_${type}_tags`;
+    console.log("UPDATE USER NEWSLINE ",js(({
+        type,
+        table,
         threadid,
         sessionid,
         key,
         switchParam,
         tag
     }))); 
-    sql=`SELECT xid from pov_v30_session_tags where \`key\`='${key}' and tag='${tag}'`;
+
+    sql=`SELECT xid from pov_v30_newsline_default_tags where newsline='${newsline}' and tag='${tag}'`;
+    l(chalk.green("Checking default newsline for the tag",sql))
+    rows=await query (`SELECT xid from pov_v30_newsline_default_tags where newsline=? and tag=?`,[newsline,tag])
+    l(chalk.green(sql,js(rows)))
+    const isDefault=rows&&rows.length;
+
+    sql=`SELECT xid from ${table} where \`key\`='${key}' and tag='${tag}'`;
     l(chalk.green("!!!",sql))
-    rows=await query (`SELECT xid from pov_v30_session_tags where \`key\`=? and tag=?`,[key,tag])
+    rows=await query (`SELECT xid from ${table} where \`key\`=? and tag=?`,[key,tag])
     l(chalk.green(sql,rows))
     if(rows&&rows.length>0){
-        if(switchParam='off'){
-            sql=`DELETE from  pov_v30_session_tags where \`key\`='${key}' and tag='${tag}'`;
+        if(switchParam=='off'&&!isDefault||switchParam=='on'&&isDefault){
+            sql=`DELETE from  ${table} where \`key\`='${key}' and tag='${tag}'`;
             l(chalk.green(sql))
-            rows=await query(`DELETE from  pov_v30_session_tags  where \`key\`=? and tag=?`,[key,tag])
+            rows=await query(`DELETE from ${table}  where \`key\`=? and tag=?`,[key,tag])
             l(chalk.green(sql,rows));
         }
         else {
-            sql=`UPDATE pov_v30_session_tags set \`switch\`='${switchParam}' where \`key\`='${key}' and tag='${tag}'`;
+            sql=`UPDATE ${table} set \`switch\`='${switchParam}' where \`key\`='${key}' and tag='${tag}'`;
             l(chalk.green(sql))
-            rows=await query(`UPDATE pov_v30_session_tags set \`switch\`=? where \`key\`=? and tag=?'`,[switchParam,key,tag])
+            rows=await query(`UPDATE ${table} set \`switch\`=? where \`key\`=? and tag=?`,[switchParam,key,tag])
             l(chalk.green(sql,rows))
         }
     }
     else {
-        sql=`INSERT into pov_v30_session_tags (sessionid,\`key\`,\`switch\`,tag) VALUES ('${sessionid}','${key}','${switchParam}','${tag}')`;
+        if(type=='session'){
+        sql=`INSERT into ${table} (userslug,\`key\`,\`switch\`,tag) VALUES ('${userslug}','${key}','${switchParam}','${tag}')`;
         l(chalk.green(sql))
-        rows=await query(`INSERT into pov_v30_session_tags (sessionid,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`,[sessionid,key,switchParam,tag])
+        rows=await query(`INSERT into ${table} (sessionid,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`,[userslug,key,switchParam,tag])
         l(chalk.green(sql,rows))
+        }
+        else {
+            sql=`INSERT into ${table} (userslug,\`key\`,\`switch\`,tag) VALUES ('${userslug}','${key}','${switchParam}','${tag}')`;
+        l(chalk.green(sql))
+        rows=await query(`INSERT into ${table} (userslug,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`,[userslug,key,switchParam,tag])
+        l(chalk.green(sql,rows))
+        }
     }  
 }
 
-export const updateUserNewsline = async ({
-    threadid,
-    userslug,
-    key,
-    switchParam,
-    tag
-}: {
-    threadid: number,
-    userslug:string,
-    key: string,
-    switchParam:'on'|'off',
-    tag:Tag
-}) => {
-    let sql, rows;
-    let query = await dbGetQuery("povdb", threadid);
-     
-    sql=`SELECT xid from pov_v30_user_tags where key='${key}'`;
-    rows=await query (`SELECT xid from pov_v30_user_tags where key=?`,[key])
-    l(chalk.green(sql,rows))
-    if(rows&&rows.length>0){
-        sql=`UPDATE pov_v30_user_tags set \`switch\`='${switchParam}' where key='${key}'`;
-        rows=await query(`UPDATE pov_v30_user_tags set \`switch\`=? where key=?`,[switchParam,key])
-        l(chalk.green(sql,rows))
-    }
-    else {
-        sql=`INSERT into pov_v30_user_tags (userslug,key,\`switch\`,tag) VALUES ('${userslug}','${key}','${switchParam}','${tag}')`;
-        rows=await query(`INSERT into pov_v30_user_tags (userslug,key,\`switch\`,tag) VALUES (?,?,?,?)`,[userslug,key,switchParam,tag])
-        l(chalk.green(sql,rows))
-    }  
-}
+
 
 export const updateDefaultNewsline = async ({
     threadid,
