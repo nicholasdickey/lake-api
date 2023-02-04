@@ -20,7 +20,7 @@ export default async function handler(
      });
 
     let { channel, sessionid, userslug, pageType, thick, dense, layoutNumber,leftOverride } = req.query;
-    if(dense)
+    if(dense=='1')
     thick='1';
     //l(chalk.blue("layoutNumber",layoutNumber))
     let userConfigKey = null;
