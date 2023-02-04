@@ -120,7 +120,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
                 await redis.set(key, catJson);
             }
           //  console.log(chalk.red.bold("==========================================================filling in details", js(f), js(cat)));
-            f.icon = cat.icon;
+           // f.icon = cat.icon;
             f.description = cat.description;
             //f.name = cat.text;
             return resolve(true);

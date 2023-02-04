@@ -140,7 +140,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
                 catJson = JSON.stringify(cat);
                 await redis.set(key, catJson);
             }
-            f.icon = cat.icon;
+           // f.icon = cat.icon;
             if(!f.description)
              f.description =  cat.description;
             //f.name = cat.text;
