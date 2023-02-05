@@ -83,9 +83,9 @@ export default async function handler(
             dense = "0";
 
         let density = +thick ? +dense ? "dense" : "thick" : "normal";
-        l(chalk.green.bold("call processLayout",js({density, channelLayout})))
+       // l(chalk.green.bold("call processLayout",js({density, channelLayout})))
         const layout = processLayout({ channelLayout, userLayout, pageType, density, layoutNumber,leftOverride })
-        l(chalk.yellow.bold(js({outputPayout:layout})))
+       // l(chalk.yellow.bold(js({outputPayout:layout})))
         res.status(200).json(layout)
     }
 

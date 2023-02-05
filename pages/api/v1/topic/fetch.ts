@@ -7,6 +7,7 @@ import { dbLog, dbEnd } from "../../../../lib/db";
 import { getQwiket } from "../../../../lib/db/qwiket";
 import { processBody } from "../../../../lib/processBody";
 import {Qwiket} from "../../../../lib/types/qwiket";
+
 type Data = any
 
 interface Query {
@@ -52,7 +53,9 @@ export default async function handler(
             if (withBody) {
                // l('withBody',json)
                 json.body = processBody(json);
-               // l(chalk.cyan.bold("withBody after processed",js(json)))
+                const key = `ntjson-${withBody + '-'}${txid}`;
+                //TODO commented out while debugging await redis.setex(key,JSON.stringify(json),7*24*3600);
+                l(chalk.cyan.bold("withBody after processed",js({withBody,key,json})))
             }
         }
         const item=json;

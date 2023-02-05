@@ -1,6 +1,7 @@
 import cheerio from "whacko"
 import { l, chalk, js } from "./common";
 
+
 export function processBody({ body }) {
    // l("PROCESS BODY", body)
     if (body) {
@@ -106,7 +107,8 @@ export function processBody({ body }) {
                     let block: {
                         type: string;
                         content: string;
-                        id?:string
+                        id?:string;
+                        ast?:any;
 
                     } = {
                         type: "",
@@ -122,7 +124,7 @@ export function processBody({ body }) {
                             const className = $(this).attr('class');
                             if (className?.indexOf('twitter-tweet') >= 0) {
                                 block.type = "twitter";
-                                $(this).find('a[href*="twitter.com"]').each(function () {
+                                $(this).find('a[href*="twitter.com"]').each(async function () {
                                     // console.log("each:", this)
                                      const link = $(this).attr('href');
                                      if (link) {
