@@ -8,8 +8,8 @@ import { getSessionLayout, getUserLayout, getChannelConfig } from "../../../../l
 import { dbLog, dbEnd } from "../../../../lib/db"
 import { processLayout } from "../../../../lib/layout"
 import { fetchQueue } from "../../../../lib/fetchQueue"
-import { Commissioner } from '@next/font/google';
-import { isImportEqualsDeclaration } from 'typescript';
+import { processPostBody } from '../../../../lib/processPostBody';
+
 type Data = any
 
 export default async function handler(
@@ -18,7 +18,7 @@ export default async function handler(
 ) {
     await NextCors(req, res, {
         // Options
-        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE','OPTIONS'],
+        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
@@ -42,22 +42,29 @@ export default async function handler(
     const pageParam = +page;
     try {
         // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
-        let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug,threadid,redis })
+        let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
             // if(type=='mix')
             // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
             // l("ret:", ret.items.map(r=>r.item))
-            const newItems = items.map(({ item }: any) => {
+            const newItems =  items.map(({ item }: any) => {
                 //l(item)
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
                 const isPost = item.qpostid ? true : false;
+                let processedBody = item.body;
+                if (isPost) {
+                    l(chalk.yellow.bold("POST:", js(item.body)))
+                    processedBody =  processPostBody(item.body)
+                    l(chalk.yellow.bold("POST2:", js(processedBody)))
+                }
+               
                 let common: any = {
                     catName: isPost ? item.cat_name : item.catName,
                     catIcon: isPost ? item.cat_icon : item.catIcon,
-                    postBody: item.body,
+                    postBody: processedBody,
                     qpostid: item.qpostid ? item.qpostid : '',
                     published_time: item.published_time,
                     shared_time: item.shared_time,
@@ -70,6 +77,8 @@ export default async function handler(
                     image: item.image,
                     tag: isPost ? item.category : item.cat,
                 }
+                if(type=='mix'&&isPost)
+                console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
                 if (isPost) {
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;
@@ -80,18 +89,24 @@ export default async function handler(
                     common['thread_author'] = item.thread_author;
                     common['createdat'] = item.createdat;
                     common['subscr_status'] = item.subscr_status;
-                    common['id']=item.id;
+                    common['id'] = item.id;
+
+
 
                 }
+                /*if(type=='mix'){
+                    l(chalk.yellow("returning common",js(common)))
+                }*/
                 return common;
 
             })
-            // l(newItems)
+           // l(newItems)
             ret.items = newItems;
-            // l(chalk.green.bold("return from fetchQueue", js(ret)))
+           // if(type=='mix')
+            //l(chalk.green.bold("return from fetchQueue", js(ret)))
         }
-        // if (type == 'tag')
-       // l(chalk.magenta.bold(js(ret)))
+         //if (type == 'mix')
+         //l(chalk.magenta.bold(js(ret)))
         if (countonly) {
             // console.log('count:',ret.newItems)
         }
@@ -102,7 +117,7 @@ export default async function handler(
         l(chalk.red.bold(x))
         res.status(501).json(x);
     }
-    finally{
+    finally {
         redis.quit();
         dbEnd(threadid);
     }

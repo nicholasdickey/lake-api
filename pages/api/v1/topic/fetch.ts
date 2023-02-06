@@ -12,7 +12,8 @@ type Data = any
 
 interface Query {
     slug: string,
-    withBody: [0, 1]
+    withBody: [0, 1],
+    userslug:string
 }
 export default async function handler(
     req: NextApiRequest,
@@ -25,7 +26,7 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    const { slug, withBody }: Query = req.query as unknown as Query;
+    const { slug, withBody,userslug }: Query = req.query as unknown as Query;
     // l(chalk.blue("layoutNumber",layoutNumber))
     let userConfigKey = null;
     let userLayout = null;
@@ -75,6 +76,12 @@ export default async function handler(
             image: item.image,
             tag: item.cat,
             body:item.body
+        }
+        /**
+         * Check the user acceptances
+         */
+        if(userslug){
+            
         }
       //  l(chalk.yellow(js(common)))
         res.status(200).json({ success: true, item: common });

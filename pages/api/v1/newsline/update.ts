@@ -7,6 +7,8 @@ import { getRedisClient } from "../../../../lib/redis"
 import {  updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import fetchNewsline from '../../../../lib/fetchNewsline';
+import {updateSession} from "../../../../lib/db/user";
+import { updateAsExpression } from 'typescript';
 
 export default async function handler(
     req: NextApiRequest,
@@ -36,7 +38,9 @@ export default async function handler(
     try {
 
         const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
-      
+        if(!userslug&&sessionid){
+            await updateSession({threadid,sessionid});
+        }
         await updateUserNewsline({type:userslug?'user':'session',sessionid,userslug,newsline, threadid, key: `${newsline}-${userslug}`, tag, switchParam })
 
         l(chalk.magenta("after update DB, delete from redis"))
