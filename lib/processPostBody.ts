@@ -44,7 +44,7 @@ export  function processPostBody(body:string) {
                     const s = w1.split(":")[0];
                     src = w[0] + token + s;
                 }
-                const htm = `<div  style="height: 100%; width: 100%;"> <img style="height: 100%; width: 100%;" src="${src}" class="q-react-embed-image" /></div > `;
+                const htm = `<img style="height: 100%; width: 100%;" src="${src}"  /> `;
                 // console.log("processBlock IMAGE CONFIRMED", { title: el.attr('title'), href: el.attr('href'), htm })
                 el.replaceWith(htm);
                 //  console.log("processBlock2", { htm, title: el.attr('title'), href: el.attr('href'), text: el.text() })

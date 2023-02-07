@@ -15,8 +15,10 @@ export const getQwiket = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     const parts = slug.split('-');
-    const silo = parts[0];
-    if (!silo && silo == 'cc')
+    let silo = parts[0];
+    if(slug=='nro-is-moving-to-facebook-comments')
+        silo='';
+   else  if (!silo && silo == 'cc')
         return null;
     const table = `q${silo}`;
     const qwiketid = `${slug}.qwiket`;
