@@ -64,7 +64,8 @@ export default async function handler(
             lacantinaSlug:jsonChannelConfig.config.lacantinaSlug,
             lowline:jsonChannelConfig.config.lowline,
             topline:jsonChannelConfig.config.topline,
-            mobileLayouts:jsonChannelConfig.config.mobileLayouts
+            mobileLayouts:jsonChannelConfig.config.mobileLayouts,
+            lacantinaUrl:jsonChannelConfig.config.lacantinaUrl
         }
         const newsline=jsonChannelConfig.newsline;
         const ret={
