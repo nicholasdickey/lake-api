@@ -52,7 +52,7 @@ export  function processPostBody(body:string) {
             }
         });
     });
-       
+    l(chalk.yellow.bold("PROCESS POST BODY"),$('body').html())   
     if(changed)
         return $('body').html();
    // }
