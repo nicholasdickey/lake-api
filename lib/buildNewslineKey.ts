@@ -21,9 +21,9 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
         const id = userslug || sessionid;
         const type = userslug ? 'user' : 'session';
         const userNewslineKey = `newsline-${newsline}-${id}`;
-      //  l(chalk.cyan("Custom newsline",js({userslug,sessionid,id,type,userNewslineKey})))
+        l(chalk.cyan("Custom newsline",js({userslug,sessionid,id,type,userNewslineKey})))
         const newslineSet = await redis.smembers(userNewslineKey);
-      //  l(chalk.cyan('got from redis',js({newslineSet})))
+        l(chalk.cyan('got from redis',js({newslineSet})))
         if (!newslineSet||!newslineSet.length) {
            // l(chalk.cyan("No custom newslineSet in redis"));
             //get definition from DB
@@ -62,7 +62,7 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
         }
         else {
             newslineKey = Array.from(newslineSet).join(':');
-          //  l(chalk.cyan("got newslineKey",js({newslineKey,newslineSet})))
+            l(chalk.cyan("got newslineKey",js({newslineKey,newslineSet})))
         }
 
     }

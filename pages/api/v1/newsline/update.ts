@@ -45,6 +45,10 @@ export default async function handler(
 
        // l(chalk.magenta("after update DB, delete from redis"))
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
+       
+        const newslineKey=`newsline-${newsline}-${id}`; 
+        await redis.del(newslineKey);  
+
        // l(chalk.magenta("after  delete from redis key:",userNewslineKey,'result:',await redis.get(userNewslineKey)))
         const myNewsline=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update:0})
        // l(chalk.yellow.bold("((((((((((((((((((((((((((((((( Result myNewsline:", js(myNewsline)));
