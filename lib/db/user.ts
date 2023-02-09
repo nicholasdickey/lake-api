@@ -77,12 +77,12 @@ export const updateSession = async ({
     sql = `SELECT xid from pov_v30_sessions where sessionid='${sessionid}'`;
     let rows = await query(`SELECT xid from pov_v30_sessions where sessionid=?`,[sessionid]);
     if(rows&&rows.length>0){
-        sql=`UPDATE pov_v30_sessions set milis=${millis} where sessionid='${sessionid}'`;
-        await query(`UPDATE pov_v30_sessions set milis=? where sessionid=?`,[millis,sessionid]);
+        sql=`UPDATE pov_v30_sessions set millis=${millis} where sessionid='${sessionid}'`;
+        await query(`UPDATE pov_v30_sessions set millis=? where sessionid=?`,[millis,sessionid]);
     }
     else {
-        sql=`INSERT INTO pov_v30_sessions (sessionid,created,milliis) VALUES ('${sessionid}',${millis},now())`;
-        await query(`INSERT INTO pov_v30_sessions (sessionid,created,milliis) VALUES (?,?,now())`,[sessionid,millis]);
+        sql=`INSERT INTO pov_v30_sessions (sessionid,millis,created) VALUES ('${sessionid}',${millis},now())`;
+        await query(`INSERT INTO pov_v30_sessions (sessionid,millis,created) VALUES (?,?,now())`,[sessionid,millis]);
 
     }
 }

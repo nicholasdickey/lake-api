@@ -41,13 +41,13 @@ export default async function handler(
         if(!userslug&&sessionid){
             await updateSession({threadid,sessionid});
         }
-        await updateUserNewsline({type:userslug?'user':'session',sessionid,userslug,newsline, threadid, key: `${newsline}-${userslug}`, tag, switchParam })
+        await updateUserNewsline({type:userslug?'user':'session',sessionid,userslug,newsline, threadid, key: `${newsline}-${id}`, tag, switchParam })
 
-        l(chalk.magenta("after update DB, delete from redis"))
+       // l(chalk.magenta("after update DB, delete from redis"))
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
-        l(chalk.magenta("after  delete from redis key:",userNewslineKey,'result:',await redis.get(userNewslineKey)))
+       // l(chalk.magenta("after  delete from redis key:",userNewslineKey,'result:',await redis.get(userNewslineKey)))
         const myNewsline=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update:0})
-        l(chalk.yellow.bold("((((((((((((((((((((((((((((((( Result myNewsline:", js(myNewsline)));
+       // l(chalk.yellow.bold("((((((((((((((((((((((((((((((( Result myNewsline:", js(myNewsline)));
         return res.status(200).json({
             success: true,
             newsline: myNewsline
