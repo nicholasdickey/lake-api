@@ -1,7 +1,49 @@
 import { l, chalk, microtime, js, ds } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 import { Qwiket } from "../types/qwiket"
+export const getRssNewsline = async ({
 
+    threadid,
+    key,
+    timeStart,
+    timeEnd
+
+}: {
+
+    threadid: number,
+    key: string,
+    timeStart: number,
+    timeEnd: number
+})=>{
+
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+            povdb.pov_categories c 
+
+            where c.xid=t.category_xid and c.shortname in (${key}) 
+            and t.shared_time>=${timeStart}
+            and t.shared_time<=${timeEnd}
+    
+            order by t.xid desc   
+            
+            limit 50000 `;
+    l(chalk.green(sql))
+    rows = await query(`
+    SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+    povdb.pov_categories c 
+    
+    where c.xid=t.category_xid and c.shortname in (${key}) 
+    and t.shared_time>=${timeStart}
+    and t.shared_time<=${timeEnd}
+    
+    order by t.xid desc   
+    
+    limit 50000 `);
+    l(chalk.green(sql, rows))
+    return rows;
+}
 export const getQwiket = async ({
     threadid,
     slug,
@@ -16,9 +58,9 @@ export const getQwiket = async ({
     let query = await dbGetQuery("povdb", threadid);
     const parts = slug.split('-');
     let silo = parts[0];
-    if(slug=='nro-is-moving-to-facebook-comments')
-        silo='';
-   else  if (!silo && silo == 'cc')
+    if (slug == 'nro-is-moving-to-facebook-comments')
+        silo = '';
+    else if (!silo && silo == 'cc')
         return null;
     const table = `q${silo}`;
     const qwiketid = `${slug}.qwiket`;
