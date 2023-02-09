@@ -1,11 +1,11 @@
 import { getUserTags, getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, updateDefaultNewsline, getTagDefinition } from "./db/newsline"
 import { RedisKey } from 'ioredis';
-import { l,chalk,js } from "./common";
+import { l, chalk, js } from "./common";
 
 const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid }: { newsline: string, userslug?: string, sessionid?: string, redis: any, threadid: number }) => {
-    if(newsline=='usconservative')
-        newsline='qwiket';
-  //  l(chalk.yellow("buildNewslineKey",js({newsline,userslug,sessionid})))
+    if (newsline == 'usconservative')
+        newsline = 'qwiket';
+    //  l(chalk.yellow("buildNewslineKey",js({newsline,userslug,sessionid})))
     /**
      * *
      * * get User of Session newsline, depending on present ids, if missing -
@@ -17,33 +17,33 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
     let newslineKey;
     let defaultNewsline: Set<String>;
     if (userslug || sessionid) {
-       
+
         const id = userslug || sessionid;
         const type = userslug ? 'user' : 'session';
         const userNewslineKey = `newsline-${newsline}-${id}`;
-        l(chalk.cyan("Custom newsline",js({userslug,sessionid,id,type,userNewslineKey})))
+        // l(chalk.cyan("Custom newsline",js({userslug,sessionid,id,type,userNewslineKey})))
         const newslineSet = await redis.smembers(userNewslineKey);
-        l(chalk.cyan('got from redis',js({newslineSet})))
-        if (!newslineSet||!newslineSet.length) {
-           // l(chalk.cyan("No custom newslineSet in redis"));
+        // l(chalk.cyan('got from redis',js({newslineSet})))
+        if (!newslineSet || !newslineSet.length) {
+            // l(chalk.cyan("No custom newslineSet in redis"));
             //get definition from DB
             const userNewsline = await getUserTags({ type, threadid, key: `${newsline}-${id}` })
             const defaultNewslineKey: RedisKey = `newsline-${newsline}`;
             defaultNewsline = await redis.smembers(defaultNewslineKey) as unknown as Set<String>;
-           // l(chalk.cyan("From DB:",js({userNewsline,defaultNewslineKey,defaultNewsline,type:typeof defaultNewsline})));
-            if (!defaultNewsline||!defaultNewsline.size) {
+            // l(chalk.cyan("From DB:",js({userNewsline,defaultNewslineKey,defaultNewsline,type:typeof defaultNewsline})));
+            if (!defaultNewsline || !defaultNewsline.size) {
                 const defaultNewslineDefinition = await getNewslineDefaultTags({ threadid, newsline }); //sorted array of {name,tag,icon}
-               // l(chalk.cyan.bold("got defaultNewslineDefinition from DB",js({defaultNewslineDefinition})))
+                // l(chalk.cyan.bold("got defaultNewslineDefinition from DB",js({defaultNewslineDefinition})))
                 if (defaultNewslineDefinition) {
-                     const defaultNewslineA = defaultNewslineDefinition.map(d => d.tag) as unknown as Set<string>;
-                    defaultNewsline=new Set<String>(defaultNewslineA);
-                     // Rebuild the default newsline (for fetching the queues)
-                  //  l(chalk.cyan.bold("after map",js({defaultNewsline})))
+                    const defaultNewslineA = defaultNewslineDefinition.map(d => d.tag) as unknown as Set<string>;
+                    defaultNewsline = new Set<String>(defaultNewslineA);
+                    // Rebuild the default newsline (for fetching the queues)
+                    //  l(chalk.cyan.bold("after map",js({defaultNewsline})))
                     await redis.sadd(defaultNewslineKey, defaultNewsline)
                 }
                 if (!defaultNewsline)
                     throw ('cant create a newsline');
-                
+
                 // now go through user newsline and modify defaultNewsline accordingly
                 if (userNewsline) {
                     userNewsline.forEach(({ tag, switchParam }: { tag: string, switchParam: 'on' | 'off' }) => {
@@ -62,16 +62,16 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
         }
         else {
             newslineKey = Array.from(newslineSet).join(':');
-            l(chalk.cyan("got newslineKey",js({newslineKey,newslineSet})))
+            l(chalk.cyan("got newslineKey", js({ newslineKey, newslineSet })))
         }
 
     }
     if (!newslineKey) {
-        console.log("No newsline key after userslug and sessionid")
+        // console.log("No newsline key after userslug and sessionid")
         const defaultNewslineKey: RedisKey = `newsline-${newsline}`;
         defaultNewsline = await redis.smembers(defaultNewslineKey);
-       // l(chalk.cyan(js({defaultNewsline,defaultNewslineKey})))
-        if (!defaultNewsline||!defaultNewsline.size) {
+        // l(chalk.cyan(js({defaultNewsline,defaultNewslineKey})))
+        if (!defaultNewsline || !defaultNewsline.size) {
             const defaultNewslineDefinition = await getNewslineDefaultTags({ threadid, newsline }); //sorted array of {name,tag,icon}
             if (defaultNewslineDefinition) {
                 defaultNewsline = defaultNewslineDefinition.map(d => d.tag) as unknown as Set<string>;
@@ -82,10 +82,10 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
                 throw ('cant create a newsline 2');
         }
         newslineKey = Array.from(defaultNewsline).join(':');
-        
+
         if (!newslineKey)
             throw ('cant create a newsline 3');
-       
+
     }
     return newslineKey;
 }

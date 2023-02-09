@@ -2,6 +2,8 @@ import { l, chalk, microtime, js, ds } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 import { Newsline, NewslineDefinition, Tag, Publications, TagDefinition } from "../types/newsline"
 
+
+
 export const getNewslineDefaultTags = async ({
     threadid,
     newsline
