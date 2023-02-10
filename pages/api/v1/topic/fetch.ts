@@ -27,7 +27,7 @@ export default async function handler(
     });
 
     const { slug, withBody,userslug }: Query = req.query as unknown as Query;
-    // l(chalk.blue("layoutNumber",layoutNumber))
+    //l(chalk.blue("layoutNumber",layoutNumber))
     let userConfigKey = null;
     let userLayout = null;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -38,25 +38,29 @@ export default async function handler(
     try {
         const key = `txid-${slug}`;
         const txid = await redis.get(key);
+       // l(chalk.yellow.bold("tttxid:",txid))
         let json: any;
         if (txid) {
             const key = `ntjson-${withBody + '-'}${txid}`;
-            //  l(chalk.green.bold("GET Qwiket from CACHE", key));
+             // l(chalk.green.bold("GET Qwiket from CACHE", key));
             const jsonRaw = await redis.get(key);
-            // l(chalk.green.bold("RESULT:"), jsonRaw)
+             // l(chalk.green.bold("RESULT:"), jsonRaw)
             if (jsonRaw)
                 json = JSON.parse(jsonRaw);
         }
         if (!json) {
             // get from db
-            // l(chalk.green.bold("GET Qwiket from DB"));
+           // l(chalk.green.bold("GET Qwiket from DB"));
             json = await getQwiket({ threadid, slug, withBody })
             if (withBody) {
-               // l('withBody',json)
+              // l('withBody',json)
                 json.body = processBody(json);
                 const key = `ntjson-${withBody + '-'}${txid}`;
-                //TODO commented out while debugging await redis.setex(key,JSON.stringify(json),7*24*3600);
-                l(chalk.cyan.bold("withBody after processed",js({withBody,key,json})))
+                const jsonRaw=JSON.stringify(json);
+               // console.log("kkkey:",key,jsonRaw)
+                await redis.setex(key,7*24*3600,jsonRaw);
+               // l(76548)
+               // l(chalk.cyan.bold("withBody after processed",js({withBody,key,json})))
             }
         }
         const item=json;

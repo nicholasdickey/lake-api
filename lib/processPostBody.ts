@@ -8,7 +8,7 @@ export  function processPostBody(body:string) {
    return;
    const md=body; 
    let changed=false;
-   l(chalk.green.bold("body",body));
+  // l(chalk.green.bold("body",body));
    let $ = cheerio.load(md, {
     decodeEntities: true,
 })
@@ -52,7 +52,7 @@ export  function processPostBody(body:string) {
             }
         });
     });
-    l(chalk.yellow.bold("PROCESS POST BODY"),$('body').html())   
+   // l(chalk.yellow.bold("PROCESS POST BODY"),$('body').html())   
     if(changed)
         return $('body').html();
    // }

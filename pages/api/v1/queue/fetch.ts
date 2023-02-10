@@ -56,9 +56,9 @@ export default async function handler(
                 const isPost = item.qpostid ? true : false;
                 let processedBody = item.body;
                 if (isPost) {
-                    l(chalk.yellow.bold("POST:", js(item.body)))
+                   // l(chalk.yellow.bold("POST:", js(item.body)))
                     processedBody =  processPostBody(item.body)
-                    l(chalk.yellow.bold("POST2:", js(processedBody)))
+                   // l(chalk.yellow.bold("POST2:", js(processedBody)))
                 }
                
                 let common: any = {
@@ -77,8 +77,8 @@ export default async function handler(
                     image: item.image,
                     tag: isPost ? item.category : item.cat,
                 }
-                if(type=='mix'&&isPost)
-                console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
+              //  if(type=='mix'&&isPost)
+              //  console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
                 if (isPost) {
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;

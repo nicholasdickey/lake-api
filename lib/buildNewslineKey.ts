@@ -62,7 +62,7 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
         }
         else {
             newslineKey = Array.from(newslineSet).join(':');
-            l(chalk.cyan("got newslineKey", js({ newslineKey, newslineSet })))
+           // l(chalk.cyan("got newslineKey", js({ newslineKey, newslineSet })))
         }
 
     }
