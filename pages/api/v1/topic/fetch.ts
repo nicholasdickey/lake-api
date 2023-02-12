@@ -28,7 +28,7 @@ export default async function handler(
     });
 
     const { slug, withBody, userslug, tag }: Query = req.query as unknown as Query;
-    l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
+   // l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
