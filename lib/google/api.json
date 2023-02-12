@@ -1,0 +1,961 @@
+{
+    "abusiveexperiencereport": [
+        "v1"
+    ],
+    "acceleratedmobilepageurl": [
+        "v1"
+    ],
+    "accessapproval": [
+        "v1",
+        "v1beta1"
+    ],
+    "accesscontextmanager": [
+        "v1",
+        "v1beta"
+    ],
+    "adexchangebuyer": [
+        "v1.2",
+        "v1.3",
+        "v1.4"
+    ],
+    "adexchangebuyer2": [
+        "v2beta1"
+    ],
+    "adexperiencereport": [
+        "v1"
+    ],
+    "admin": [
+        "datatransfer_v1",
+        "directory_v1",
+        "reports_v1"
+    ],
+    "admob": [
+        "v1",
+        "v1beta"
+    ],
+    "adsense": [
+        "v1.4",
+        "v2"
+    ],
+    "adsensehost": [
+        "v4.1"
+    ],
+    "alertcenter": [
+        "v1beta1"
+    ],
+    "analytics": [
+        "v3"
+    ],
+    "analyticsadmin": [
+        "v1alpha",
+        "v1beta"
+    ],
+    "analyticsdata": [
+        "v1alpha",
+        "v1beta"
+    ],
+    "analyticshub": [
+        "v1",
+        "v1beta1"
+    ],
+    "analyticsreporting": [
+        "v4"
+    ],
+    "androiddeviceprovisioning": [
+        "v1"
+    ],
+    "androidenterprise": [
+        "v1"
+    ],
+    "androidmanagement": [
+        "v1"
+    ],
+    "androidpublisher": [
+        "v1.1",
+        "v1",
+        "v2",
+        "v3"
+    ],
+    "apigateway": [
+        "v1",
+        "v1beta"
+    ],
+    "apigeeregistry": [
+        "v1"
+    ],
+    "apikeys": [
+        "v2"
+    ],
+    "appengine": [
+        "v1",
+        "v1alpha",
+        "v1beta"
+    ],
+    "appsactivity": [
+        "v1"
+    ],
+    "area120tables": [
+        "v1alpha1"
+    ],
+    "artifactregistry": [
+        "v1",
+        "v1beta1",
+        "v1beta2"
+    ],
+    "assuredworkloads": [
+        "v1",
+        "v1beta1"
+    ],
+    "authorizedbuyersmarketplace": [
+        "v1"
+    ],
+    "baremetalsolution": [
+        "v1",
+        "v1alpha1",
+        "v2"
+    ],
+    "batch": [
+        "v1"
+    ],
+    "beyondcorp": [
+        "v1",
+        "v1alpha"
+    ],
+    "bigquery": [
+        "v2"
+    ],
+    "bigqueryconnection": [
+        "v1beta1"
+    ],
+    "bigquerydatatransfer": [
+        "v1"
+    ],
+    "bigqueryreservation": [
+        "v1",
+        "v1alpha2",
+        "v1beta1"
+    ],
+    "bigtableadmin": [
+        "v1",
+        "v2"
+    ],
+    "billingbudgets": [
+        "v1",
+        "v1beta1"
+    ],
+    "binaryauthorization": [
+        "v1",
+        "v1beta1"
+    ],
+    "blogger": [
+        "v2",
+        "v3"
+    ],
+    "books": [
+        "v1"
+    ],
+    "businessprofileperformance": [
+        "v1"
+    ],
+    "calendar": [
+        "v3"
+    ],
+    "certificatemanager": [
+        "v1"
+    ],
+    "chat": [
+        "v1"
+    ],
+    "chromemanagement": [
+        "v1"
+    ],
+    "chromepolicy": [
+        "v1"
+    ],
+    "chromeuxreport": [
+        "v1"
+    ],
+    "civicinfo": [
+        "v2"
+    ],
+    "classroom": [
+        "v1"
+    ],
+    "cloudasset": [
+        "v1",
+        "v1beta1",
+        "v1p1beta1",
+        "v1p4beta1",
+        "v1p5beta1",
+        "v1p7beta1"
+    ],
+    "cloudbilling": [
+        "v1",
+        "v1beta"
+    ],
+    "cloudbuild": [
+        "v1",
+        "v1alpha1",
+        "v1alpha2",
+        "v1beta1"
+    ],
+    "cloudchannel": [
+        "v1"
+    ],
+    "clouddebugger": [
+        "v2"
+    ],
+    "clouddeploy": [
+        "v1"
+    ],
+    "clouderrorreporting": [
+        "v1beta1"
+    ],
+    "cloudfunctions": [
+        "v1",
+        "v1beta2",
+        "v2",
+        "v2alpha",
+        "v2beta"
+    ],
+    "cloudidentity": [
+        "v1",
+        "v1beta1"
+    ],
+    "cloudiot": [
+        "v1"
+    ],
+    "cloudkms": [
+        "v1"
+    ],
+    "cloudprofiler": [
+        "v2"
+    ],
+    "cloudresourcemanager": [
+        "v1",
+        "v1beta1",
+        "v2",
+        "v2beta1",
+        "v3"
+    ],
+    "cloudscheduler": [
+        "v1",
+        "v1beta1"
+    ],
+    "cloudsearch": [
+        "v1"
+    ],
+    "cloudshell": [
+        "v1",
+        "v1alpha1"
+    ],
+    "cloudsupport": [
+        "v2beta"
+    ],
+    "cloudtasks": [
+        "v2",
+        "v2beta2",
+        "v2beta3"
+    ],
+    "cloudtrace": [
+        "v1",
+        "v2",
+        "v2beta1"
+    ],
+    "composer": [
+        "v1",
+        "v1beta1"
+    ],
+    "compute": [
+        "alpha",
+        "beta",
+        "v1"
+    ],
+    "connectors": [
+        "v1",
+        "v2"
+    ],
+    "contactcenterinsights": [
+        "v1"
+    ],
+    "container": [
+        "v1",
+        "v1beta1"
+    ],
+    "containeranalysis": [
+        "v1",
+        "v1alpha1",
+        "v1beta1"
+    ],
+    "content": [
+        "v2.1",
+        "v2"
+    ],
+    "contentwarehouse": [
+        "v1"
+    ],
+    "customsearch": [
+        "v1"
+    ],
+    "datacatalog": [
+        "v1",
+        "v1beta1"
+    ],
+    "dataflow": [
+        "v1b3"
+    ],
+    "dataform": [
+        "v1beta1"
+    ],
+    "datafusion": [
+        "v1",
+        "v1beta1"
+    ],
+    "datalabeling": [
+        "v1beta1"
+    ],
+    "datamigration": [
+        "v1",
+        "v1beta1"
+    ],
+    "datapipelines": [
+        "v1"
+    ],
+    "dataplex": [
+        "v1"
+    ],
+    "dataproc": [
+        "v1",
+        "v1beta2"
+    ],
+    "datastore": [
+        "v1",
+        "v1beta1",
+        "v1beta3"
+    ],
+    "datastream": [
+        "v1",
+        "v1alpha1"
+    ],
+    "deploymentmanager": [
+        "alpha",
+        "v2",
+        "v2beta"
+    ],
+    "dfareporting": [
+        "v3.3",
+        "v3.4",
+        "v3.5",
+        "v4"
+    ],
+    "dialogflow": [
+        "v2",
+        "v2beta1",
+        "v3",
+        "v3beta1"
+    ],
+    "digitalassetlinks": [
+        "v1"
+    ],
+    "discovery": [
+        "v1"
+    ],
+    "discoveryengine": [
+        "v1alpha",
+        "v1beta"
+    ],
+    "displayvideo": [
+        "v1",
+        "v1beta",
+        "v1beta2",
+        "v1dev",
+        "v2"
+    ],
+    "dlp": [
+        "v2"
+    ],
+    "dns": [
+        "v1",
+        "v1beta2",
+        "v2",
+        "v2beta1"
+    ],
+    "docs": [
+        "v1"
+    ],
+    "documentai": [
+        "v1",
+        "v1beta2",
+        "v1beta3"
+    ],
+    "domains": [
+        "v1",
+        "v1alpha2",
+        "v1beta1"
+    ],
+    "domainsrdap": [
+        "v1"
+    ],
+    "doubleclickbidmanager": [
+        "v1.1",
+        "v1",
+        "v2"
+    ],
+    "doubleclicksearch": [
+        "v2"
+    ],
+    "drive": [
+        "v2",
+        "v3"
+    ],
+    "driveactivity": [
+        "v2"
+    ],
+    "drivelabels": [
+        "v2",
+        "v2beta"
+    ],
+    "essentialcontacts": [
+        "v1"
+    ],
+    "eventarc": [
+        "v1",
+        "v1beta1"
+    ],
+    "factchecktools": [
+        "v1alpha1"
+    ],
+    "fcm": [
+        "v1"
+    ],
+    "fcmdata": [
+        "v1beta1"
+    ],
+    "file": [
+        "v1",
+        "v1beta1"
+    ],
+    "firebase": [
+        "v1beta1"
+    ],
+    "firebaseappcheck": [
+        "v1",
+        "v1beta"
+    ],
+    "firebasedatabase": [
+        "v1beta"
+    ],
+    "firebasedynamiclinks": [
+        "v1"
+    ],
+    "firebasehosting": [
+        "v1",
+        "v1beta1"
+    ],
+    "firebaseml": [
+        "v1",
+        "v1beta2"
+    ],
+    "firebaserules": [
+        "v1"
+    ],
+    "firebasestorage": [
+        "v1beta"
+    ],
+    "firestore": [
+        "v1",
+        "v1beta1",
+        "v1beta2"
+    ],
+    "fitness": [
+        "v1"
+    ],
+    "forms": [
+        "v1"
+    ],
+    "games": [
+        "v1"
+    ],
+    "gamesConfiguration": [
+        "v1configuration"
+    ],
+    "gamesManagement": [
+        "v1management"
+    ],
+    "gameservices": [
+        "v1",
+        "v1beta"
+    ],
+    "genomics": [
+        "v1",
+        "v1alpha2",
+        "v2alpha1"
+    ],
+    "gkebackup": [
+        "v1"
+    ],
+    "gkehub": [
+        "v1",
+        "v1alpha",
+        "v1alpha2",
+        "v1beta",
+        "v1beta1",
+        "v2alpha"
+    ],
+    "gmail": [
+        "v1"
+    ],
+    "gmailpostmastertools": [
+        "v1",
+        "v1beta1"
+    ],
+    "groupsmigration": [
+        "v1"
+    ],
+    "groupssettings": [
+        "v1"
+    ],
+    "healthcare": [
+        "v1",
+        "v1beta1"
+    ],
+    "homegraph": [
+        "v1"
+    ],
+    "iam": [
+        "v1",
+        "v2beta"
+    ],
+    "iamcredentials": [
+        "v1"
+    ],
+    "iap": [
+        "v1",
+        "v1beta1"
+    ],
+    "ideahub": [
+        "v1alpha",
+        "v1beta"
+    ],
+    "identitytoolkit": [
+        "v2",
+        "v3"
+    ],
+    "ids": [
+        "v1"
+    ],
+    "indexing": [
+        "v3"
+    ],
+    "jobs": [
+        "v2",
+        "v3",
+        "v3p1beta1",
+        "v4"
+    ],
+    "kgsearch": [
+        "v1"
+    ],
+    "language": [
+        "v1",
+        "v1beta1",
+        "v1beta2"
+    ],
+    "libraryagent": [
+        "v1"
+    ],
+    "licensing": [
+        "v1"
+    ],
+    "lifesciences": [
+        "v2beta"
+    ],
+    "localservices": [
+        "v1"
+    ],
+    "logging": [
+        "v2"
+    ],
+    "managedidentities": [
+        "v1",
+        "v1alpha1",
+        "v1beta1"
+    ],
+    "manufacturers": [
+        "v1"
+    ],
+    "memcache": [
+        "v1",
+        "v1beta2"
+    ],
+    "metastore": [
+        "v1",
+        "v1alpha",
+        "v1beta"
+    ],
+    "ml": [
+        "v1"
+    ],
+    "monitoring": [
+        "v1",
+        "v3"
+    ],
+    "mybusinessaccountmanagement": [
+        "v1"
+    ],
+    "mybusinessbusinesscalls": [
+        "v1"
+    ],
+    "mybusinessbusinessinformation": [
+        "v1"
+    ],
+    "mybusinesslodging": [
+        "v1"
+    ],
+    "mybusinessnotifications": [
+        "v1"
+    ],
+    "mybusinessplaceactions": [
+        "v1"
+    ],
+    "mybusinessqanda": [
+        "v1"
+    ],
+    "mybusinessverifications": [
+        "v1"
+    ],
+    "networkconnectivity": [
+        "v1",
+        "v1alpha1"
+    ],
+    "networkmanagement": [
+        "v1",
+        "v1beta1"
+    ],
+    "networksecurity": [
+        "v1",
+        "v1beta1"
+    ],
+    "networkservices": [
+        "v1",
+        "v1beta1"
+    ],
+    "notebooks": [
+        "v1"
+    ],
+    "oauth2": [
+        "v2"
+    ],
+    "ondemandscanning": [
+        "v1",
+        "v1beta1"
+    ],
+    "orgpolicy": [
+        "v2"
+    ],
+    "osconfig": [
+        "v1",
+        "v1alpha",
+        "v1beta"
+    ],
+    "oslogin": [
+        "v1",
+        "v1alpha",
+        "v1beta"
+    ],
+    "pagespeedonline": [
+        "v5"
+    ],
+    "paymentsresellersubscription": [
+        "v1"
+    ],
+    "people": [
+        "v1"
+    ],
+    "playablelocations": [
+        "v3"
+    ],
+    "playcustomapp": [
+        "v1"
+    ],
+    "playdeveloperreporting": [
+        "v1alpha1",
+        "v1beta1"
+    ],
+    "playintegrity": [
+        "v1"
+    ],
+    "plus": [
+        "v1"
+    ],
+    "policyanalyzer": [
+        "v1",
+        "v1beta1"
+    ],
+    "policysimulator": [
+        "v1",
+        "v1alpha",
+        "v1beta1"
+    ],
+    "policytroubleshooter": [
+        "v1",
+        "v1beta"
+    ],
+    "poly": [
+        "v1"
+    ],
+    "privateca": [
+        "v1",
+        "v1beta1"
+    ],
+    "prod_tt_sasportal": [
+        "v1alpha1"
+    ],
+    "pubsub": [
+        "v1",
+        "v1beta1a",
+        "v1beta2"
+    ],
+    "pubsublite": [
+        "v1"
+    ],
+    "realtimebidding": [
+        "v1",
+        "v1alpha"
+    ],
+    "recaptchaenterprise": [
+        "v1"
+    ],
+    "recommendationengine": [
+        "v1beta1"
+    ],
+    "recommender": [
+        "v1",
+        "v1beta1"
+    ],
+    "redis": [
+        "v1",
+        "v1beta1"
+    ],
+    "remotebuildexecution": [
+        "v1",
+        "v1alpha",
+        "v2"
+    ],
+    "reseller": [
+        "v1"
+    ],
+    "resourcesettings": [
+        "v1"
+    ],
+    "retail": [
+        "v2",
+        "v2alpha",
+        "v2beta"
+    ],
+    "run": [
+        "v1",
+        "v1alpha1",
+        "v1beta1",
+        "v2"
+    ],
+    "runtimeconfig": [
+        "v1",
+        "v1beta1"
+    ],
+    "safebrowsing": [
+        "v4"
+    ],
+    "sasportal": [
+        "v1alpha1"
+    ],
+    "script": [
+        "v1"
+    ],
+    "searchconsole": [
+        "v1"
+    ],
+    "secretmanager": [
+        "v1",
+        "v1beta1"
+    ],
+    "securitycenter": [
+        "v1",
+        "v1beta1",
+        "v1beta2",
+        "v1p1alpha1",
+        "v1p1beta1"
+    ],
+    "serviceconsumermanagement": [
+        "v1",
+        "v1beta1"
+    ],
+    "servicecontrol": [
+        "v1",
+        "v2"
+    ],
+    "servicedirectory": [
+        "v1",
+        "v1beta1"
+    ],
+    "servicemanagement": [
+        "v1"
+    ],
+    "servicenetworking": [
+        "v1",
+        "v1beta"
+    ],
+    "serviceusage": [
+        "v1",
+        "v1beta1"
+    ],
+    "sheets": [
+        "v4"
+    ],
+    "siteVerification": [
+        "v1"
+    ],
+    "slides": [
+        "v1"
+    ],
+    "smartdevicemanagement": [
+        "v1"
+    ],
+    "sourcerepo": [
+        "v1"
+    ],
+    "spanner": [
+        "v1"
+    ],
+    "speech": [
+        "v1",
+        "v1p1beta1",
+        "v2beta1"
+    ],
+    "sql": [
+        "v1beta4"
+    ],
+    "sqladmin": [
+        "v1",
+        "v1beta4"
+    ],
+    "storage": [
+        "v1",
+        "v1beta2"
+    ],
+    "storagetransfer": [
+        "v1"
+    ],
+    "streetviewpublish": [
+        "v1"
+    ],
+    "sts": [
+        "v1",
+        "v1beta"
+    ],
+    "tagmanager": [
+        "v1",
+        "v2"
+    ],
+    "tasks": [
+        "v1"
+    ],
+    "testing": [
+        "v1"
+    ],
+    "texttospeech": [
+        "v1",
+        "v1beta1"
+    ],
+    "toolresults": [
+        "v1beta3"
+    ],
+    "tpu": [
+        "v1",
+        "v1alpha1",
+        "v2",
+        "v2alpha1"
+    ],
+    "trafficdirector": [
+        "v2"
+    ],
+    "transcoder": [
+        "v1",
+        "v1beta1"
+    ],
+    "translate": [
+        "v2",
+        "v3",
+        "v3beta1"
+    ],
+    "travelimpactmodel": [
+        "v1"
+    ],
+    "vault": [
+        "v1"
+    ],
+    "vectortile": [
+        "v1"
+    ],
+    "verifiedaccess": [
+        "v1",
+        "v2"
+    ],
+    "versionhistory": [
+        "v1"
+    ],
+    "videointelligence": [
+        "v1",
+        "v1beta2",
+        "v1p1beta1",
+        "v1p2beta1",
+        "v1p3beta1"
+    ],
+    "vision": [
+        "v1",
+        "v1p1beta1",
+        "v1p2beta1"
+    ],
+    "vmmigration": [
+        "v1",
+        "v1alpha1"
+    ],
+    "webfonts": [
+        "v1"
+    ],
+    "webmasters": [
+        "v3"
+    ],
+    "webrisk": [
+        "v1"
+    ],
+    "websecurityscanner": [
+        "v1",
+        "v1alpha",
+        "v1beta"
+    ],
+    "workflowexecutions": [
+        "v1",
+        "v1beta"
+    ],
+    "workflows": [
+        "v1",
+        "v1beta"
+    ],
+    "workloadmanager": [
+        "v1"
+    ],
+    "workstations": [
+        "v1beta"
+    ],
+    "youtube": [
+        "v3"
+    ],
+    "youtubeAnalytics": [
+        "v1",
+        "v2"
+    ],
+    "youtubereporting": [
+        "v1"
+    ]
+}
