@@ -14,7 +14,7 @@ export const getRssNewsline = async ({
     key: string,
     timeStart: number,
     timeEnd: number
-})=>{
+}) => {
 
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
@@ -47,39 +47,59 @@ export const getRssNewsline = async ({
 export const getQwiket = async ({
     threadid,
     slug,
-    withBody
+    withBody,
+    tag
 
 }: {
     threadid: number,
-    slug: string,
-    withBody: [0, 1]
+    slug?: string,
+    txid?: string,
+    withBody: [0, 1],
+    tag?: string
 }): Promise<Qwiket | null> => {
-    let sql, rows;
+    let sql, rows, qwiket;
     let query = await dbGetQuery("povdb", threadid);
-    const parts = slug.split('-');
-    let silo = parts[0];
-    if (slug == 'nro-is-moving-to-facebook-comments')
-        silo = '';
-    else if (!silo && silo == 'cc')
-        return null;
-    const table = `q${silo}`;
-    const qwiketid = `${slug}.qwiket`;
-    // console.log('getQwiket',qwiketid,withBody)
-    sql = `SELECT * from ${table} where \`key\` ='${qwiketid}' limit 1`;
-    rows = await query(`SELECT * from ${table} where \`key\`=?  limit 1`, [qwiketid]);
-    const json = rows[0]?.value;
-    // console.log("result json:",sql,json)
-    let qwiket;
-    if (json)
-        qwiket = json ? JSON.parse(json) : {};
-    else {
-        const table = `pov_threads_view${silo}`;
-        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t, pov_categories c where t.category_xid=c.xid and \`threadid\` ='${slug}' limit 1`;
+    if (slug) {
+        const parts = slug.split('-');
+        let silo = parts[0];
+        if (slug == 'nro-is-moving-to-facebook-comments')
+            silo = '';
+        else if (!silo && silo == 'cc')
+            return null;
+        const table = `q${silo}`;
+        const qwiketid = `${slug}.qwiket`;
+        // console.log('getQwiket',qwiketid,withBody)
+        sql = `SELECT * from ${table} where \`key\` ='${qwiketid}' limit 1`;
+        rows = await query(`SELECT * from ${table} where \`key\`=?  limit 1`, [qwiketid]);
+        const json = rows[0]?.value;
+        // console.log("result json:",sql,json)
+
+        if (json)
+            qwiket = json ? JSON.parse(json) : {};
+        else {
+            const table = `pov_threads_view${silo}`;
+            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t, pov_categories c where t.category_xid=c.xid and \`threadid\` ='${slug}' limit 1`;
+            // l(chalk.green(sql))
+            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
+            // console.log("ALTERNATIVE QWIKET",sql,rows)
+            qwiket = rows[0];
+            qwiket.body = '';
+        }
+    }
+    else if (tag) {
+        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}' order by t.xid desc limit 1`;
         // l(chalk.green(sql))
-        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
+        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? order by t.xid desc limit 1`, [tag]);
         // console.log("ALTERNATIVE QWIKET",sql,rows)
-        qwiket = rows[0];
-        qwiket.body = '';
+        if (withBody) {
+            qwiket = rows[0];
+            const qwiketid = qwiket['threadid'];
+            sql = `SELECT * from q51 where \`key\` ='${qwiketid}' limit 1`;
+            rows = await query(`SELECT * from q51 where \`key\`=?  limit 1`, [qwiketid]);
+            const json = rows[0]?.value;
+            if (json)
+                qwiket = json ? JSON.parse(json) : {};
+        }
     }
     if (!withBody)
         delete qwiket?.body;

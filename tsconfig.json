@@ -16,6 +16,6 @@
     "incremental": true,
 
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/google/searchConsole.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/google/submitCurrentSitemap.js"],
   "exclude": ["node_modules"]
 }
