@@ -75,7 +75,7 @@ export default async function handler(
             }
         }
         const item = json;
-        console.log(js(item))
+       // console.log(js(item))
         let common: Qwiket = {
             catName: item.catName,
             catIcon: item.catIcon,

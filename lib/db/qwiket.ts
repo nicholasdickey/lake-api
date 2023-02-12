@@ -41,7 +41,7 @@ export const getRssNewsline = async ({
     order by t.xid desc   
     
     limit 50000 `);
-    l(chalk.green(sql, rows))
+   // l(chalk.green(sql, rows))
     return rows;
 }
 export const getQwiket = async ({

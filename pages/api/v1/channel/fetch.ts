@@ -25,63 +25,63 @@ export default async function handler(
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
-        return res.status(500).json({msg:"Unable to create redis"})
-   
+        return res.status(500).json({ msg: "Unable to create redis" })
+
     try {
 
         const channelConfigKey = `channel-${slug}-config`;
-      //  console.log("redis.get",channelConfigKey)
+        //  console.log("redis.get",channelConfigKey)
         let channelConfig = await redis.get(channelConfigKey);
-      //  console.log("redis.get",channelConfigKey,channelConfig)
+        //  console.log("redis.get",channelConfigKey,channelConfig)
         let jsonChannelConfig;
         if (!channelConfig) {
-           // l(chalk.red("CHANNEL CONFIG FETCH NO channel layout, calling db"))
-            jsonChannelConfig = await getChannelConfig({ threadid, channel:slug })
+            // l(chalk.red("CHANNEL CONFIG FETCH NO channel layout, calling db"))
+            jsonChannelConfig = await getChannelConfig({ threadid, channel: slug })
             //l("return from db",jsonChannelConfig)
-            jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
-          
-            channelConfig=JSON.stringify(jsonChannelConfig);
-           // l("return from db",channelConfig)
-            if(channelConfig)
-            redis.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
+            jsonChannelConfig.config = JSON.parse(jsonChannelConfig.config);
+
+            channelConfig = JSON.stringify(jsonChannelConfig);
+            // l("return from db",channelConfig)
+            if (channelConfig)
+                redis.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
         }
         else {
-            jsonChannelConfig=JSON.parse(channelConfig);
+            jsonChannelConfig = JSON.parse(channelConfig);
         }
-       
+
         if (!jsonChannelConfig)
-            return res.status(500).json({msg:"Unable to parse channel config"});
-    //  console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
-        const channelDetails={
-            comment:jsonChannelConfig.config.comment,
-            displayName:jsonChannelConfig.config.displayName,
-            slug:jsonChannelConfig.channelSlug,
-            shortname:jsonChannelConfig.config.shortname,
-            description:jsonChannelConfig.config.description,
-            hometown:jsonChannelConfig.config.hometown,
-            logo:jsonChannelConfig.config.logo,
-            lacantinaName:jsonChannelConfig.config.lacantinaName,
-            lacantinaSlug:jsonChannelConfig.config.lacantinaSlug,
-            lowline:jsonChannelConfig.config.lowline,
-            topline:jsonChannelConfig.config.topline,
-            mobileLayouts:jsonChannelConfig.config.mobileLayouts,
-            lacantinaUrl:jsonChannelConfig.config.lacantinaUrl
+            return res.status(500).json({ msg: "Unable to parse channel config" });
+        //  console.log("jsonChannelConfig:",chalk.blue.bold(js(jsonChannelConfig)))  
+        const channelDetails = {
+            comment: jsonChannelConfig.config.comment,
+            displayName: jsonChannelConfig.config.displayName,
+            slug: jsonChannelConfig.channelSlug,
+            shortname: jsonChannelConfig.config.shortname,
+            description: jsonChannelConfig.config.description,
+            hometown: jsonChannelConfig.config.hometown,
+            logo: jsonChannelConfig.config.logo,
+            lacantinaName: jsonChannelConfig.config.lacantinaName,
+            lacantinaSlug: jsonChannelConfig.config.lacantinaSlug,
+            lowline: jsonChannelConfig.config.lowline,
+            topline: jsonChannelConfig.config.topline,
+            mobileLayouts: jsonChannelConfig.config.mobileLayouts,
+            lacantinaUrl: jsonChannelConfig.config.lacantinaUrl
         }
-        const newsline=jsonChannelConfig.newsline;
-        const ret={
+        const newsline = jsonChannelConfig.newsline;
+        const ret = {
             channelDetails,
             newsline,
-            channelSlug:jsonChannelConfig.channelSlug
+            channelSlug: jsonChannelConfig.channelSlug
         }
-      //  l(chalk.magenta.bold(js(ret)))
+        //  l(chalk.magenta.bold(js(ret)))
         res.status(200).json(ret)
     }
 
     catch (x) {
         l(chalk.red.bold(x));
-        res.status(501).json(x); 
+        res.status(501).json(x);
     }
-    finally{
+    finally {
         redis.quit();
         dbEnd(threadid);
     }

@@ -27,7 +27,7 @@ export default async function handler(
     let dateEnd=sub(addDays(dateStart,7),{seconds:1});
     const timeStart=dateStart.getTime()/1000|0;
     const timeEnd=dateEnd.getTime()/1000|0;
-    console.log(dateStart.getTime(), dateEnd.getTime(),timeStart,timeEnd);
+    console.log('SITEMAP REQ',dateStart.getTime(), dateEnd.getTime(),timeStart,timeEnd);
     console.log("dates:",formatISO(dateStart),formatISO(dateEnd));
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
