@@ -42,28 +42,30 @@ export default async function handler(
             const keyTxid = `tids-cat-published-${tag}`;
             const range = await redis.zrevrange(keyTxid, 0, 0);
             txid = range[0];
-            l(chalk.yellow.bold("NO SLUG",js({keyTxid,range,txid})))
+           // l(chalk.yellow.bold("NO SLUG",js({keyTxid,range,txid})))
            
         }
         else {
             const key = `txid-${slug}`;
+            //l('txid--:',key)
             txid = await redis.get(key) || '';
         }
         // l(chalk.yellow.bold("tttxid:",txid))
 
         if (txid) {
             const key = `ntjson-${withBody + '-'}${txid}`;
-            // l(chalk.green.bold("GET Qwiket from CACHE", key));
+             //l(chalk.green.bold("GET Qwiket from CACHE", key));
             const jsonRaw = await redis.get(key);
-            // l(chalk.green.bold("RESULT:"), jsonRaw)
+          //l(chalk.green.bold("RESULT:"), jsonRaw)
             if (jsonRaw)
                 json = JSON.parse(jsonRaw);
         }
         if (!json) {
             // get from db
-            // l(chalk.green.bold("GET Qwiket from DB"));
+            //l(chalk.green.bold("GET Qwiket from DB"));
             json = await getQwiket({ threadid, slug, withBody,tag })
-            if (withBody) {
+           // l(chalk.green.bold("GET Qwiket from DB22",json));
+            if (json&&withBody) {
                 // l('withBody',json)
                 json.body = processBody(json);
                 const key = `ntjson-${withBody + '-'}${txid}`;
@@ -75,6 +77,10 @@ export default async function handler(
             }
         }
         const item = json;
+        if(!item){
+            l(chalk.red("TOPIC NOT FOUND",slug,tag))
+            return res.status(200).json({ success: false, msg: "Topic doesn't exist"});
+        }
        // console.log(js(item))
         let common: Qwiket = {
             catName: item.catName,

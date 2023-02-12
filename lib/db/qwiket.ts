@@ -83,6 +83,7 @@ export const getQwiket = async ({
             rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
             // console.log("ALTERNATIVE QWIKET",sql,rows)
             qwiket = rows[0];
+            if(qwiket)
             qwiket.body = '';
         }
     }
