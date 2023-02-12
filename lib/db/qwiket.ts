@@ -41,7 +41,7 @@ export const getRssNewsline = async ({
     order by t.xid desc   
     
     limit 50000 `);
-   // l(chalk.green(sql, rows))
+    // l(chalk.green(sql, rows))
     return rows;
 }
 export const getQwiket = async ({
@@ -64,6 +64,8 @@ export const getQwiket = async ({
         let silo = parts[0];
         if (slug == 'nro-is-moving-to-facebook-comments')
             silo = '';
+        else if (!(+silo >= 0))
+            return null;
         else if (!silo && silo == 'cc')
             return null;
         const table = `q${silo}`;
@@ -83,8 +85,8 @@ export const getQwiket = async ({
             rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
             // console.log("ALTERNATIVE QWIKET",sql,rows)
             qwiket = rows[0];
-            if(qwiket)
-            qwiket.body = '';
+            if (qwiket)
+                qwiket.body = '';
         }
     }
     else if (tag) {
