@@ -35,7 +35,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
     let userNewslineModified = false;
     let newslineObjectRaw = await redis.get(userNewslineKey);
-   // l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
+    l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
 
     let userNewsline: any;
     if (newslineObjectRaw) {
@@ -43,7 +43,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     }
     if(!userNewsline||!userNewsline.length) {
         //get from db and populate redis
-
+       
         if (userslug) {
             userNewsline = await getUserNewslineTags({ threadid, key: `${newsline}-${userslug}` })
             if (userNewsline&&userNewsline.length)
@@ -52,7 +52,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         }
         else if (sessionid) {
             userNewsline = await getSessionNewslineTags({ threadid, key: `${newsline}-${sessionid}` })
-            l(chalk.red("got session newsline from db",userNewsline,"key:",userNewslineKey))
+          //  l(chalk.red("got session newsline from db",js({userNewsline}),"key:",js({userNewslineKey})))
             if (userNewsline&&userNewsline.length)
                 await redis.setex(userNewslineKey, 7 * 24 * 3600, JSON.stringify(userNewsline));
         }

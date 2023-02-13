@@ -65,7 +65,7 @@ export const getSessionNewslineTags = async ({
     l("getSessionNewslineTags")
     sql = `SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key='${key}' order by c.text`;
     rows = await query(`SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]);
-    l(chalk.green(sql, rows))
+    l(chalk.green(sql, js(rows)))
     return rows;
 }
 

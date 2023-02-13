@@ -21,7 +21,7 @@ export default async function handler(
 
    
 
-    console.log("===*** &&& === inside newsline update all handler",req.body)
+   // console.log("===*** &&& === inside newsline update all handler",req.body)
     const body = req.body;
     let { sessionid, userslug, newsline, switch: switchParam, tag,filters,q }: { sessionid?: string, userslug?: string, newsline: string, switch: 'on' | 'off', tag: string, filters: string[], q?: string } = body;
 
@@ -36,14 +36,14 @@ export default async function handler(
     try {
 
         const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
-        l(chalk.green.bold(js({userNewslineKey,userslug,sessionid,id})));
+      //  l(chalk.green.bold(js({userNewslineKey,userslug,sessionid,id})));
        
-        await updateUserNewsline({type:userslug?'user':'session',newsline,sessionid,userslug, threadid, key: `${newsline}-${userslug}`, tag, switchParam })
+        await updateUserNewsline({type:userslug?'user':'session',newsline,sessionid,userslug, threadid, key: `${newsline}-${id}`, tag, switchParam })
 
        
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
         const publications=await fetchAll({redis,threadid,sessionid,userslug,newsline,filters,q})
-        l(chalk.yellow.bold("================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Result myNewsline:", js(publications)));
+       // l(chalk.yellow.bold("================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Result myNewsline:", js(publications)));
         return res.status(200).json({
             success: true,
             publications
