@@ -26,7 +26,7 @@ export default async function handler(
    
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-    l(chalk.cyan.bold("allPublications",sessionid, q,js({filters})))
+   // l(chalk.cyan.bold("allPublications",sessionid, q,js({filters})))
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
     try {
