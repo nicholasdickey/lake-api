@@ -35,7 +35,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
     let userNewslineModified = false;
     let newslineObjectRaw = await redis.get(userNewslineKey);
-    l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
+   // l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
 
     let userNewsline: any;
     if (newslineObjectRaw) {
@@ -63,8 +63,9 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     }
 
     let allPublicationsRaw: string | null = null, allPublications: Publications;
-    let newslineCategoriesKey: RedisKey = `all-publications-${newsline}`
-    if ((!filters || !filters.length) && !q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
+    let newslineCategoriesKey: RedisKey = `all-publications-${newsline}${filters&&filters.length>0?`-${filters.join('-')}`:''}`
+    //console.log(chalk.red(newslineCategoriesKey,filters,q))
+    if (!q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
         allPublicationsRaw = await redis.get(newslineCategoriesKey);
     }
 
@@ -75,7 +76,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         //get from db
         allPublications = await getNewslinePublications({ threadid, newsline, filters, q }); //array of {name, icon,tag, description, category_tag, category_name}
         if (allPublications) {
-            if (!filters && !q) {
+            if (!q) {
                 allPublicationsRaw = JSON.stringify(allPublications);
                 await redis.setex(newslineCategoriesKey, 7 * 24 * 3600, allPublicationsRaw);
             }
