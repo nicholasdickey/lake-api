@@ -4,10 +4,10 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { dbLog, dbEnd } from "../../../../lib/db"
 
- const  onlineCount=async (identity:string,redis:any)=> {
+const onlineCount = async (identity: string, redis: any) => {
     if (identity) {
         if (Array.isArray(identity)) identity = identity[0];
-        // console.log("onlineCount2=", count, identity)
+        console.log("onlineCount2=", identity)
         var d = new Date();
         var q =
             "user-count-" +
@@ -20,12 +20,12 @@ import { dbLog, dbEnd } from "../../../../lib/db"
         if (!sq) {
             redis.zadd(q, (Date.now() / 1000) | 0, identity);
 
-           
+
         }
         sq = await redis.zscore(mq, identity);
         if (!sq) {
             redis.zadd(mq, (Date.now() / 1000) | 0, identity);
-           
+
         }
 
         redis.expire(q, 365 * 24 * 3600);
@@ -33,7 +33,7 @@ import { dbLog, dbEnd } from "../../../../lib/db"
         redis.zadd("online", (Date.now() / 1000) | 0, identity);
         redis.expire("online", 365 * 24 * 3600);
 
-       
+
 
         await redis.zremrangebyscore(
             "online",
@@ -42,11 +42,14 @@ import { dbLog, dbEnd } from "../../../../lib/db"
         );
         let count = await redis.zcount("online", "-inf", "+inf");
         let dayCount = await redis.zcount(q, "-inf", "+inf");
-        return {success:true,
+       
+        return {
+            success: true,
             count,
-            daycount:dayCount};
+            daycount: dayCount
+        };
     } else {
-        return {"success":false};
+        return { "success": false };
     }
 }
 
@@ -64,30 +67,32 @@ export default async function handler(
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
-    l(chalk.yellow("onlineCount"));
-    let { userslug,sessionid } = req.query;
-    const id=userslug||sessionid||'';
-   // let threadid = Math.floor(Math.random() * 100000000)
+   // l(chalk.yellow("onlineCount"));
+    let { userslug, sessionid } = req.query;
+    const id = userslug || sessionid || '';
+   // console.log("count", js({ id, sessionid, userslug }))
+    // let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-    if (!redis)
-        return res.status(500).json({msg:"Unable to create redis"})
-        if(!userslug)
-        return res.status(200).json({user:{}})
+    if (!redis){
+        l(chalk.red("no redis"))
+        return res.status(500).json({ msg: "Unable to create redis" })
+    }
    
     try {
-        const ret=await onlineCount(id as string||'',redis);
-        l(chalk.yellow("onlineCount",js(ret)));
+       // console.log(chalk.green("calling onlineCount", js({ id })))
+        const ret = await onlineCount(id as string || '', redis);
+        l(chalk.yellow("onlineCount", js(ret)));
         res.status(200).json(ret);
     }
 
     catch (x) {
         l(chalk.red.bold(x));
-        res.status(501).json({success:false})
-      
+        res.status(501).json({ success: false })
+
     }
-    finally{
+    finally {
         redis.quit();
-      //  dbEnd(threadid);
+        //  dbEnd(threadid);
     }
 
 }
