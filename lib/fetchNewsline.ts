@@ -12,7 +12,7 @@ const fetchNewsline = async ({ redis, threadid,sessionid, userslug, newsline, up
 
  
     const defaultNewslineDefinitionKey: RedisKey = `definition-newsline-${newsline}`;
-    let defaultNewslineDefinitionRaw = await redis.get(defaultNewslineDefinitionKey);
+    let defaultNewslineDefinitionRaw //TMP = await redis.get(defaultNewslineDefinitionKey);
     let defaultNewslineDefinition: NewslineDefinition | null = null;
     if (defaultNewslineDefinitionRaw)
         defaultNewslineDefinition = JSON.parse(defaultNewslineDefinitionRaw);

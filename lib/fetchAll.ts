@@ -5,17 +5,18 @@ import { dbLog, dbEnd } from "./db"
 import { RedisKey } from 'ioredis';
 import { Newsline, NewslineDefinition, ExplorerPublication, Publications, NewslineDefinitionItem, TagDefinition } from "./types/newsline"
 const fetchPublications = async ({ redis, threadid, sessionid, userslug, newsline, filters, q }: { redis: any, threadid: number, sessionid?: string, userslug?: string, newsline: string, filters: string[], q?: string }) => {
-
+    try{
     const id = userslug || sessionid;
     const defaultNewslineDefinitionKey: RedisKey = `definition-newsline-${newsline}`;
-    let defaultNewslineDefinitionRaw = await redis.get(defaultNewslineDefinitionKey);
+    let defaultNewslineDefinitionRaw //TMP = await redis.get(defaultNewslineDefinitionKey);
     let defaultNewslineDefinition: NewslineDefinition | null = null;
     if (defaultNewslineDefinitionRaw)
         defaultNewslineDefinition = JSON.parse(defaultNewslineDefinitionRaw);
 
     if (!defaultNewslineDefinition) {
+ 
         //get from db and populate redis
-        defaultNewslineDefinition = await getNewslineDefaultTags({ threadid, newsline }); //sorted array of {name,tag,icon}
+        defaultNewslineDefinition  = await getNewslineDefaultTags({ threadid, newsline }); //sorted array of {name,tag,icon}
         if (defaultNewslineDefinition) {
             defaultNewslineDefinitionRaw = JSON.stringify(defaultNewslineDefinition);
 
@@ -34,7 +35,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
 
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
     let userNewslineModified = false;
-    let newslineObjectRaw = await redis.get(userNewslineKey);
+    let newslineObjectRaw //TMP = await redis.get(userNewslineKey);
    // l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
 
     let userNewsline: any;
@@ -66,7 +67,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     let newslineCategoriesKey: RedisKey = `all-publications-${newsline}${filters&&filters.length>0?`-${filters.join('-')}`:''}`
     //console.log(chalk.red(newslineCategoriesKey,filters,q))
     if (!q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
-        allPublicationsRaw = await redis.get(newslineCategoriesKey);
+        //TMP allPublicationsRaw = await redis.get(newslineCategoriesKey);
     }
 
     if (allPublicationsRaw) {
@@ -77,12 +78,12 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         allPublications = await getNewslinePublications({ threadid, newsline, filters, q }); //array of {name, icon,tag, description, category_tag, category_name}
         if (allPublications) {
             if (!q) {
-                allPublicationsRaw = JSON.stringify(allPublications);
+               //TMP allPublicationsRaw = JSON.stringify(allPublications);
                 await redis.setex(newslineCategoriesKey, 7 * 24 * 3600, allPublicationsRaw);
             }
         }
     }
-
+ 
     // overlay private newsline over the default newsline
 
     //  for (let i = 0; i < defaultNewsline.length; i++) {
@@ -111,7 +112,6 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         defaultOverlayNewslineDefinition.push(f);
     }
     defaultOverlayNewslineDefinition.sort((a: ExplorerPublication, b: ExplorerPublication) => a.name && b.name && a.name > b.name ? 1 : a.name && b.name && a.name < b.name ? 1 : 0);
-
 
     //overlay combined newsline over selection of publications for explore tab
     for (let i = 0; i < allPublications.length; i++) {
@@ -151,5 +151,9 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
 
     await Promise.all(promises);
     return allPublications;
+    }
+    catch(x){
+        l(chalk.red.bold(x))
+    }
 }
 export default fetchPublications;
