@@ -26,11 +26,10 @@ export default async function handler(
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
-    if (!userslug)
-        return res.status(200).json({ user: {} })
-
+  
     try {
         const ackKey = `ack-${userslug || sessionid}-${tag}`;
+        l("USER ACK",userslug,sessionid,tag)
         if (userslug)
             await updateUserAck({ threadid, userslug: userslug as string || '', tag: tag as string || '' });
         else

@@ -105,7 +105,7 @@ export default async function handler(
         /**
          * Check the user acceptances
          */
-        if (false&&item.body) {
+        if (item.body) {
             const ackKey = `ack-${userslug || sessionid}-${tag}`;
             let hasAck =ack|| await redis.get(ackKey);
             if (!hasAck) {

@@ -127,16 +127,16 @@ export const updateUserAck = async ({
     l("updateUserAck",userslug)
     const millis=microtime();
     let query = await dbGetQuery("povdb", threadid);
-    sql = `SELECT xid from pov_v30_user_acks where sessionid='${userslug}'`;
-    let rows = await query(`SELECT xid from pov_v30_user_acks where sessionid=?`,[userslug]);
+    sql = `SELECT xid from pov_v30_user_acks where userslug='${userslug}'`;
+    let rows = await query(`SELECT xid from pov_v30_user_acks where userslug=?`,[userslug]);
 
     if(rows&&rows.length>0){
-        sql=`UPDATE pov_v30_user_acks set tag=${tag} where sessionid='${userslug}'`;
-        await query(`UPDATE pov_v30_user_acks set tag=? where sessionid=?`,[tag,userslug]);
+        sql=`UPDATE pov_v30_user_acks set tag=${tag} where userslug='${userslug}'`;
+        await query(`UPDATE pov_v30_user_acks set tag=? where userslug=?`,[tag,userslug]);
     }
     else {
-        sql=`INSERT INTO pov_v30_user_acks (sessionid,tag) VALUES ('${userslug}','${tag}')`;
-        await query(`INSERT INTO pov_v30_user_acks (sessionid,tag) VALUES (?,?)`,[userslug,tag]);
+        sql=`INSERT INTO pov_v30_user_acks (userslug,tag) VALUES ('${userslug}','${tag}')`;
+        await query(`INSERT INTO pov_v30_user_acks (userslug,tag) VALUES (?,?)`,[userslug,tag]);
 
     }
 }
@@ -157,8 +157,10 @@ export const verifyAck = async ({
     const table=`pov_v30_${userslug?'user':'session'}_acks`;
     const id=userslug||sessionid;
     const idField=userslug?'userslug':'sessionid';
+    
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from ${table} where (tag='all' OR tag='${tag}'} and ${idField}='${id}'`;
+    l('verifyAck',js({userslug,sessionid,tag,sql}))
     let rows = await query(`SELECT xid from ${table} where (tag='all' OR tag=?) and ${idField}=?`,[tag,id]);
     l(chalk.green(sql,rows))
     if(rows&&rows.length>0)
