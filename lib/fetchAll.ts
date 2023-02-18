@@ -36,7 +36,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
     let userNewslineModified = false;
     let newslineObjectRaw //TMP = await redis.get(userNewslineKey);
-   // l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
+    l(chalk.blue.bold("fetchAll",js({userNewslineKey,newslineObjectRaw})))
 
     let userNewsline: any;
     if (newslineObjectRaw) {
@@ -53,7 +53,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         }
         else if (sessionid) {
             userNewsline = await getSessionNewslineTags({ threadid, key: `${newsline}-${sessionid}` })
-          //  l(chalk.red("got session newsline from db",js({userNewsline}),"key:",js({userNewslineKey})))
+            l(chalk.red("got session newsline from db",js({userNewsline}),"key:",js({userNewslineKey})))
             if (userNewsline&&userNewsline.length)
                 await redis.setex(userNewslineKey, 7 * 24 * 3600, JSON.stringify(userNewsline));
         }
@@ -65,7 +65,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
 
     let allPublicationsRaw: string | null = null, allPublications: Publications;
     let newslineCategoriesKey: RedisKey = `all-publications-${newsline}${filters&&filters.length>0?`-${filters.join('-')}`:''}`
-    //console.log(chalk.red(newslineCategoriesKey,filters,q))
+    console.log(chalk.red(newslineCategoriesKey,filters,q))
     if (!q) { //for the vasdt majority of default page loads, filter and q only when actively exploring feeds and setting the newsline, goes to db only
         //TMP allPublicationsRaw = await redis.get(newslineCategoriesKey);
     }
@@ -87,7 +87,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     // overlay private newsline over the default newsline
 
     //  for (let i = 0; i < defaultNewsline.length; i++) {
-
+if(userNewsline){
     const defaultOverlayNewslineDefinition: Publications = defaultNewslineDefinition?.map(n => {
 
         const f = userNewsline.find((f: any) => f.tag == n.tag && f.switch == 'off');
@@ -126,6 +126,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
             n.switch = 'off';
         }
     }
+}
     //fill in the details from catJson.
 
     //fill-in the details from catJson

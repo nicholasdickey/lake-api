@@ -86,3 +86,82 @@ export const updateSession = async ({
 
     }
 }
+export const updateSessionAck = async ({
+    threadid,
+    sessionid,
+    tag
+}:{
+    threadid:number,
+    sessionid:string,
+    tag:string
+}) => {
+    let sql, result;
+    /// l("fetchSubroots");
+    l("updateSessionAck",sessionid)
+    const millis=microtime();
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT xid from pov_v30_session_acks where sessionid='${sessionid}'`;
+    let rows = await query(`SELECT xid from pov_v30_session_acks where sessionid=?`,[sessionid]);
+
+    if(rows&&rows.length>0){
+        sql=`UPDATE pov_v30_session_acks set tag=${tag} where sessionid='${sessionid}'`;
+        await query(`UPDATE pov_v30_session_acks set tag=? where sessionid=?`,[tag,sessionid]);
+    }
+    else {
+        sql=`INSERT INTO pov_v30_session_acks (sessionid,tag) VALUES ('${sessionid}','${tag}')`;
+        await query(`INSERT INTO pov_v30_session_acks (sessionid,tag) VALUES (?,?)`,[sessionid,tag]);
+
+    }
+}
+export const updateUserAck = async ({
+    threadid,
+    userslug,
+    tag
+}:{
+    threadid:number,
+    userslug:string,
+    tag:string
+}) => {
+    let sql, result;
+    /// l("fetchSubroots");
+    l("updateUserAck",userslug)
+    const millis=microtime();
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT xid from pov_v30_user_acks where sessionid='${userslug}'`;
+    let rows = await query(`SELECT xid from pov_v30_user_acks where sessionid=?`,[userslug]);
+
+    if(rows&&rows.length>0){
+        sql=`UPDATE pov_v30_user_acks set tag=${tag} where sessionid='${userslug}'`;
+        await query(`UPDATE pov_v30_user_acks set tag=? where sessionid=?`,[tag,userslug]);
+    }
+    else {
+        sql=`INSERT INTO pov_v30_user_acks (sessionid,tag) VALUES ('${userslug}','${tag}')`;
+        await query(`INSERT INTO pov_v30_user_acks (sessionid,tag) VALUES (?,?)`,[userslug,tag]);
+
+    }
+}
+
+export const verifyAck = async ({
+    threadid,
+    userslug,
+    sessionid,
+    tag
+}:{
+    threadid:number,
+    userslug?:string,
+    sessionid:string,
+    tag:string
+}) => {
+    let sql, result;
+    /// l("fetchSubroots");
+    const table=`pov_v30_${userslug?'user':'session'}_acks`;
+    const id=userslug||sessionid;
+    const idField=userslug?'userslug':'sessionid';
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT xid from ${table} where (tag='all' OR tag='${tag}'} and ${idField}='${id}'`;
+    let rows = await query(`SELECT xid from ${table} where (tag='all' OR tag=?) and ${idField}=?`,[tag,id]);
+    l(chalk.green(sql,rows))
+    if(rows&&rows.length>0)
+        return true
+    return false;
+}

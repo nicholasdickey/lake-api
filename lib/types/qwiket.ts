@@ -35,6 +35,8 @@ export interface Qwiket{
     thread_url?:string,
     thread_image?:string,
     thread_author?:string,
-    subscr_status?:number
+    subscr_status?:number,
+    hasBody?:boolean,
+    ack?:boolean
 
 }

@@ -7,14 +7,17 @@ import { dbLog, dbEnd } from "../../../../lib/db";
 import { getQwiket } from "../../../../lib/db/qwiket";
 import { processBody } from "../../../../lib/processBody";
 import { Qwiket } from "../../../../lib/types/qwiket";
+import { verifyAck } from "../../../../lib/db/user"
 
 type Data = any
 
 interface Query {
     slug?: string,
     withBody: [0, 1],
-    userslug: string,
-    tag?: string
+    userslug?: string,
+    sessionid: string,
+    tag?: string,
+    ack?:number
 }
 export default async function handler(
     req: NextApiRequest,
@@ -27,8 +30,8 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    const { slug, withBody, userslug, tag }: Query = req.query as unknown as Query;
-   // l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
+    const { slug, withBody, userslug, sessionid, tag,ack }: Query = req.query as unknown as Query;
+    // l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
@@ -36,14 +39,14 @@ export default async function handler(
 
     try {
         let json: any;
-        let txid: string='';
+        let txid: string = '';
         if (!slug) {
             //home mode, the latest topic from feed
             const keyTxid = `tids-cat-published-${tag}`;
             const range = await redis.zrevrange(keyTxid, 0, 0);
             txid = range[0];
-           // l(chalk.yellow.bold("NO SLUG",js({keyTxid,range,txid})))
-           
+            // l(chalk.yellow.bold("NO SLUG",js({keyTxid,range,txid})))
+
         }
         else {
             const key = `txid-${slug}`;
@@ -54,18 +57,18 @@ export default async function handler(
 
         if (txid) {
             const key = `ntjson-${withBody + '-'}${txid}`;
-             //l(chalk.green.bold("GET Qwiket from CACHE", key));
+            //l(chalk.green.bold("GET Qwiket from CACHE", key));
             const jsonRaw = await redis.get(key);
-          //l(chalk.green.bold("RESULT:"), jsonRaw)
+            //l(chalk.green.bold("RESULT:"), jsonRaw)
             if (jsonRaw)
                 json = JSON.parse(jsonRaw);
         }
         if (!json) {
             // get from db
             //l(chalk.green.bold("GET Qwiket from DB"));
-            json = await getQwiket({ threadid, slug, withBody,tag })
-           // l(chalk.green.bold("GET Qwiket from DB22",json));
-            if (json&&withBody) {
+            json = await getQwiket({ threadid, slug, withBody, tag })
+            // l(chalk.green.bold("GET Qwiket from DB22",json));
+            if (json && withBody) {
                 // l('withBody',json)
                 json.body = processBody(json);
                 const key = `ntjson-${withBody + '-'}${txid}`;
@@ -77,11 +80,11 @@ export default async function handler(
             }
         }
         const item = json;
-        if(!item){
-            l(chalk.red("TOPIC NOT FOUND",slug,tag))
-            return res.status(200).json({ success: false, msg: "Topic doesn't exist"});
+        if (!item) {
+            l(chalk.red("TOPIC NOT FOUND", slug, tag))
+            return res.status(200).json({ success: false, msg: "Topic doesn't exist" });
         }
-       // console.log(js(item))
+        // console.log(js(item))
         let common: Qwiket = {
             catName: item.catName,
             catIcon: item.catIcon,
@@ -102,8 +105,28 @@ export default async function handler(
         /**
          * Check the user acceptances
          */
-        if (userslug) {
-
+        if (false&&item.body) {
+            const ackKey = `ack-${userslug || sessionid}-${tag}`;
+            let hasAck =ack|| await redis.get(ackKey);
+            if (!hasAck) {
+                const ackAllKey = `ack-${userslug || sessionid}-all`;
+                hasAck = await redis.get(ackAllKey);
+                if (!hasAck) {
+                    hasAck = (await verifyAck({ threadid, userslug, sessionid, tag: tag || '' })) ? "1" : null;
+                    if (hasAck) {
+                       //TMP  await redis.setex(ackKey, 24 * 3600, "1")
+                    }
+                }
+            }
+            if(!hasAck){
+                common.body='';
+                common.hasBody=true;
+                common.ack=false;
+            }
+            else {
+                common.ack=true;
+                common.hasBody=true;
+            }
         }
         //  l(chalk.yellow(js(common)))
         res.status(200).json({ success: true, item: common });
