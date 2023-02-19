@@ -39,7 +39,7 @@ export default async function handler(
         
         const key=`'${allPublications?.map(p=>p.tag).join(`','`)}'`
         const range =await getRssNewsline({threadid,key,timeStart,timeEnd});
-        l(222)
+       
         const sitemap=range.map((m:any)=>`${m.tag}/${m.threadid}`)//.join(',');
         l(chalk.yellow.bold(key,range.length,sitemap.length,timeEnd,timeStart,key,JSON.stringify(sitemap)))
         res.status(200).json({success:true,sitemap})
@@ -50,7 +50,7 @@ export default async function handler(
         res.status(501).json(x);
     }
     finally {
-        redis.quit();
+        await redis.quit();
         dbEnd(threadid);
     }
 
