@@ -12,7 +12,7 @@ export const getUser = async ({
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT user_name,avatar,subscr_status from pov_v10_users where slug='${slug}'`;
     let rows = await query(`SELECT user_name,avatar,subscr_status from pov_v10_users where slug=?`,[slug]);
-    l(chalk.green(sql))
+    l(chalk.green(sql),rows)
     return rows[0]
 }
 export const getUserSession = async ({

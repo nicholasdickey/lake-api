@@ -33,7 +33,7 @@ export default async function handler(
 
         const userKey = `user-${userslug}`;
         console.log("redis.get",userKey)
-        let user = await redis.get(userKey);
+        let user// = await redis.get(userKey);
         console.log("redis.get",userKey,user)
         let jsonUser;
         if (!user) {
@@ -48,7 +48,7 @@ export default async function handler(
        
         if (!jsonUser)
             return res.status(500).json({msg:"Unable to parse user"});
- 
+        l(js({success:true,user:jsonUser}))
         res.status(200).json({success:true,user:jsonUser})
     }
 
