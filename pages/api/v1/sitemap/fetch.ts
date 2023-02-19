@@ -36,9 +36,8 @@ export default async function handler(
 
     try {
         const allPublications=await fetchAll({redis,threadid,sessionid:'',userslug:'',newsline: newsline as string,filters:[]})
-        console.log(123)
-        const key=`'${allPublications.map(p=>p.tag).join(`','`)}'`
-        console.log(111)
+        
+        const key=`'${allPublications?.map(p=>p.tag).join(`','`)}'`
         const range =await getRssNewsline({threadid,key,timeStart,timeEnd});
         l(222)
         const sitemap=range.map((m:any)=>`${m.tag}/${m.threadid}`)//.join(',');
