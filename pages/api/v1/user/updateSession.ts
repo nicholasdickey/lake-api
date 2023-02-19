@@ -48,7 +48,7 @@ export default async function handler(
 
     }
     finally {
-        await ();
+        await redis.quit();
         dbEnd(threadid);
     }
 
