@@ -80,7 +80,7 @@ export default async function handler(
                 const jsonRaw = JSON.stringify(json);
                 // console.log("kkkey:",key,jsonRaw)
                 try{
-                 redis.setex(key, 7 * 24 * 3600, jsonRaw);
+                  await redis.setex(key, 7 * 24 * 3600, jsonRaw);
                 }
                 catch(x){
                     l(chalk.red.bold(x))
@@ -117,12 +117,17 @@ export default async function handler(
          */
         if (item.body) {
             const ackKey = `ack-${userslug || sessionid}-${tag}`;
+           
             let hasAck = ack || await redis.get(ackKey);
+        
             if (!hasAck) {
                 const ackAllKey = `ack-${userslug || sessionid}-all`;
+             
                 hasAck = await redis.get(ackAllKey);
+             
                 if (!hasAck) {
                     hasAck = (await verifyAck({ threadid, userslug, sessionid, tag: tag || '' })) ? "1" : null;
+                   
                     if (hasAck) {
                         //TMP  await redis.setex(ackKey, 24 * 3600, "1")
                     }
@@ -148,7 +153,7 @@ export default async function handler(
         res.status(501).json(x);
     }
     finally {
-        redis?.quit();
+        await redis?.quit();
         dbEnd(threadid);
     }
 

@@ -118,7 +118,7 @@ export default async function handler(
         res.status(501).json(x);
     }
     finally {
-        redis.quit();
+        await redis.quit();
         dbEnd(threadid);
     }
 

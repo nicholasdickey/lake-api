@@ -63,6 +63,6 @@ export default async function handler(
     finally {
         l("end of publicationCategories")
         dbEnd(threadid);
-        redis.quit();
+        await redis.quit();
     }
 }

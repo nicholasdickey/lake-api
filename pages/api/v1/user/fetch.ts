@@ -40,7 +40,7 @@ export default async function handler(
             l(chalk.red("USER FETCH NO user, calling db"))
             jsonUser = await getUser({ threadid, slug:userslug as string })
             user=JSON.stringify(jsonUser)
-            redis.setex(userKey, 365 * 24 * 3600, user);
+            await redis.setex(userKey, 365 * 24 * 3600, user);
         }
         else {
             jsonUser=JSON.parse(user);
@@ -58,7 +58,7 @@ export default async function handler(
       
     }
     finally{
-        redis.quit();
+        await redis.quit();
         dbEnd(threadid);
     }
 
