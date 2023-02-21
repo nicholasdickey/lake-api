@@ -48,12 +48,17 @@ export default async function handler(
             // if(type=='mix')
             // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
             // l("ret:", ret.items.map(r=>r.item))
-            const newItems =  items.map(({ item }: any) => {
+            const newItems =  items.filter((p:any)=>p!=null).map(({ item }: any) => {
+                if(!item)
+                return null;
                 //l(item)
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
+               //  l(1111)
                 const isPost = item.qpostid ? true : false;
+               // l(11222,isPost)
+               
                 let processedBody = item.body;
                 if (isPost) {
                    // l(chalk.yellow.bold("POST:", js(item.body)))
@@ -101,15 +106,17 @@ export default async function handler(
 
             })
            // l(newItems)
-            ret.items = newItems;
+            ret.items = newItems.filter((p:any)=>p!=null);
            // if(type=='mix')
             //l(chalk.green.bold("return from fetchQueue", js(ret)))
         }
-         //if (type == 'mix')
-         //l(chalk.magenta.bold(js(ret)))
+        // if (type == 'mix')
+        //  l(chalk.magenta.bold(js(ret)))
         if (countonly) {
             // console.log('count:',ret.newItems)
         }
+
+       // l(chalk.cyan.bold("444",js(ret)))
         res.status(200).json(ret)
     }
 

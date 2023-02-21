@@ -122,7 +122,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     if (countonly == 1)
         return await getNewCount({ newslineKey, forum, commentsKey, lastXid, tail, redis })
 
-
+    //l(99999)
     /**
      * * If lastid=0 need to find actual lastxid, and compare it to lastXidKey
      * * If still current, can reuse secondaryCache for that lastid
@@ -151,18 +151,25 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     let pageJson = [];
     const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
     let pageJsonRaw = await redis.get(pageKey);
-    // l(chalk.green.bold("ifm: pageJsonRaw", pageKey, pageJsonRaw, page, size))
+   // l(chalk.green.bold("ifm: pageJsonRaw", pageKey, pageJsonRaw, page, size))
     if (pageJsonRaw) {  //already in cache, just if page==0 prepend comments to tail (or end if no tail)
         redis.expire(pageKey, 600);
         pageJson = JSON.parse(pageJsonRaw);
-        if (page == 0) {// will need to prepend fresh comments from tail         
-            const { shared_time } = pageJson[0].item;
+        if (page == 0) {// will need to prepend fresh comments from tail  
+           // l(chalk.yellow.bold("6684",js(pageJson[0])))      
+            const { shared_time } = pageJson[0].item||{shared_time:''};
             const { tail: newTail, prepends } = await prependComments({ commentsKey, lastCreatedAt: shared_time, tail, forum, redis });
             tail = newTail;
             pageJson.unshift(...prepends); // prepend all the new comments in the descending order
             // console.log("ifm: adding prepends existing page:", js({ newTail,prepends }))
         }
-        //  console.log(`T3 END Time:`,Date.now()-t1,tail)
+       /* console.log({
+            success: true,
+            items: pageJson,
+            tail,
+            lastid: lastXid //switching to xid
+        })*/
+    
         return {
             success: true,
             items: pageJson,
@@ -202,6 +209,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             prevCreatedAt = createdAt;
         }
     }
+   // l(987672626)
     const start = triggerPosition + page * size;
     const end = triggerPosition + (page + 1) * size - 1;
     // console.log('t6 Time:',Date.now()-t1)
@@ -235,10 +243,12 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         lastCreatedAt = shared_time;//i == 0 ? shared_time : commentsBefore[1]; //0 is id, q - createdat
 
         if (commentsBefore) {
-            //l(chalk.yellow("commentsBefore",js(commentsBefore)))  
+           // l(chalk.yellow("commentsBefore",js(commentsBefore)))  
             for (let j = 0; j < commentsBefore.length; j++) {
                 const qpostid = commentsBefore[j];
+               // console.log('2213',qpostid)
                 const pJson = await getPJson({ qpostid, forum, redis });
+               // console.log('8235',pJson)
                 // console.log(`t4-${i} Time:`,Date.now()-t1)
                 pageJson.push({ item: pJson });
             }
@@ -293,6 +303,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
      })
      l(chalk.bgBlue.whiteBright(`times: ${js(times)}`))*/
     // console.log('End Time:',Date.now()-t1)
+    console.log(93939)
     if (page == 0 && pageJson[0]) {// will need to prepend fresh comments from tail   
         const item = pageJson[0].item;
         if (item) {
@@ -305,6 +316,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             pageJson.unshift(...prepends); // prepend all the new comments in the descending order
         }
     }
+    console.log(88111)
     //   console.log('End Time:',Date.now()-t1)
     const ret = {
         success: true,
@@ -313,7 +325,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         tail,
         lastid: lastXid
     };
-    //   console.log("ifm: returning", js(ret));
+     console.log("ifm: returning", js(ret));
     /*return {
                     type: "mix",
                     success: true,
