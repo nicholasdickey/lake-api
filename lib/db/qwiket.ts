@@ -97,11 +97,18 @@ export const getQwiket = async ({
         if (withBody) {
             qwiket = rows[0];
             const qwiketid = qwiket['threadid'];
-            sql = `SELECT * from q51 where \`key\` ='${qwiketid}' limit 1`;
-            rows = await query(`SELECT * from q51 where \`key\`=?  limit 1`, [qwiketid]);
-            const json = rows[0]?.value;
+            sql = `SELECT * from q6 where \`key\` ='${qwiketid}' limit 1`;
+            rows = await query(`SELECT * from q6 where \`key\`=?  limit 1`, [qwiketid]);
+            let json = rows[0]?.value;
             if (json)
                 qwiket = json ? JSON.parse(json) : {};
+            else {
+                sql = `SELECT * from q51 where \`key\` ='${qwiketid}' limit 1`;
+                rows = await query(`SELECT * from q51 where \`key\`=?  limit 1`, [qwiketid]);
+                json = rows[0]?.value;
+                if (json)
+                    qwiket = json ? JSON.parse(json) : {};
+            }
         }
     }
     if (!withBody)
