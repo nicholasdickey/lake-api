@@ -132,16 +132,16 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         const lastIdFromCache = await redis.zrevrange(newslineKey, 0, 0);
 
         lastXid = lastIdFromCache[0];
-        //  l(chalk.yellow.bold('ifm: ', js({ lastIdFromCache, newslineKey, lastXid })));
+        l(chalk.yellow.bold('ifm: ', js({ lastIdFromCache, newslineKey, lastXid })));
 
-        /* let ntJson = await getNtJson({ xid: lastXid, redis });
-         if (ntJson)
-             lastid = ntJson.slug; */
-        //  l(chalk.green.bold("ifm: NOLASTID, got the latest", js({ lastid, lastXid })));
+         let ntJson = await getNtJson({ xid: lastXid, redis });
+         //if (ntJson)
+         //    lastid = ntJson.slug; 
+            l(chalk.green.bold("ifm: NOLASTID, got the latest", js({ ntJson })));
     }
     else {
         // lastXid = lastid ? await redis.get(`txids-${lastid}`) : 0;
-        // l(chalk.green.bold("ifm: HAS LASTID, got the latest", js({ lastid, lastXid })));
+          l(chalk.green.bold("ifm: HAS LASTID, got the latest", js({ lastid, lastXid })));
     }
 
     /**
