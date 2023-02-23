@@ -83,6 +83,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
             }
         }
     }
+    l(chalk.cyan.bold(9912128))
  
     // overlay private newsline over the default newsline
 
@@ -138,6 +139,7 @@ if(userNewsline){
             let cat: TagDefinition = catJson ? JSON.parse(catJson) : null;
             if (!cat) {
                 // fill-in from DB and update redis
+                l(chalk.cyan.bold(7777))
                 cat = await getTagDefinition({ threadid, tag: f.tag });
                 catJson = JSON.stringify(cat);
                 await redis.set(key, catJson);

@@ -15,8 +15,9 @@ export const getNewslineDefaultTags = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c  on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag  where n.newsline='${newsline}' order by c.text`;
+    l(chalk.green("12311",sql));
     rows = await query(`SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag where n.newsline=? order by c.text`, [newsline]);
-    // l(chalk.green(sql,js(rows)))
+     l(chalk.green(sql,js(rows)))
     return rows;
 }
 export const getUserTags = async ({
@@ -81,30 +82,31 @@ export const getNewslinePublications = async ({
     q?: string
 }): Promise<Publications> => {
     let sql, rows;
-    /// l("fetchSubroots");
+     l("getNewslinePublications");
     let inStr = "('" + filters?.join("','") + "')";
   //  console.log("insStr", inStr)
     let query = await dbGetQuery("povdb", threadid);
     if (filters && filters.length > 0 && !q) {
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}'  order by cc.text asc `;
-        //l(chalk.green(sql))
+        l(chalk.green(sql))
         rows = await query(`SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline=? and p.category_tag=c.tag and p.newsline=? order by cc.text asc `, [newsline, newsline]);
     }
     else if (filters && filters.length > 0 && q) {
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description,c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}' and c.text like '%${q}%' order by cc.text asc `;
-       // l(chalk.green(sql))
+        l(chalk.green(sql))
         rows = await query(`SELECT cc.text as name, cc.icon, p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline=? and p.category_tag=c.tag and p.newsline=? and cc.text like '%${q}%' order by cc.text asc `, [newsline, newsline]);
     }
     else if ((!filters || !filters.length) && q) {
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline='${newsline}'  and p.category_tag=c.tag and p.newsline='${newsline}' and p.name like '%${q}%'order by cc.text asc `;
+        l(chalk.green(sql))
         rows = await query(`SELECT cc.text as name, cc.icon, p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline=?  and p.category_tag=c.tag and p.newsline=? and p.name like '%${q}%' order by cc.text asc `, [newsline, newsline]);
     }
     else {
         sql = `SELECT DISTINCT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline='${newsline}'  and p.category_tag=c.tag and p.newsline='${newsline}'  order by cc.text asc `;
-       // l(chalk.green(sql))
+        l(chalk.green(sql))
         rows = await query(`SELECT DISTINCT cc.text as name, cc.icon,p.tag,p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag  and c.newsline=?  and p.category_tag=c.tag and p.newsline=? order by cc.text asc `, [newsline, newsline]);
     }
-   // l(chalk.green(sql, rows))
+    l(chalk.green(sql, js(rows)))
     return rows;
 }
 export const updateUserNewsline = async ({
@@ -213,8 +215,9 @@ export const getTagDefinition = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT shortname as tag, text as name, icon, description from pov_categories where shortname='${tag}'`;
-    rows = await query(`SELECT shortname as tag, text as name, icon, description from pov_categories where shortname=?'`, [tag]);
-   // l(chalk.green(sql, rows[0]))
+    l(chalk.green(sql))
+    rows = await query(`SELECT shortname as tag, text as name, icon, description from pov_categories where shortname=?`, [tag]);
+    l(chalk.green(sql, js(rows[0])))
     return rows[0];
 }
 export const getNewslinePublicationCategories = async ({
