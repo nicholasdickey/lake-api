@@ -57,12 +57,12 @@ export default async function handler(
             // l(chalk.yellow.bold("tttxid:",txid))
 
             if (txid) {
-                const key = `ntjson-${withBody + '-'}${txid}`;
+               /* const key = `ntjson-${withBody + '-'}${txid}`;
                 //l(chalk.green.bold("GET Qwiket from CACHE", key));
                 const jsonRaw = await redis.get(key);
                 //l(chalk.green.bold("RESULT:"), jsonRaw)
                 if (jsonRaw)
-                    json = JSON.parse(jsonRaw);
+                    json = JSON.parse(jsonRaw);*/
             }
         }
         catch (x) {
