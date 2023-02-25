@@ -15,9 +15,9 @@ export const getNewslineDefaultTags = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c  on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag  where n.newsline='${newsline}' order by c.text`;
-    l(chalk.green("12311",sql));
+    //l(chalk.green("12311",sql));
     rows = await query(`SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n INNER JOIN pov_categories c on c.shortname=n.tag INNER JOIN pov_v30_publications d on d.tag=n.tag where n.newsline=? order by c.text`, [newsline]);
-     l(chalk.green(sql,js(rows)))
+    // l(chalk.green(sql,js(rows)))
     return rows;
 }
 export const getUserTags = async ({

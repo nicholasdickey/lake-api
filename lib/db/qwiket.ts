@@ -116,3 +116,18 @@ export const getQwiket = async ({
     // l(chalk.green(sql,js(qwiket.body)))
     return qwiket;
 }
+export const fetchPosts=async ({
+    threadid,
+    forum,
+    size
+}: {
+    threadid: number,
+    forum:string,
+    size:number
+}): Promise<Array<Qwiket>> => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT * FROM povdb.pov_channel_posts where forum='${forum}' order by qpostid desc limit ${size}`;
+    rows = await query(sql);
+    return rows;
+}

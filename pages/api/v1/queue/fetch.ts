@@ -7,7 +7,7 @@ import { getRedisClient } from "../../../../lib/redis"
 import { getSessionLayout, getUserLayout, getChannelConfig } from "../../../../lib/db/config"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import { processLayout } from "../../../../lib/layout"
-import { fetchQueue } from "../../../../lib/fetchQueue"
+import { fetchQueue } from "../../../../lib/queue/fetchQueue"
 import { processPostBody } from '../../../../lib/processPostBody';
 
 type Data = any
@@ -43,29 +43,30 @@ export default async function handler(
     try {
         // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
         let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
+        // l('ret:',js(ret))
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
             // if(type=='mix')
             // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
-            // l("ret:", ret.items.map(r=>r.item))
-            const newItems =  items.filter((p:any)=>p!=null).map(({ item }: any) => {
-                if(!item)
-                return null;
+            //   l("ret:", ret.items.map(r=>r.item))
+            const newItems = items.filter((p: any) => p != null).map(({ item }: any) => {
+                if (!item)
+                    return null;
                 //l(item)
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
-               //  l(1111)
+                //  l(1111)
                 const isPost = item.qpostid ? true : false;
-               // l(11222,isPost)
-               
+                // l(11222,isPost)
+
                 let processedBody = item.body;
                 if (isPost) {
-                   // l(chalk.yellow.bold("POST:", js(item.body)))
-                    processedBody =  processPostBody(item.body)
-                   // l(chalk.yellow.bold("POST2:", js(processedBody)))
+                    l(chalk.yellow.bold("POST:", js(item.body)))
+                    processedBody = processPostBody(item.body)
+                    // l(chalk.yellow.bold("POST2:", js(processedBody)))
                 }
-               
+
                 let common: any = {
                     catName: isPost ? item.cat_name : item.catName,
                     catIcon: isPost ? item.cat_icon : item.catIcon,
@@ -82,8 +83,8 @@ export default async function handler(
                     image: item.image,
                     tag: isPost ? item.category : item.cat,
                 }
-              //  if(type=='mix'&&isPost)
-              //  console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
+                //  if(type=='mix'&&isPost)
+                //  console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
                 if (isPost) {
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;
@@ -105,9 +106,9 @@ export default async function handler(
                 return common;
 
             })
-           // l(newItems)
-            ret.items = newItems.filter((p:any)=>p!=null);
-           // if(type=='mix')
+            // l(newItems)
+            ret.items = newItems.filter((p: any) => p != null);
+            // if(type=='mix')
             //l(chalk.green.bold("return from fetchQueue", js(ret)))
         }
         // if (type == 'mix')
@@ -116,7 +117,7 @@ export default async function handler(
             // console.log('count:',ret.newItems)
         }
 
-       // l(chalk.cyan.bold("444",js(ret)))
+        // l(chalk.cyan.bold("444",js(ret)))
         res.status(200).json(ret)
     }
 

@@ -1,6 +1,6 @@
 import { isReturnStatement } from "typescript";
-import { l, chalk, js } from "./common";
-import { Qwiket } from "./types/qwiket";
+import { l, chalk, js } from "../common";
+import { Qwiket,React } from "../types/qwiket";
 
 const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, redis }: { newslineKey: string, forum: string, commentsKey: string, lastXid: number, tail: number, redis: any }) => {
     //l(chalk.green.bold(`ifm: getNewCount`, js({ lastXid, tail })))
@@ -42,7 +42,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
     const comments = await redis.zrevrangebyscore(commentsKey, '+inf', lastCreatedAt, 'withscores');
     // l(chalk.green.bold("ifm: inside prependComments", tail,commentsKey, lastCreatedAt, comments))
     let trigger = tail > 0 ? false : true;
-    let prepends: Array<{ item: Qwiket }> = [];
+    let prepends: Array<{ item: Qwiket|React }> = [];
     for (let i = 0; i < comments.length; i++) {
         const qpostid = comments[i++];
         const createdAt = comments[i];
@@ -72,7 +72,7 @@ const getPJson = async ({ qpostid, forum, redis }: { qpostid: number, forum: str
     const commentKey = `pjson-${forum}-${qpostid}`;
     //l(chalk.yellow.bold(js({commentKey})))
     const pJsonRaw = await redis.get(commentKey);
-    let pJson: Qwiket | null = null;
+    let pJson: React | null = null;
     if (!pJsonRaw) {
         /**
          * Get from DB

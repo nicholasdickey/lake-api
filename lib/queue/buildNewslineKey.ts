@@ -1,6 +1,6 @@
-import { getUserTags, getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, updateDefaultNewsline, getTagDefinition } from "./db/newsline"
+import { getUserTags, getNewslineDefaultTags, getUserNewslineTags, getSessionNewslineTags, updateDefaultNewsline, getTagDefinition } from "../db/newsline"
 import { RedisKey } from 'ioredis';
-import { l, chalk, js } from "./common";
+import { l, chalk, js } from "../common";
 
 const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid }: { newsline: string, userslug?: string, sessionid?: string, redis: any, threadid: number }) => {
     if (newsline == 'usconservative')
