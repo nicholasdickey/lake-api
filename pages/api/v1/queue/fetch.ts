@@ -39,7 +39,7 @@ export default async function handler(
 
     const countOnlyParam = +countonly;
     const tailParam = +tail;
-    const pageParam = +page;
+    const pageParam = +page; 
     try {
         // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
         let ret = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
@@ -62,7 +62,7 @@ export default async function handler(
 
                 let processedBody = item.body;
                 if (isPost) {
-                    l(chalk.yellow.bold("POST:", js(item.body)))
+                    //l(chalk.yellow.bold("POST:", js(item.body)))
                     processedBody = processPostBody(item.body)
                     // l(chalk.yellow.bold("POST2:", js(processedBody)))
                 }
@@ -100,7 +100,7 @@ export default async function handler(
 
 
                 }
-                /*if(type=='mix'){
+               /* if(type=='newsline'){
                     l(chalk.yellow("returning common",js(common)))
                 }*/
                 return common;

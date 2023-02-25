@@ -89,7 +89,7 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
 
         if (!newslineKey)
             throw ('cant create a newsline 3');
-
+        l(chalk.magenta.bold("##################  newslineKey",newslineKey))
     }
     return newslineKey;
 }
