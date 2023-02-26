@@ -3,6 +3,8 @@ import { l, chalk, js } from "../common";
 import { Qwiket } from "../types/qwiket";
 import {fetchPosts} from "../db/qwiket";
 const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size, countonly }: { reactsKey: string, lastid: string, forum: string, redis: any, threadid:number, page: number, size: number, countonly: number }) => {
+    page=+page;
+    size=+size;
     if(page&&!lastid){
         return {
             success:false,
@@ -10,7 +12,7 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size
             items:[]
         }
     }
-  //  l(chalk.green.bold("scanReacts",js({reactsKey, lastid, forum,page, size, countonly})))
+   // l(chalk.green.bold("scanReacts",js({reactsKey, lastid, forum,page, size, countonly})))
     /**
      * Check if reacts queue exists in redis, rebuild if missing
      */
@@ -28,9 +30,9 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size
     if (lastid) {
         while (true) {
             const test=await redis.zrevrange(reactsKey, count, count);
-            l(test)
+            //l(test)
             const qpostid = (await redis.zrevrange(reactsKey, count, count))[0];
-            l('scan for lastid',js({lastid,qpostid}))
+           // l('scan for lastid',js({lastid,qpostid}))
             if (qpostid == lastid){
                 l("match")
                 break;
@@ -47,16 +49,16 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size
             newItems:count,
             items:[]
         }
-    const qpostidItems=await redis.zrevrange(reactsKey,count+page*size,count+page*size+size-1);
-  //  l(chalk.green.bold("Got Items:",js({qpostidItems,start:count+page*size,end:count+page*size+size-1})))
+    const qpostidItems=await redis.zrevrange(reactsKey,count+page*size,(count+page*size)+size-1);
+    l(chalk.green.bold("Got Items:",count,page,size,count+page*size,(count+(page*size))+size-1,js({qpostidItems,start:count+page*size,end:count+(page*size)+size-1})))
 
     const pjsonKeys=qpostidItems.map((k:string)=>`pjson-${forum}-${k}`);
-  //  l(js({pjsonKeys}))
+   // l(js({pjsonKeys}))
     const itemsRaw=await redis.mget(pjsonKeys);
   //  l(js({itemsRaw}))
     const items=itemsRaw.map((i:string)=>{
         
-    //    l("iterating",i)
+      // l("iterating",i)
         return {item:JSON.parse(i)}
         
     });

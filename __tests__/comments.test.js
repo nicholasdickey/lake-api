@@ -10,7 +10,7 @@ describe('Test paging comments queue', () => {
   test('compares api comments wuth DB', async () => {
     const size = 4;
     // const page=1;
-    let rows;
+    let rows, data;
     if (process.env.LOCAL_TEST) {
       let sql;
       let query = await dbGetQuery("povdb", threadid);
@@ -21,6 +21,7 @@ describe('Test paging comments queue', () => {
       const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-comments`);
       expect(res.data.success == true);
       rows = res.data.rows;
+      l(chalk.green.bold(js({rows})))
     }
 
     const lastQwiket = rows[10];
@@ -29,34 +30,43 @@ describe('Test paging comments queue', () => {
     //let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid, tail, page, test, qwiketid, size, solo, debug } = req.query;
 
     for (let page = 0; page < 10; page++) {
-      const { req, res } = createMocks({
-        method: 'GET',
-        query: {
-          newsline: 'qwiket',
-          forum: 'usconservative',
-          type: 'reacts',
-          sessionid: 'test',
-          lastid,
-          page,
-          size
-        },
-      });
 
-      await fetch(req, res);
-      const dataString = await res._getData();
-      const data = JSON.parse(dataString);
-      //  l(data);
+      if (process.env.LOCAL_TEST) {
+        const { req, res } = createMocks({
+          method: 'GET',
+          query: {
+            newsline: 'qwiket',
+            forum: 'usconservative',
+            type: 'reacts',
+            sessionid: 'test',
+            lastid,
+            page,
+            size
+          },
+        });
+
+        await fetch(req, res);
+        const dataString = await res._getData();
+        expect(res._getStatusCode()).toBe(200);
+        data = JSON.parse(dataString);
+      }
+      else {
+       // l('axios',`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=reacts&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`)
+        const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=reacts&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
+        data = res.data;
+      }
+       // l("returned data",data);
       expect(data.success == true);
       expect(data.lastid == lastid);
       expect(data.type == 'reacts');
       const items = data.items;
       const itemsIds = items.map(i => i.qpostid)
-      // l(chalk.yellow(js(itemsIds)))
+       l(chalk.yellow(js(itemsIds)))
       expect(items.length == size);
       const dbItems = rows.slice(10 + page * size, 10 + page * size + 4);
       const dbItemsIds = dbItems.map(i => "" + i.qpostid);
-      // l(chalk.cyan(js(dbItemsIds)))
-      expect(res._getStatusCode()).toBe(200);
+       l(chalk.cyan(js(dbItemsIds)))
+
       expect(itemsIds).toEqual(dbItemsIds)
     }
     /*expect(JSON.parse(res._getData())).toEqual(
