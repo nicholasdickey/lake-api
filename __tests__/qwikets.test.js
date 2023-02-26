@@ -4,18 +4,27 @@ import { createMocks } from 'node-mocks-http';
 import fetch from '../pages/api/v1/queue/fetch';
 import { l, chalk, microtime, js, ds } from "../lib/common";
 import { dbEnd, dbGetQuery, dbLog } from "../lib/db";
+import axios from 'axios';
 const threadid = Math.floor(Math.random() * 100000000)
 describe('Test paging comments queue', () => {
   test('compares api comments wuth DB', async () => {
     const size = 4;
     const offset=10;
     // const page=1;
+    let dbQwikets;
+    if (process.env.LOCAL_TEST) {
     let sql;
     let query = await dbGetQuery("povdb", threadid);
     
     sql = `SELECT * FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  order by published_time desc , shared_time desc limit 100`;
-    const dbQwikets = await query(sql);
-
+     dbQwikets = await query(sql);
+    }
+    else {
+      const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-newsline`);
+      l("AXIOS RETURN ",res)
+      expect(res.data.success == true);
+      dbQwikets = res.data.rows;
+    }
     const lastQwiket = dbQwikets[offset];
     l(chalk.green(js(lastQwiket)));
     const lastid = lastQwiket.threadid;
