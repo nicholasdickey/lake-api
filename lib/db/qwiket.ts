@@ -19,26 +19,42 @@ export const getRssNewsline = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
 
-    sql = `SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+    sql = `select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
             povdb.pov_categories c 
 
             where c.xid=t.category_xid and c.shortname in (${key}) 
             and t.shared_time>=${timeStart}
             and t.shared_time<=${timeEnd}
-    
-            order by t.xid desc   
+            order by t.xid desc) as a
+            UNION ALL
+            select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view6 t,  
+            povdb.pov_categories c 
+
+            where c.xid=t.category_xid and c.shortname in (${key}) 
+            and t.shared_time>=${timeStart}
+            and t.shared_time<=${timeEnd}
+            order by t.xid desc) as b   
             
             limit 50000 `;
     l(chalk.green(sql))
     rows = await query(`
-    SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+    select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
     povdb.pov_categories c 
     
     where c.xid=t.category_xid and c.shortname in (${key}) 
     and t.shared_time>=${timeStart}
     and t.shared_time<=${timeEnd}
+    order by t.xid desc) as a
+    UNION ALL
+    select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view6 t,  
+    povdb.pov_categories c 
     
-    order by t.xid desc   
+    where c.xid=t.category_xid and c.shortname in (${key}) 
+    and t.shared_time>=${timeStart}
+    and t.shared_time<=${timeEnd}
+
+
+    order by t.xid desc ) as b  
     
     limit 50000 `);
     // l(chalk.green(sql, rows))
