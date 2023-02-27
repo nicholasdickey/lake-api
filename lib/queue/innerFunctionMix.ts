@@ -198,30 +198,40 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     let trigger = false;
     let triggerPosition = 0;
     let prevCreatedAt = 0;
+    if(page>0){
     while (!trigger) {
-        const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition);
+        const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition, "withscores");
         l(xid)
         if (xid == lastXid) {
             trigger = true;
-           // l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition))
+            prevCreatedAt = createdAt+100000; // only used for page0, otherwise overriden
+           l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition,createdAt))
         }
         else {
             triggerPosition++;
             prevCreatedAt = createdAt;
         }
     }
+    }
    // l(987672626)
-    const start = triggerPosition + page * size+1;
-    const end = triggerPosition + (page + 1) * size;
-   // l(`await redis.zrevrange(newslineKey, start, end, "withscores")`,js({newslineKey,start,end}))
+    const start = page==0?0:triggerPosition + page * size+1;
+   const end = page==0?3:triggerPosition + (page + 1) * size;
+   //const start=triggerPosition-(page+1)*size;
+   //const end=triggerPosition-(page)*size-1;
+    l(`await redis.zrevrange(prevCreatedAt,newslineKey, start, end, "withscores")`,js({prevCreatedAt,newslineKey,start,end}))
     // console.log('t6 Time:',Date.now()-t1)
     let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
     l(chalk.magenta.bold("ifm:got all newslines", start, end, newslineAll.length, newslineAll))
-    if (page > 0) {
+    if (page>0) {
         const [xid, createdAt] = await redis.zrevrange(newslineKey,start-1, start-1, 'withscores');
-        //l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt",js({newslineKey,start:start-1,end:start-1,xid,createdAt})));
+        l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt",js({newslineKey,start:start-1,end:start-1,xid,createdAt})));
         prevCreatedAt = createdAt;
     }
+    else {
+        prevCreatedAt=9999999999999999999;
+    }
+
+   
     //  let xids = new Array<{ xid: number, shared_time: number }>;
     let lastCreatedAt = prevCreatedAt; // 0 when page==0 and no lastid or lastid still first item;
     // l(chalk.cyan.bold("ifm: lastCreatedAt", lastCreatedAt))
@@ -230,33 +240,34 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         const xid = newslineAll[i++];
 
         const shared_time = newslineAll[i];
-        // console.log("ifn: inside newslineAll loop", i, shared_time)
+         console.log("ifn: inside newslineAll loop", i, xid,shared_time)
         /**
          * First item (lastid) is left without commentsBefore, those will be filled out for each call depending on tail and current comments
          */
 
         let commentsBefore = [];
         if (lastCreatedAt) {
-            commentsBefore = await redis.zrevrangebyscore(commentsKey, lastCreatedAt, shared_time);
+            commentsBefore = await redis.zrevrangebyscore(commentsKey,  lastCreatedAt-1,shared_time);
             //  console.log(`t5-${i} Time:`,Date.now()-t1)
-            //  l(chalk.yellow(`ifm: commentsBefore`, js({ commentsKey, lastCreatedAt, shared_time, commentsBefore })))
+              l(chalk.yellow(`ifm: commentsBefore`, js({ commentsKey, lastCreatedAt:lastCreatedAt-1, shared_time, commentsBefore })))
         }
 
         lastCreatedAt = shared_time;//i == 0 ? shared_time : commentsBefore[1]; //0 is id, q - createdat
 
         if (commentsBefore) {
-           // l(chalk.yellow("commentsBefore",js(commentsBefore)))  
+           l(chalk.yellow("commentsBefore",js(commentsBefore)))  
             for (let j = 0; j < commentsBefore.length; j++) {
                 const qpostid = commentsBefore[j];
                // console.log('2213',qpostid)
                 const pJson = await getPJson({ qpostid, forum, redis });
-               // console.log('8235',pJson)
+                //console.log('8235',pJson)
                 // console.log(`t4-${i} Time:`,Date.now()-t1)
                 pageJson.push({ item: pJson });
             }
         }
         const ntJson = await getNtJson({ xid, redis });
         pageJson.push({ item: ntJson });
+      //  l('push ntJson',js(ntJson))
     }
     /*
     // SecondaryCache is now ready
@@ -287,6 +298,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
              pageJson.push(ntJson);
          }
      }*/
+   // l(chalk.green.bold(js(pageJson))) 
     pageJsonRaw = JSON.stringify(pageJson);
     await redis.setex(pageKey, 600, pageJsonRaw); // cahce for the next 10 mins;
     /* const times=pageJson.map(it=>{
@@ -305,7 +317,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
      })
      l(chalk.bgBlue.whiteBright(`times: ${js(times)}`))*/
     // console.log('End Time:',Date.now()-t1)
-    console.log(93939)
+   // console.log(93939)
     if (page == 0 && pageJson[0]) {// will need to prepend fresh comments from tail   
         const item = pageJson[0].item;
         if (item) {
@@ -318,7 +330,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             pageJson.unshift(...prepends); // prepend all the new comments in the descending order
         }
     }
-    console.log(88111)
+    //console.log(88111)
     //   console.log('End Time:',Date.now()-t1)
     const ret = {
         success: true,
@@ -327,7 +339,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         tail,
         lastid: lastXid
     };
-     console.log("ifm: returning", js(ret));
+    // console.log("ifm: returning", js(ret));
     /*return {
                     type: "mix",
                     success: true,
