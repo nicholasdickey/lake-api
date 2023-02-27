@@ -7,10 +7,10 @@ import { dbEnd, dbGetQuery, dbLog } from "../lib/db";
 import axios from 'axios';
 const threadid = Math.floor(Math.random() * 100000000)
 describe('Test paging comments queue', () => {
-  test('compares api comments wuth DB', async () => {
+  test('qwikets', async () => {
     const size = 4;
     const offset = 10;
-    // const page=1;
+  
     let dbQwikets, data;
     if (process.env.LOCAL_TEST) {
       let sql;
@@ -21,17 +21,17 @@ describe('Test paging comments queue', () => {
     }
     else {
       const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-newsline`);
-      l("AXIOS RETURN ", res)
+     // l("AXIOS RETURN ", res)
       expect(res.data.success == true);
       dbQwikets = res.data.rows;
     }
     const lastQwiket = dbQwikets[offset];
-    l(chalk.green(js(lastQwiket)));
+    l(chalk.green("lastQwiket:",js(lastQwiket)));
     const lastid = lastQwiket.threadid;
     l(chalk.cyan.bold('lastid=', lastid))
-    //let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid, tail, page, test, qwiketid, size, solo, debug } = req.query;
+   
     for (let page = 0; page < 10; page++) {
-      //const page=7;
+     
       if (process.env.LOCAL_TEST) {
         const { req, res } = createMocks({
           method: 'GET',
@@ -55,23 +55,24 @@ describe('Test paging comments queue', () => {
         const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=newsline&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
         data = res.data;
       }
-      l(data);
+     // l(data);
       expect(data.success == true);
       expect(data.lastid == lastid);
       expect(data.type == 'newsline');
+      
       const items = data.items;
       const itemsIds = items.map(i => i.slug)
+     
       l(chalk.yellow(js(itemsIds)))
       expect(items.length == size);
 
       const dbItems = dbQwikets.slice(offset + page * size, 10 + page * size + 4);
       const dbItemsIds = dbItems.map(i => i.threadid);
-      l(chalk.cyan(js(dbItemsIds)))
-    
+      
+      l(chalk.cyan(js(dbItemsIds)))   
       expect(itemsIds).toEqual(dbItemsIds)
     }
 
-    // dbEnd(threadid);
   });
 });
 afterAll((done) => {

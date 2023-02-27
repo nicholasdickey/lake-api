@@ -14,7 +14,7 @@ describe('/api/v1/sitemap/fetchAll?newsline=qwiket&forum=usconservative', () => 
     });
 
     await fetchAll(req, res);
-    console.log(res._getData())
+   // console.log(res._getData())
     expect(res._getStatusCode()).toBe(200);
     /*expect(JSON.parse(res._getData())).toEqual(
       expect.objectContaining({

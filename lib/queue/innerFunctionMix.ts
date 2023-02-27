@@ -121,7 +121,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     let lastXid = + lastid;
     if (countonly == 1)
         return await getNewCount({ newslineKey, forum, commentsKey, lastXid, tail, redis })
-
+    l("DBG:innerFunctionMix",js({lastid,page,size}))
     //l(99999)
     /**
      * * If lastid=0 need to find actual lastxid, and compare it to lastXidKey
@@ -132,16 +132,16 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         const lastIdFromCache = await redis.zrevrange(newslineKey, 0, 0);
 
         lastXid = lastIdFromCache[0];
-        l(chalk.yellow.bold('ifm: ', js({ lastIdFromCache, newslineKey, lastXid })));
+      //  l(chalk.yellow.bold('ifm: ', js({ lastIdFromCache, newslineKey, lastXid })));
 
          let ntJson = await getNtJson({ xid: lastXid, redis });
          //if (ntJson)
          //    lastid = ntJson.slug; 
-            l(chalk.green.bold("ifm: NOLASTID, got the latest", js({ ntJson })));
+         //   l(chalk.green.bold("ifm: NOLASTID, got the latest", js({ ntJson })));
     }
     else {
         // lastXid = lastid ? await redis.get(`txids-${lastid}`) : 0;
-          l(chalk.green.bold("ifm: HAS LASTID, got the latest", js({ lastid, lastXid })));
+         // l(chalk.green.bold("ifm: HAS LASTID, got the latest", js({ lastid, lastXid })));
     }
 
     /**
@@ -150,7 +150,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
 
     let pageJson = [];
     const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
-    let pageJsonRaw = await redis.get(pageKey);
+    let pageJsonRaw //= await redis.get(pageKey);
    // l(chalk.green.bold("ifm: pageJsonRaw", pageKey, pageJsonRaw, page, size))
     if (pageJsonRaw) {  //already in cache, just if page==0 prepend comments to tail (or end if no tail)
         redis.expire(pageKey, 600);
@@ -200,9 +200,10 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     let prevCreatedAt = 0;
     while (!trigger) {
         const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition);
+        l(xid)
         if (xid == lastXid) {
             trigger = true;
-            // l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition))
+           // l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition))
         }
         else {
             triggerPosition++;
@@ -210,14 +211,15 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         }
     }
    // l(987672626)
-    const start = triggerPosition + page * size;
-    const end = triggerPosition + (page + 1) * size - 1;
+    const start = triggerPosition + page * size+1;
+    const end = triggerPosition + (page + 1) * size;
+   // l(`await redis.zrevrange(newslineKey, start, end, "withscores")`,js({newslineKey,start,end}))
     // console.log('t6 Time:',Date.now()-t1)
     let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
-    // l(chalk.magenta.bold("ifm:got all newslines", start, end, newslineAll.length, newslineAll))
+    l(chalk.magenta.bold("ifm:got all newslines", start, end, newslineAll.length, newslineAll))
     if (page > 0) {
-        const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition + (page + 1) * size, triggerPosition + (page + 1) * size, 'withscores');
-        // l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt",newslineKey,triggerPosition-1+page*size,triggerPosition - 1 + page * size,createdAt))
+        const [xid, createdAt] = await redis.zrevrange(newslineKey,start-1, start-1, 'withscores');
+        //l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt",js({newslineKey,start:start-1,end:start-1,xid,createdAt})));
         prevCreatedAt = createdAt;
     }
     //  let xids = new Array<{ xid: number, shared_time: number }>;

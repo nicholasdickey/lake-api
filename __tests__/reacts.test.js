@@ -7,7 +7,7 @@ import { dbEnd, dbGetQuery, dbLog } from "../lib/db";
 import axios from 'axios';
 const threadid = Math.floor(Math.random() * 100000000)
 describe('Test paging comments queue', () => {
-  test('compares api comments wuth DB', async () => {
+  test('reacts', async () => {
     const size = 4;
     // const page=1;
     let rows, data;
@@ -18,14 +18,14 @@ describe('Test paging comments queue', () => {
       rows = await query(sql);
     }
     else {
-      const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-comments`);
+      const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-reacts`);
       expect(res.data.success == true);
       rows = res.data.rows;
-      l(chalk.green.bold(js({rows})))
+     // l(chalk.green.bold(js({rows})))
     }
 
     const lastQwiket = rows[10];
-    l(chalk.green(js(lastQwiket)));
+   l(chalk.green("lastQwiket:",js(lastQwiket)));
     const lastid = lastQwiket.qpostid;
     //let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid, tail, page, test, qwiketid, size, solo, debug } = req.query;
 
@@ -59,14 +59,17 @@ describe('Test paging comments queue', () => {
       expect(data.success == true);
       expect(data.lastid == lastid);
       expect(data.type == 'reacts');
+      
       const items = data.items;
       const itemsIds = items.map(i => i.qpostid)
-       l(chalk.yellow(js(itemsIds)))
+      
+      l(chalk.yellow(js(itemsIds)))
       expect(items.length == size);
+      
       const dbItems = rows.slice(10 + page * size, 10 + page * size + 4);
       const dbItemsIds = dbItems.map(i => "" + i.qpostid);
-       l(chalk.cyan(js(dbItemsIds)))
-
+      
+      l(chalk.cyan(js(dbItemsIds)))
       expect(itemsIds).toEqual(dbItemsIds)
     }
     /*expect(JSON.parse(res._getData())).toEqual(
