@@ -161,6 +161,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
                 success: true,
                 items: pageJson,
                 tail,
+                type: "mix",
                 lastid: lastXid //switching to xid
             }
         }
@@ -232,6 +233,8 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             l(chalk.yellow("commentsBefore", js(commentsBefore)))
             for (let j = 0; j < commentsBefore.length; j++) {
                 const qpostid = commentsBefore[j];
+                if(page==0&&i==1&&j==0)
+                    tail=qpostid;
                 console.log('comment push', qpostid)
                 const pJson = await getPJson({ qpostid, forum, redis });
                 //console.log('8235',pJson)

@@ -2,13 +2,13 @@
 // 🚨 Remember to keep your `*.test.js` files out of your `/pages` directory!
 import { createMocks } from 'node-mocks-http';
 import fetch from '../pages/api/v1/queue/fetch';
-import { l, chalk, microtime, js, ds,sleep } from "../lib/common";
+import { l, chalk, microtime, js, ds, sleep } from "../lib/common";
 import { dbEnd, dbGetQuery, dbLog } from "../lib/db";
 import axios from 'axios';
 const threadid = Math.floor(Math.random() * 100000000)
 describe('Test Mix', () => {
-    beforeAll(() => {jest.setTimeout(90 * 1000);jest.useFakeTimers('legacy')})
-    
+    beforeAll(() => { jest.setTimeout(90 * 1000); jest.useFakeTimers('legacy') })
+
     test('mix', async () => {
         const size = 4;
         let offset = 10;
@@ -42,7 +42,7 @@ describe('Test Mix', () => {
         }
         l(chalk.green(js(lastQwiket)));
         const lastid = lastQwiket.xid;
-    
+
         for (let page = 1; page < 3; page++) {
 
             if (process.env.LOCAL_TEST) {
@@ -69,15 +69,15 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
                 data = res.data;
             }
-            //  l("returned data", data);
-            expect(data.success == true);
-            expect(data.lastid == lastid);
-            expect(data.type == 'reacts');
+            l("returned data", data);
+            expect(data.success).toEqual(true);
+            expect(data.lastid).toEqual(lastid);
+            expect(data.type).toEqual('mix');
 
             const items = data.items;
             const itemsIds = items.map(i => i.qpostid || i.slug)
 
-          //  l(chalk.yellow(js(itemsIds)))
+            //  l(chalk.yellow(js(itemsIds)))
 
             expect(items.length == size);
 
@@ -87,9 +87,9 @@ describe('Test Mix', () => {
                 //count size qwikets per page
                 let count = 0;
                 while (count < size) {
-                   // l("getting item ",js({o,i,count}))
+                    // l("getting item ",js({o,i,count}))
                     const item = rows[o++];
-                   // l("item =",js(item))
+                    // l("item =",js(item))
                     if (i == page) {
                         dbItems.push(item)
                     }
@@ -120,12 +120,12 @@ describe('Test Mix', () => {
                     }
                     good = true;
                 }
-                
+
             }
             l(chalk.yellow(js(itemsIds)))
             expect(itemsIds).toEqual(dbItemsIds)
         }
-        
+
     });
     test('mix, page0', async () => {
         jest.setTimeout(90 * 1000)
@@ -150,11 +150,11 @@ describe('Test Mix', () => {
             //l(chalk.green.bold(js({ rows })))
         }
 
-    
-            const page=0;
-            let retry=6;
-            let dbItemsIds,itemsIds;
-            while (retry){
+
+        const page = 0;
+        let retry = 6;
+        let dbItemsIds, itemsIds;
+        while (retry) {
             if (process.env.LOCAL_TEST) {
                 const { req, res } = createMocks({
                     method: 'GET',
@@ -163,7 +163,7 @@ describe('Test Mix', () => {
                         forum: 'usconservative',
                         type: 'mix',
                         sessionid: 'test',
-                       
+
                         page,
                         size
                     },
@@ -179,17 +179,17 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=0&page=${page}&size=${size}`);
                 data = res.data;
             }
-              l("returned data", data.lastid);
-            expect(data.success == true);
-            expect(+data.lastid >0);
-            expect(data.type == 'reacts');
+            l("returned data", data.lastid, data.tail, data.type);
+            expect(data.success).toEqual(true);
+            expect(+data.lastid > 0).toEqual(true)
+
+            expect(data.type == 'mix').toEqual(true);
 
             const items = data.items;
             itemsIds = items.map(i => i.qpostid || i.slug)
 
             l(chalk.yellow(js(itemsIds)))
 
-            expect(items.length == size);
 
             let dbItems = [];
             let o = offset;
@@ -199,7 +199,7 @@ describe('Test Mix', () => {
                 while (count < size) {
                     //l("getting item ",js({o,i,count}))
                     const item = rows[o++];
-                   // l("item =",js(item))
+                    // l("item =",js(item))
                     if (i == page) {
                         dbItems.push(item)
                     }
@@ -207,41 +207,48 @@ describe('Test Mix', () => {
                         count++;
                 }
             }
+            //check for tail
+            const { qtype, slug } = dbItems[0];
+            if (qtype =='react') {
+                l("comparing tail", slug,dbItems[0])
+                expect(data.tail).toEqual(slug);
+            }
 
             // l(chalk.red(js({dbItems})))
             // const dbItems = rows.slice(offset + page * size, 10 + page * size + 4);
             dbItemsIds = dbItems.map(i => i.slug);
 
             l(chalk.cyan(js(dbItemsIds)));
-            if(dbItemsIds.length==itemsIds.length)
-            break;;
+            if (dbItemsIds.length == itemsIds.length)
+                break;;
             l(chalk.red.bold("******************* RETRY **************", retry))
             await sleep(1000)
             retry--;
         }
+        var good = false;
+        if (dbItemsIds.length == itemsIds.length) {
             var good = false;
-            if (dbItemsIds.length == itemsIds.length) {
-                var good = false;
-                while (!good) {
-                    for (let i = 0; i < dbItemsIds.length; i++) {
-                        if (dbItemsIds[i] == itemsIds[i]) {
-                            continue;
-                        }
-                        if (dbItemsIds[i] == itemsIds[i + 1]) {
-                            const i1 = itemsIds[i];
-                            const i2 = itemsIds[i + 1]
-                            itemsIds[i] = i2;
-                            itemsIds[i + 1] = i1;
-                            break;
-                        }
+            while (!good) {
+                for (let i = 0; i < dbItemsIds.length; i++) {
+                    if (dbItemsIds[i] == itemsIds[i]) {
+                        continue;
                     }
-                    good = true;
+                    if (dbItemsIds[i] == itemsIds[i + 1]) {
+                        const i1 = itemsIds[i];
+                        const i2 = itemsIds[i + 1]
+                        itemsIds[i] = i2;
+                        itemsIds[i + 1] = i1;
+                        break;
+                    }
                 }
-                
+                good = true;
             }
-            l(chalk.yellow(js(itemsIds)))
-            expect(itemsIds).toEqual(dbItemsIds)
-        
+
+        }
+
+        l(chalk.yellow(js(itemsIds)))
+        expect(itemsIds).toEqual(dbItemsIds)
+
         /*expect(JSON.parse(res._getData())).toEqual(
           expect.objectContaining({
             message: 'Your favorite animal is dog',
