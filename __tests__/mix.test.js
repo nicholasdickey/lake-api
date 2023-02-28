@@ -9,7 +9,7 @@ const threadid = Math.floor(Math.random() * 100000000)
 describe('Test Mix', () => {
     beforeAll(() => {jest.setTimeout(90 * 1000);jest.useFakeTimers('legacy')})
     
-  /*  test('mix', async () => {
+    test('mix', async () => {
         const size = 4;
         let offset = 10;
         // const page=1;
@@ -43,7 +43,7 @@ describe('Test Mix', () => {
         l(chalk.green(js(lastQwiket)));
         const lastid = lastQwiket.xid;
     
-        for (let page = 1; page < 8; page++) {
+        for (let page = 1; page < 3; page++) {
 
             if (process.env.LOCAL_TEST) {
                 const { req, res } = createMocks({
@@ -126,7 +126,7 @@ describe('Test Mix', () => {
             expect(itemsIds).toEqual(dbItemsIds)
         }
         
-    });*/
+    });
     test('mix, page0', async () => {
         jest.setTimeout(90 * 1000)
         const size = 4;
@@ -179,7 +179,7 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=0&page=${page}&size=${size}`);
                 data = res.data;
             }
-            //  l("returned data", data);
+              l("returned data", data.lastid);
             expect(data.success == true);
             expect(+data.lastid >0);
             expect(data.type == 'reacts');

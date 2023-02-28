@@ -117,18 +117,18 @@ interface SecondaryCacheItem {
 const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size, tail, countonly }: { newslineKey: string, lastid: string, forum: string, redis: any, page: number, size: number, tail: number, countonly: number }) => {
     const t1 = Date.now();
     const commentsKey = `lpxids-${forum}`;
-   
+
     let lastXid = + lastid;
     if (countonly == 1)
         return await getNewCount({ newslineKey, forum, commentsKey, lastXid, tail, redis })
     l("DBG:innerFunctionMix", js({ lastid, page, size }))
-   
+
     /**
      * * If lastid=0 need to find actual lastxid, and compare it to lastXidKey
      * * If still current, can reuse secondaryCache for that lastid
      * * Otherwise, set new lastid. 
      */
-    
+
     /**
      * * ok, now we have lastXid
      */
@@ -166,7 +166,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         }
     }
 
-   
+
     let trigger = false;
     let triggerPosition = 0;
     let prevCreatedAt = 0;
@@ -185,10 +185,10 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             }
         }
     }
-   
+
     const start = page == 0 ? 0 : triggerPosition + page * size + 1;
     const end = page == 0 ? size - 1 : triggerPosition + (page + 1) * size;
-   
+
     l(`await redis.zrevrange(prevCreatedAt,newslineKey, start, end, "withscores")`, js({ prevCreatedAt, newslineKey, start, end }))
     // console.log('t6 Time:',Date.now()-t1)
     let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
@@ -203,15 +203,18 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     }
 
 
-   
+
     let lastCreatedAt = prevCreatedAt; // 0 when page==0 and no lastid or lastid still first item;
     // l(chalk.cyan.bold("ifm: lastCreatedAt", lastCreatedAt))
     // console.log('t7 Time:',Date.now()-t1)
     for (let i = 0; i < newslineAll.length; i++) {
         const xid = newslineAll[i++];
-
+        if (page == 0 && i == 1){
+            l("setting xid for page 0",xid)
+            lastXid = xid;
+        }
         const shared_time = newslineAll[i];
-        console.log("ifn: inside newslineAll loop", i, xid, shared_time)
+        console.log("ifn: inside newslineAll loop", i, page,xid, shared_time)
         /**
          * First item (lastid) is left without commentsBefore, those will be filled out for each call depending on tail and current comments
          */
@@ -240,13 +243,14 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         pageJson.push({ item: ntJson });
         //  l('push ntJson',js(ntJson))
     }
-   
+
     if (page > 0) {
         const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
         pageJsonRaw = JSON.stringify(pageJson);
         await redis.setex(pageKey, 600, pageJsonRaw); // cahce for the next 10 mins;
     }
-    
+
+    l("returning lastid=",lastXid,page)
     const ret = {
         success: true,
         type: "mix",
@@ -254,7 +258,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         tail,
         lastid: lastXid
     };
-   
+
     try {
         return ret;
     }
