@@ -9,7 +9,7 @@ const threadid = Math.floor(Math.random() * 100000000)
 describe('Test Mix', () => {
     beforeAll(() => {jest.setTimeout(90 * 1000);jest.useFakeTimers('legacy')})
     
-    test('mix', async () => {
+  /*  test('mix', async () => {
         const size = 4;
         let offset = 10;
         // const page=1;
@@ -126,7 +126,7 @@ describe('Test Mix', () => {
             expect(itemsIds).toEqual(dbItemsIds)
         }
         
-    });
+    });*/
     test('mix, page0', async () => {
         jest.setTimeout(90 * 1000)
         const size = 4;

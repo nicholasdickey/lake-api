@@ -1,6 +1,6 @@
 import { isReturnStatement } from "typescript";
 import { l, chalk, js } from "../common";
-import { Qwiket,React } from "../types/qwiket";
+import { Qwiket, React } from "../types/qwiket";
 
 const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, redis }: { newslineKey: string, forum: string, commentsKey: string, lastXid: number, tail: number, redis: any }) => {
     //l(chalk.green.bold(`ifm: getNewCount`, js({ lastXid, tail })))
@@ -42,7 +42,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
     const comments = await redis.zrevrangebyscore(commentsKey, '+inf', lastCreatedAt, 'withscores');
     // l(chalk.green.bold("ifm: inside prependComments", tail,commentsKey, lastCreatedAt, comments))
     let trigger = tail > 0 ? false : true;
-    let prepends: Array<{ item: Qwiket|React }> = [];
+    let prepends: Array<{ item: Qwiket | React }> = [];
     for (let i = 0; i < comments.length; i++) {
         const qpostid = comments[i++];
         const createdAt = comments[i];
@@ -117,122 +117,93 @@ interface SecondaryCacheItem {
 const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size, tail, countonly }: { newslineKey: string, lastid: string, forum: string, redis: any, page: number, size: number, tail: number, countonly: number }) => {
     const t1 = Date.now();
     const commentsKey = `lpxids-${forum}`;
-    //  const noLastid = !(lastid && lastid != '' && lastid.length > 5);
+   
     let lastXid = + lastid;
     if (countonly == 1)
         return await getNewCount({ newslineKey, forum, commentsKey, lastXid, tail, redis })
-    l("DBG:innerFunctionMix",js({lastid,page,size}))
-    //l(99999)
+    l("DBG:innerFunctionMix", js({ lastid, page, size }))
+   
     /**
      * * If lastid=0 need to find actual lastxid, and compare it to lastXidKey
      * * If still current, can reuse secondaryCache for that lastid
      * * Otherwise, set new lastid. 
      */
-    if (!lastXid) {
-        const lastIdFromCache = await redis.zrevrange(newslineKey, 0, 0);
-
-        lastXid = lastIdFromCache[0];
-      //  l(chalk.yellow.bold('ifm: ', js({ lastIdFromCache, newslineKey, lastXid })));
-
-         let ntJson = await getNtJson({ xid: lastXid, redis });
-         //if (ntJson)
-         //    lastid = ntJson.slug; 
-         //   l(chalk.green.bold("ifm: NOLASTID, got the latest", js({ ntJson })));
-    }
-    else {
-        // lastXid = lastid ? await redis.get(`txids-${lastid}`) : 0;
-         // l(chalk.green.bold("ifm: HAS LASTID, got the latest", js({ lastid, lastXid })));
-    }
-
+    
     /**
      * * ok, now we have lastXid
      */
 
     let pageJson = [];
-    const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
-    let pageJsonRaw //= await redis.get(pageKey);
-   // l(chalk.green.bold("ifm: pageJsonRaw", pageKey, pageJsonRaw, page, size))
-    if (pageJsonRaw) {  //already in cache, just if page==0 prepend comments to tail (or end if no tail)
-        redis.expire(pageKey, 600);
-        pageJson = JSON.parse(pageJsonRaw);
-        if (page == 0) {// will need to prepend fresh comments from tail  
-           // l(chalk.yellow.bold("6684",js(pageJson[0])))      
-            const { shared_time } = pageJson[0].item||{shared_time:''};
-            const { tail: newTail, prepends } = await prependComments({ commentsKey, lastCreatedAt: shared_time, tail, forum, redis });
-            tail = newTail;
-            pageJson.unshift(...prepends); // prepend all the new comments in the descending order
-            // console.log("ifm: adding prepends existing page:", js({ newTail,prepends }))
-        }
-       /* console.log({
-            success: true,
-            items: pageJson,
-            tail,
-            lastid: lastXid //switching to xid
-        })*/
-    
-        return {
-            success: true,
-            items: pageJson,
-            tail,
-            lastid: lastXid //switching to xid
-        }
-    }
+    let pageJsonRaw;
+    if (page > 0) {
+        const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
+        pageJsonRaw = await redis.get(pageKey);
+        l(chalk.green.bold("ifm: pageJsonRaw", pageKey, pageJsonRaw, page, size))
+        if (pageJsonRaw) {  //already in cache, just if page==0 prepend comments to tail (or end if no tail)
+            redis.expire(pageKey, 600);
+            pageJson = JSON.parse(pageJsonRaw);
+            if (page == 0) {// will need to prepend fresh comments from tail  
+                // l(chalk.yellow.bold("6684",js(pageJson[0])))      
+                const { shared_time } = pageJson[0].item || { shared_time: '' };
+                const { tail: newTail, prepends } = await prependComments({ commentsKey, lastCreatedAt: shared_time, tail, forum, redis });
+                tail = newTail;
+                pageJson.unshift(...prepends); // prepend all the new comments in the descending order
+                // console.log("ifm: adding prepends existing page:", js({ newTail,prepends }))
+            }
+            /* console.log({
+                 success: true,
+                 items: pageJson,
+                 tail,
+                 lastid: lastXid //switching to xid
+             })*/
 
-    // const secondaryCacheKey = `2ndCache-mix-${newslineKey}-${lastXid}`; // will start the queue on lastid, then  prepend later comments to the first page when returning
-    // const secondaryCacheRaw = null;//await redis.get(secondaryCacheKey);
-    // l(chalk.green.bold("ifm: secondaryCache", js({ secondaryCacheKey, secondaryCacheRaw })))
-    //let secondaryCache: Array<SecondaryCacheItem> | null = null;
-
-    /*if (secondaryCacheRaw) {
-        redis.expire(secondaryCacheKey, 600); // keep it for another 10 minutes, expire after a minute of no use
-        secondaryCache = JSON.parse(secondaryCacheRaw);
-        console.log("ifm: parsed secondaryCache")
-    }
-    else {
-        secondaryCache = [];*/
-    //Build a combined set of newsline items (sorted by shared time) and comments.
-    //Remember the last comment time as a tail.'
-    //  l(chalk.cyan.bold("ifm: fresh secondary cache"))
-
-
-    let trigger = false;
-    let triggerPosition = 0;
-    let prevCreatedAt = 0;
-    if(page>0){
-    while (!trigger) {
-        const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition, "withscores");
-        l(xid)
-        if (xid == lastXid) {
-            trigger = true;
-            prevCreatedAt = createdAt+100000; // only used for page0, otherwise overriden
-           l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition,createdAt))
+            return {
+                success: true,
+                items: pageJson,
+                tail,
+                lastid: lastXid //switching to xid
+            }
         }
-        else {
-            triggerPosition++;
-            prevCreatedAt = createdAt;
-        }
-    }
-    }
-   // l(987672626)
-    const start = page==0?0:triggerPosition + page * size+1;
-   const end = page==0?3:triggerPosition + (page + 1) * size;
-   //const start=triggerPosition-(page+1)*size;
-   //const end=triggerPosition-(page)*size-1;
-    l(`await redis.zrevrange(prevCreatedAt,newslineKey, start, end, "withscores")`,js({prevCreatedAt,newslineKey,start,end}))
-    // console.log('t6 Time:',Date.now()-t1)
-    let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
-    l(chalk.magenta.bold("ifm:got all newslines", start, end, newslineAll.length, newslineAll))
-    if (page>0) {
-        const [xid, createdAt] = await redis.zrevrange(newslineKey,start-1, start-1, 'withscores');
-        l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt",js({newslineKey,start:start-1,end:start-1,xid,createdAt})));
-        prevCreatedAt = createdAt;
-    }
-    else {
-        prevCreatedAt=9999999999999999999;
     }
 
    
-    //  let xids = new Array<{ xid: number, shared_time: number }>;
+    let trigger = false;
+    let triggerPosition = 0;
+    let prevCreatedAt = 0;
+    if (page > 0) {
+        while (!trigger) {
+            const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition, "withscores");
+            l(xid)
+            if (xid == lastXid) {
+                trigger = true;
+                prevCreatedAt = createdAt + 100000; // only used for page0, otherwise overriden
+                l(chalk.green.bold('ifm: lastXid trigger ON!!!', triggerPosition, createdAt))
+            }
+            else {
+                triggerPosition++;
+                prevCreatedAt = createdAt;
+            }
+        }
+    }
+   
+    const start = page == 0 ? 0 : triggerPosition + page * size + 1;
+    const end = page == 0 ? size - 1 : triggerPosition + (page + 1) * size;
+   
+    l(`await redis.zrevrange(prevCreatedAt,newslineKey, start, end, "withscores")`, js({ prevCreatedAt, newslineKey, start, end }))
+    // console.log('t6 Time:',Date.now()-t1)
+    let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
+    l(chalk.magenta.bold("ifm:got all newslines", start, end, newslineAll.length, newslineAll))
+    if (page > 0) {
+        const [xid, createdAt] = await redis.zrevrange(newslineKey, start - 1, start - 1, 'withscores');
+        l(chalk.blue.bold("`ifm: page>0, looking for the prevCreatedAt", js({ newslineKey, start: start - 1, end: start - 1, xid, createdAt })));
+        prevCreatedAt = createdAt;
+    }
+    else {
+        prevCreatedAt = 9999999999999999999;
+    }
+
+
+   
     let lastCreatedAt = prevCreatedAt; // 0 when page==0 and no lastid or lastid still first item;
     // l(chalk.cyan.bold("ifm: lastCreatedAt", lastCreatedAt))
     // console.log('t7 Time:',Date.now()-t1)
@@ -240,25 +211,25 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         const xid = newslineAll[i++];
 
         const shared_time = newslineAll[i];
-         console.log("ifn: inside newslineAll loop", i, xid,shared_time)
+        console.log("ifn: inside newslineAll loop", i, xid, shared_time)
         /**
          * First item (lastid) is left without commentsBefore, those will be filled out for each call depending on tail and current comments
          */
 
         let commentsBefore = [];
         if (lastCreatedAt) {
-            commentsBefore = await redis.zrevrangebyscore(commentsKey,  lastCreatedAt-1,shared_time);
+            commentsBefore = await redis.zrevrangebyscore(commentsKey, lastCreatedAt - 1, shared_time);
             //  console.log(`t5-${i} Time:`,Date.now()-t1)
-              l(chalk.yellow(`ifm: commentsBefore`, js({ commentsKey, lastCreatedAt:lastCreatedAt-1, shared_time, commentsBefore })))
+            l(chalk.yellow(`ifm: commentsBefore`, js({ commentsKey, lastCreatedAt: lastCreatedAt - 1, shared_time, commentsBefore })))
         }
 
         lastCreatedAt = shared_time;//i == 0 ? shared_time : commentsBefore[1]; //0 is id, q - createdat
 
         if (commentsBefore) {
-           l(chalk.yellow("commentsBefore",js(commentsBefore)))  
+            l(chalk.yellow("commentsBefore", js(commentsBefore)))
             for (let j = 0; j < commentsBefore.length; j++) {
                 const qpostid = commentsBefore[j];
-               // console.log('2213',qpostid)
+                console.log('comment push', qpostid)
                 const pJson = await getPJson({ qpostid, forum, redis });
                 //console.log('8235',pJson)
                 // console.log(`t4-${i} Time:`,Date.now()-t1)
@@ -267,71 +238,15 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         }
         const ntJson = await getNtJson({ xid, redis });
         pageJson.push({ item: ntJson });
-      //  l('push ntJson',js(ntJson))
+        //  l('push ntJson',js(ntJson))
     }
-    /*
-    // SecondaryCache is now ready
-    const secondaryCacheRaw = JSON.stringify(secondaryCache);
-    l(chalk.green("ifn: secondaryCacheRaw", secondaryCacheRaw))
-    await redis.setex(secondaryCacheKey, 600, secondaryCacheRaw);
-    */
-    /* }
-     if (!secondaryCache) {
-         return {
-             success: false,
-             msg: 'Unable to create secondary cache for mix queue'
-         }
-     }*/
-    // locate the page
-    /*const start = page * size;
- 
-     for (let i = 0; i < size; i++) {
-         const { xid, commentsBefore } = secondaryCache[start + i];
-         console.log("build page", xid, i)
-         if (commentsBefore) {
-             for (let j = 0; j < commentsBefore.length; j++) {
-                 const { qpostid } = commentsBefore[j];
-                 const pJson = await getPJson({ qpostid, forum, redis });
-                 pageJson.push(pJson);
-             }
-             const ntJson = await getNtJson({ xid, redis });
-             pageJson.push(ntJson);
-         }
-     }*/
-   // l(chalk.green.bold(js(pageJson))) 
-    pageJsonRaw = JSON.stringify(pageJson);
-    await redis.setex(pageKey, 600, pageJsonRaw); // cahce for the next 10 mins;
-    /* const times=pageJson.map(it=>{
-        // console.log(it)
-         const {item}=it;
-         if(!item){
-             l(chalk.redBright("NO ITEM"))
-             return null;
-         }
-         if(item.createdat){
-             l(`returning createdAt`,item.createdat)
-             return item.createdat;
-         }
-         l(`returning shared_time`,item.shared_time)
-         return item.shared_time;
-     })
-     l(chalk.bgBlue.whiteBright(`times: ${js(times)}`))*/
-    // console.log('End Time:',Date.now()-t1)
-   // console.log(93939)
-    if (page == 0 && pageJson[0]) {// will need to prepend fresh comments from tail   
-        const item = pageJson[0].item;
-        if (item) {
-            // console.log(chalk.magenta("ifm: adding prepend comments for fresh page:", js({ page, pageJson: item, tail })))
-            const { shared_time } = item;
-
-            const { tail: newTail, prepends } = await prependComments({ commentsKey, lastCreatedAt: +(shared_time ? shared_time : 0), tail, forum, redis });
-            tail = newTail;
-            //console.log(chalk.blue("ifm: adding prepends page:", js({ prepends })))
-            pageJson.unshift(...prepends); // prepend all the new comments in the descending order
-        }
+   
+    if (page > 0) {
+        const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
+        pageJsonRaw = JSON.stringify(pageJson);
+        await redis.setex(pageKey, 600, pageJsonRaw); // cahce for the next 10 mins;
     }
-    //console.log(88111)
-    //   console.log('End Time:',Date.now()-t1)
+    
     const ret = {
         success: true,
         type: "mix",
@@ -339,14 +254,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
         tail,
         lastid: lastXid
     };
-    // console.log("ifm: returning", js(ret));
-    /*return {
-                    type: "mix",
-                    success: true,
-                    lastid: lastid,
-                    items: items,
-                    tail: tail,
-                };*/
+   
     try {
         return ret;
     }
