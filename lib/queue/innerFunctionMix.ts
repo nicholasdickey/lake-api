@@ -171,10 +171,11 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
     let trigger = false;
     let triggerPosition = 0;
     let prevCreatedAt = 0;
+    let count=0;
     if (page > 0) {
         while (!trigger) {
             const [xid, createdAt] = await redis.zrevrange(newslineKey, triggerPosition, triggerPosition, "withscores");
-            l(xid)
+            l("looking for lastid",xid,lastXid)
             if (xid == lastXid) {
                 trigger = true;
                 prevCreatedAt = createdAt + 100000; // only used for page0, otherwise overriden
@@ -184,6 +185,8 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
                 triggerPosition++;
                 prevCreatedAt = createdAt;
             }
+            if(count++>1000)
+            break;
         }
     }
 

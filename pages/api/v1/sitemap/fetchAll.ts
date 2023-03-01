@@ -27,6 +27,7 @@ export default async function handler(
 
     const now = Date.now();
     let sitemaps = [];
+    let count=0;
     while (true) {
 
         let sitemap= `https://am1.news/sitemap_${newsline}_${forum}_${formatISO(dateStart)}`;
@@ -35,6 +36,8 @@ export default async function handler(
         dateStart = addDays(dateStart, 7);
         if (dateStart.getTime() > now)
             break;
+        if(count++>1000)
+            break;    
     }
 
     res.status(200).json({ success: true, sitemaps })
