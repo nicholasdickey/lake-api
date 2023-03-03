@@ -22,7 +22,7 @@ export default async function handler(
     try {
         let sql, rows;
         let query = await dbGetQuery("povdb", threadid);
-        sql = `SELECT * FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  order by published_time desc , shared_time desc limit 100`;
+        sql = `SELECT DISTINCT threadid FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  order by published_time desc , shared_time desc limit 100`;
         rows = await query(sql);
    //     l(js({success:true,rows}))
         res.status(200).json({success:true,rows})

@@ -16,7 +16,8 @@ describe('Test paging comments queue', () => {
       let sql;
       let query = await dbGetQuery("povdb", threadid);
 
-      sql = `SELECT * FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  order by published_time desc , shared_time desc limit 100`;
+      sql = `SELECT DISTINCT threadid FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  
+      order by published_time desc , shared_time desc limit 100`;
       dbQwikets = await query(sql);
     }
     else {
@@ -26,7 +27,7 @@ describe('Test paging comments queue', () => {
       dbQwikets = res.data.rows;
     }
     const lastQwiket = dbQwikets[offset];
-    l(chalk.green("lastQwiket:",js(lastQwiket)));
+   // l(chalk.green("lastQwiket:",js(dbQwikets,lastQwiket)));
     const lastid = lastQwiket.threadid;
     l(chalk.cyan.bold('lastid=', lastid))
    
@@ -63,13 +64,13 @@ describe('Test paging comments queue', () => {
       const items = data.items;
       const itemsIds = items.map(i => i.slug)
      
-      l(chalk.yellow(js(itemsIds)))
+      l(chalk.yellow(page,js(itemsIds)))
       expect(items.length == size);
 
       const dbItems = dbQwikets.slice(offset + page * size, 10 + page * size + 4);
       const dbItemsIds = dbItems.map(i => i.threadid);
       
-      l(chalk.cyan(js(dbItemsIds)))   
+      l(chalk.cyan(page,js(dbItemsIds)))   
       expect(itemsIds).toEqual(dbItemsIds)
     }
 
