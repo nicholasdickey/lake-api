@@ -20,8 +20,10 @@ export default async function handler(
 
 
     // console.log("inside fetchExplore handler",req.body)
-    const body = req.body;
-    let { sessionid, userslug, newsline, update }: { sessionid?: string, userslug?: string, newsline: string,  update?: number } = body;
+    let body = req.body;
+    if (!body || !body.newsline)
+        body = req.query;
+    let { sessionid, userslug, newsline, update }: { sessionid?: string, userslug?: string, newsline: string, update?: number } = body;
 
     const id = userslug || sessionid;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -30,8 +32,8 @@ export default async function handler(
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" });
     try {
-        const defaultOverlayNewslineDefinition=await fetchNewsline({redis,threadid,sessionid,userslug,newsline,update});
-       //console.log("========================================== fetch newsline end:",sessionid,js(defaultOverlayNewslineDefinition))
+        const defaultOverlayNewslineDefinition = await fetchNewsline({ redis, threadid, sessionid, userslug, newsline, update });
+        //console.log("========================================== fetch newsline end:",sessionid,js(defaultOverlayNewslineDefinition))
         return res.status(200).json({
             success: true,
             newsline: defaultOverlayNewslineDefinition
@@ -41,7 +43,7 @@ export default async function handler(
         l(chalk.red.bold("Exception in fetchExplore", x));
         return res.status(500).json({})
     }
-    finally{
+    finally {
         dbEnd(threadid);
         await redis.quit();
     }

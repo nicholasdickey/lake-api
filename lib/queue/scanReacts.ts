@@ -1,7 +1,7 @@
 import { isReturnStatement } from "typescript";
 import { l, chalk, js } from "../common";
 import { Qwiket } from "../types/qwiket";
-import {fetchPosts} from "../db/qwiket";
+import {fetchPosts,getPost} from "../db/qwiket";
 const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size, countonly }: { reactsKey: string, lastid: string, forum: string, redis: any, threadid:number, page: number, size: number, countonly: number }) => {
     page=+page;
     size=+size;
@@ -53,16 +53,32 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid,page, size
     l(chalk.green.bold("Got Items:",count,page,size,count+page*size,(count+(page*size))+size-1,js({qpostidItems,start:count+page*size,end:count+(page*size)+size-1})))
 
     const pjsonKeys=qpostidItems.map((k:string)=>`pjson-${forum}-${k}`);
-   // l(js({pjsonKeys}))
+    l(js({pjsonKeys}))
     const itemsRaw=await redis.mget(pjsonKeys);
-  //  l(js({itemsRaw}))
+    l(js({itemsRaw}))
+    for (let i=0;i<itemsRaw.length;i++){
+        const item=itemsRaw[i];
+        if(!item){
+          
+            const key=pjsonKeys[i];
+            const partsKey=key.split('-');
+            const qpostid=partsKey[partsKey.length-1];
+            l(chalk.yellow("no item",key,qpostid))
+            const result=await getPost({threadid,qpostid});
+            if(result.success){
+                itemsRaw[i]=JSON.stringify(result.react);
+                l(chalk.green.bold("itemsRaw:", itemsRaw[i]))
+                //  await redis.setex(key,7*24*3600,itemsRaw[i])
+            }
+        }
+    }
     const items=itemsRaw.map((i:string)=>{
         
       // l("iterating",i)
         return {item:JSON.parse(i)}
         
     });
-   // l(js({items}))
+    l(js({items}))
   
     return {
         success:true,

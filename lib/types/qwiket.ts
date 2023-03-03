@@ -41,8 +41,8 @@ export interface Qwiket{
 
 }
 export interface React{
-    catName?: string,
-    catIcon?: string,
+    cat_name?: string,
+    cat_icon?: string,
     postBody?:string,
     qpostid?:number,
     id?:number,

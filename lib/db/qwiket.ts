@@ -1,6 +1,6 @@
 import { l, chalk, microtime, js, ds } from "../common";
 import { dbGetQuery, dbLog } from "../db";
-import { Qwiket } from "../types/qwiket"
+import { Qwiket, React } from "../types/qwiket"
 export const getRssNewsline = async ({
 
     threadid,
@@ -64,13 +64,14 @@ export const getQwiket = async ({
     threadid,
     slug,
     withBody,
+    txid,
     tag
 
 }: {
     threadid: number,
     slug?: string,
-    txid?: string,
-    withBody: [0, 1],
+    txid?: number,
+    withBody?: [0, 1],
     tag?: string
 }): Promise<Qwiket | null> => {
     let sql, rows, qwiket;
@@ -132,18 +133,95 @@ export const getQwiket = async ({
     // l(chalk.green(sql,js(qwiket.body)))
     return qwiket;
 }
-export const fetchPosts=async ({
+export const fetchPosts = async ({
     threadid,
     forum,
     size
 }: {
     threadid: number,
-    forum:string,
-    size:number
-}): Promise<Array<Qwiket>> => {
+    forum: string,
+    size: number
+}): Promise<Array<React>> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    sql=`SELECT * FROM povdb.pov_channel_posts where forum='${forum}' order by qpostid desc limit ${size}`;
+    sql = `SELECT * FROM povdb.pov_channel_posts where forum='${forum}' order by qpostid desc limit ${size}`;
     rows = await query(sql);
     return rows;
+}
+interface PostReturn { success: boolean, react?: React }
+export const getPost = async ({
+    threadid,
+    qpostid
+}: {
+    threadid: number,
+    qpostid: number
+}): Promise<PostReturn> => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT p.*,u.subscr_status FROM povdb.pov_channel_posts p left outer join pov_users u on u.username=p.author_username where p.qpostid='${qpostid}' limit 1`;
+    rows = await query(`SELECT p.*,u.subscr_status FROM povdb.pov_channel_posts p left outer join pov_users u on u.username=p.author_username where p.qpostid=? limit 1`, [qpostid]);
+    if (!rows || !rows.length)
+        return {
+            success: false
+        }
+    const react = rows[0];
+    const {thread,author_username,subscr_status,author_name,author_avatar,thread_url,body,createdat,id} = react;
+
+    let millis = microtime();
+    sql = `SELECT * from pov_threads_map2 where thread=${thread}  limit 1`;
+    l(chalk.magenta.bold(sql))
+    rows = await query(
+        sql
+    );
+    l(chalk.green.bold(sql, js(rows[0])))
+    if (!rows || !rows.length)
+        return { success: false }
+    let slug;
+
+    slug = rows[0]['threadid'];
+
+    const slugParts = slug.split('-slug-');
+    const table = `pov_threads_view${slugParts[0]}`;;
+    sql = `SELECT t.*,c.shortname as tag, c.icon as cat_icon, c.text as cat_name from ${table} t, pov_categories c  where c.xid=t.category_xid and t.threadid='${slug}'`;
+    l(chalk.cyan.bold(sql))
+    rows = await query(
+        sql
+    );
+    if (rows && rows.length) {
+        const {xid,description,author,title,url,image,cat_icon,cat_name} = rows[0];
+        l(chalk.yellow.bold('rows[0]:'),js(rows[0]))
+        const react={
+            qpostid,
+            cat_name,
+            cat_icon,
+            subscr_status,
+            author_username,
+            author_avatar,
+            author_name,
+            username:author_username,
+            thread_url:url,
+            thread_image:image,
+            threadid:slug,
+            description,
+            title:title,
+            thread_title:title,
+            thread_xid:xid,
+            thread_author:author,
+            thread_description:description,
+            createdat,
+            id,
+            body
+
+        }
+        l(chalk.magenta.bold('react:',js(react)))
+        return {
+            success: true,
+            react
+        }
+    }
+    return {
+        success: false,
+
+    }
+
 }

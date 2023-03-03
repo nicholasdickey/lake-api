@@ -6,6 +6,7 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { dbLog, dbEnd } from "../../../../lib/db"
 import fetchAll from "../../../../lib/fetchAll"
+import { brotliDecompress } from 'zlib';
 
 export default async function handler(
     req: NextApiRequest,
@@ -20,13 +21,16 @@ export default async function handler(
 
 
    // console.log("inside fetchEAll handler",req.body)
-    const body = req.body;
+    let body = req.body;
+    if(!body||!body.newsline)
+    body=req.query;
+
     let { sessionid, userslug, newsline, filters, q }: { sessionid?: string, userslug?: string, newsline: string, filters: string[], q?: string} = body;
 
    
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-   // l(chalk.cyan.bold("allPublications",sessionid, q,js({filters})))
+    l(chalk.cyan.bold("allPublications",sessionid, q,js({newsline,filters})))
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
     try {

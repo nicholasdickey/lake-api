@@ -33,7 +33,7 @@ export default async function handler(
     try {
 
         const redisKey: RedisKey = `publication-categories-${newsline}`;
-        let publicationCategoriesRaw = await redis.get(redisKey);
+        let publicationCategoriesRaw //TMP = await redis.get(redisKey);
         let publicationCategories:string[]|null=null
         if(publicationCategoriesRaw)
             publicationCategories=JSON.parse(publicationCategoriesRaw);

@@ -53,7 +53,8 @@ export default async function handler(
             const newItems = items.filter((p: any) => p != null).map(({ item }: any) => {
                 if (!item)
                     return null;
-                //l(item)
+                    if(type=='reacts')
+                l("item after filter",js(item))
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
@@ -101,9 +102,9 @@ export default async function handler(
 
 
                 }
-               /* if(type=='newsline'){
+                if(type=='reacts'){
                     l(chalk.yellow("returning common",js(common)))
-                }*/
+                }
                 return common;
 
             })

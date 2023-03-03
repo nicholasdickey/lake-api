@@ -12,7 +12,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
     let defaultNewslineDefinition: NewslineDefinition | null = null;
     if (defaultNewslineDefinitionRaw)
         defaultNewslineDefinition = JSON.parse(defaultNewslineDefinitionRaw);
-
+    l(chalk.green.bold("FETCH PUBLICATIONS",js({newsline})))
     if (!defaultNewslineDefinition) {
  
         //get from db and populate redis

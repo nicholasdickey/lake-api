@@ -1,8 +1,8 @@
-import { isReturnStatement } from "typescript";
 import { l, chalk, js } from "../common";
 import { Qwiket, React } from "../types/qwiket";
+import {getPJson,getNtJson} from './fetchQwiket';
 
-const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, redis }: { newslineKey: string, forum: string, commentsKey: string, lastXid: number, tail: number, redis: any }) => {
+const getNewCount = async ({ threadid,newslineKey, forum, commentsKey, lastXid, tail, redis }: { threadid:number,newslineKey: string, forum: string, commentsKey: string, lastXid: number, tail: number, redis: any }) => {
     //l(chalk.green.bold(`ifm: getNewCount`, js({ lastXid, tail })))
     if (!lastXid)
         return {
@@ -12,12 +12,12 @@ const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, red
         }
     let lastTime = 0;
     if (tail) {
-        const pJson = await getPJson({ qpostid: tail, forum, redis });
+        const pJson = await getPJson({ threadid,qpostid: tail, forum, redis });
         if (pJson && pJson.createdat)
             lastTime = +pJson.createdat;
     }
     else {
-        const ntJson = await getNtJson({ xid: lastXid, redis });
+        const ntJson = await getNtJson({ threadid,xid: lastXid, redis });
         // l(chalk.green.bold(`ifm: got last ntJson`, js(ntJson)))
         if (ntJson)
             lastTime = + ntJson.shared_time;
@@ -38,7 +38,7 @@ const getNewCount = async ({ newslineKey, forum, commentsKey, lastXid, tail, red
     }
 }
 
-const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis }: { commentsKey: string, lastCreatedAt: number, tail: number, forum: string, redis: any }) => {
+const prependComments = async ({ threadid,commentsKey, lastCreatedAt, tail, forum, redis }: { threadid:number,commentsKey: string, lastCreatedAt: number, tail: number, forum: string, redis: any }) => {
     const comments = await redis.zrevrangebyscore(commentsKey, '+inf', lastCreatedAt, 'withscores');
     // l(chalk.green.bold("ifm: inside prependComments", tail,commentsKey, lastCreatedAt, comments))
     let trigger = tail > 0 ? false : true;
@@ -52,7 +52,7 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
                 trigger = true;
         }
         if (trigger) {
-            const pJson = await getPJson({ qpostid, forum, redis });
+            const pJson = await getPJson({ threadid,qpostid, forum, redis });
             //l(chalk.yellow.bold(js({pJson})))
             if (pJson) {
                 prepends.push({ item: pJson });
@@ -68,34 +68,6 @@ const prependComments = async ({ commentsKey, lastCreatedAt, tail, forum, redis 
     return { tail, prepends };
 }
 
-const getPJson = async ({ qpostid, forum, redis }: { qpostid: number, forum: string, redis: any }) => {
-    const commentKey = `pjson-${forum}-${qpostid}`;
-    //l(chalk.yellow.bold(js({commentKey})))
-    const pJsonRaw = await redis.get(commentKey);
-    let pJson: React | null = null;
-    if (!pJsonRaw) {
-        /**
-         * Get from DB
-         */
-    }
-    else
-        pJson = JSON.parse(pJsonRaw);
-    //  l(chalk.cyan.bold(js({pJsonRaw,pJson})))    
-    return pJson;
-}
-const getNtJson = async ({ xid, redis }: { xid: number, redis: any }) => {
-    const ntJsonRaw = await redis.get(`ntjson-${xid}`);
-    let ntJson: Qwiket | null = null;
-    if (!ntJsonRaw) {
-        /**
-         * Get from DB
-         */
-    }
-    else {
-        ntJson = JSON.parse(ntJsonRaw);
-    }
-    return ntJson;
-}
 
 /**
  * *    Note that size is only for newsline items, 
@@ -114,13 +86,13 @@ interface SecondaryCacheItem {
     shared_time: number,
     commentsBefore?: Array<CommentsBefore>
 }
-const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size, tail, countonly }: { newslineKey: string, lastid: string, forum: string, redis: any, page: number, size: number, tail: number, countonly: number }) => {
+const innerFunctionMix = async ({ threadid,newslineKey, lastid, forum, redis, page, size, tail, countonly }: { threadid:number,newslineKey: string, lastid: string, forum: string, redis: any, page: number, size: number, tail: number, countonly: number }) => {
     const t1 = Date.now();
     const commentsKey = `lpxids-${forum}`;
 
     let lastXid = + lastid;
     if (countonly == 1)
-        return await getNewCount({ newslineKey, forum, commentsKey, lastXid, tail, redis })
+        return await getNewCount({ threadid,newslineKey, forum, commentsKey, lastXid, tail, redis })
     l("DBG:innerFunctionMix", js({ lastid, page, size }))
 
     /**
@@ -145,7 +117,7 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
             if (page == 0) {// will need to prepend fresh comments from tail  
                 // l(chalk.yellow.bold("6684",js(pageJson[0])))      
                 const { shared_time } = pageJson[0].item || { shared_time: '' };
-                const { tail: newTail, prepends } = await prependComments({ commentsKey, lastCreatedAt: shared_time, tail, forum, redis });
+                const { tail: newTail, prepends } = await prependComments({ threadid,commentsKey, lastCreatedAt: shared_time, tail, forum, redis });
                 tail = newTail;
                 pageJson.unshift(...prepends); // prepend all the new comments in the descending order
                 // console.log("ifm: adding prepends existing page:", js({ newTail,prepends }))
@@ -239,13 +211,13 @@ const innerFunctionMix = async ({ newslineKey, lastid, forum, redis, page, size,
                 if(page==0&&i==1&&j==0)
                     tail=qpostid;
                 console.log('comment push', qpostid)
-                const pJson = await getPJson({ qpostid, forum, redis });
-                //console.log('8235',pJson)
+                const pJson = await getPJson({ threadid,qpostid, forum, redis });
+                console.log('============  8235',pJson)
                 // console.log(`t4-${i} Time:`,Date.now()-t1)
                 pageJson.push({ item: pJson });
             }
         }
-        const ntJson = await getNtJson({ xid, redis });
+        const ntJson = await getNtJson({ threadid, xid, redis });
         pageJson.push({ item: ntJson });
         //  l('push ntJson',js(ntJson))
     }
