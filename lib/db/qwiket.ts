@@ -188,12 +188,13 @@ export const getPost = async ({
         sql
     );
     if (rows && rows.length) {
-        const {xid,description,author,title,url,image,cat_icon,cat_name} = rows[0];
+        const {xid,description,author,title,url,image,cat_icon,cat_name,tag} = rows[0];
         l(chalk.yellow.bold('rows[0]:'),js(rows[0]))
         const react={
             qpostid,
             cat_name,
             cat_icon,
+            category:tag,
             subscr_status,
             author_username,
             author_avatar,

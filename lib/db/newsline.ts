@@ -115,6 +115,7 @@ export const getNewslinePublications = async ({
     l(chalk.green(sql, js(rows)))
     return rows;
 }
+
 export const updateUserNewsline = async ({
     type,
     threadid,
@@ -241,4 +242,36 @@ export const getNewslinePublicationCategories = async ({
     rows = await query(`SELECT name,tag from  pov_v30_publication_categories where newsline=? order by xid`, [newsline]);
    // l(chalk.green(sql, rows))
     return rows;
+}
+export const getPublicationNewslines= async ({
+    threadid,
+    tag
+}: {
+    threadid: number,
+    tag: string
+}): Promise<Array<{newsline:string}>> => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+   // l("PublicationCategories", newsline);
+    sql = `SELECT DISTINCT newsline from  pov_v30_publications where tag='${tag}'`;
+   // l(chalk.green(sql))
+    rows = await query(`SELECT DISTINCT newsline from  pov_v30_publications where tag=? `, [tag]);
+   // l(chalk.green(sql, rows))
+    return rows;
+}
+export const getNewslineForumAndDomain= async ({
+    threadid,
+    newsline
+}: {
+    threadid: number,
+    newsline: string
+}): Promise<{domain:string,forum:string}|null> => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+   // l("PublicationCategories", newsline);
+    sql = `SELECT domain,forum from  pov_v30_forums where channel='${newsline}' `;
+   // l(chalk.green(sql))
+    rows = await query(`SELECT domain,forum from  pov_v30_forums where channel=?`, [newsline]);
+   // l(chalk.green(sql, rows))
+    return rows&&rows.length>0?rows[0]:null;
 }

@@ -21,16 +21,18 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    const { newsline, forum } = req.query;
+    let { newsline, forum,domain } = req.query;
     const startDate = '2023-01-29T00:00:00';
     let dateStart = parseISO(startDate as string)
 
     const now = Date.now();
     let sitemaps = [];
     let count=0;
+    if(!domain)
+        domain='am1.news';
     while (true) {
 
-        let sitemap= `https://am1.news/sitemap_${newsline}_${forum}_${formatISO(dateStart)}`;
+        let sitemap= `https://${domain}/sitemap_${newsline}_${forum}_${formatISO(dateStart)}`;
         sitemap= sitemap.substring(0, sitemap.length - 1);
         sitemaps.push(sitemap);
         dateStart = addDays(dateStart, 7);
