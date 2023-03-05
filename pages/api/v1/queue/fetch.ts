@@ -32,7 +32,7 @@ export default async function handler(
         page = '0';
     
     if(+(size||'0')==0)
-    size='4';
+    size=type=='hot'?'9':'4';
 
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
