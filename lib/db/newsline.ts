@@ -23,7 +23,7 @@ export const getNewslineDefaultTags = async ({
     INNER JOIN pov_categories c on c.shortname=n.tag 
     INNER JOIN pov_v30_publications d on d.tag=n.tag and d.newsline=n.newsline
     where n.newsline=? order by c.text`, [newsline]);
-    // l(chalk.green(sql,js(rows)))
+    l(chalk.green(sql,js(rows)))
     return rows;
 }
 export const getUserTags = async ({
