@@ -30,9 +30,9 @@ export default async function handler(
         tail = '0';
     if (!page)
         page = '0';
-    
-    if(+(size||'0')==0)
-    size=type=='hot'?'9':'4';
+
+    if (+(size || '0') == 0)
+        size = type == 'hot' ? '9' : '4';
 
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
@@ -42,11 +42,11 @@ export default async function handler(
 
     const countOnlyParam = +countonly;
     const tailParam = +tail;
-    const pageParam = +page; 
+    const pageParam = +page;
     try {
         // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
-        let ret:any= await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
-        ret.type=type;
+        let ret: any = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
+        ret.type = type;
         // l('ret:',js(ret))
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
@@ -56,8 +56,8 @@ export default async function handler(
             const newItems = items.filter((p: any) => p != null).map(({ item }: any) => {
                 if (!item)
                     return null;
-                    if(type=='reacts')
-                l("item after filter",js(item))
+                if (type == 'reacts')
+                    l("item after filter", js(item))
                 /* if (!item.catIcon) {
                      l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
                  }*/
@@ -71,7 +71,9 @@ export default async function handler(
                     processedBody = processPostBody(item.body)
                     // l(chalk.yellow.bold("POST2:", js(processedBody)))
                 }
-
+                let description = item.description.substring(0, 196);
+                if (description.length == 196)
+                    description += "...";
                 let common: any = {
                     catName: isPost ? item.cat_name : item.catName,
                     catIcon: isPost ? item.cat_icon : item.catIcon,
@@ -83,7 +85,7 @@ export default async function handler(
                     title: item.title,
                     site_name: item.site_name,
                     url: item.url,
-                    description: item.description,
+                    description: description,
                     author: item.author,
                     image: item.image,
                     tag: isPost ? item.category : item.cat,
@@ -105,8 +107,8 @@ export default async function handler(
 
 
                 }
-                if(type=='reacts'){
-                    l(chalk.yellow("returning common",js(common)))
+                if (type == 'reacts') {
+                    l(chalk.yellow("returning common", js(common)))
                 }
                 return common;
 
