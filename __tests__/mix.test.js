@@ -69,7 +69,7 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
                 data = res.data;
             }
-            l("returned data", data);
+           // l("returned data", data);
             expect(data.success).toEqual(true);
             expect(data.lastid).toEqual(lastid);
             expect(data.type).toEqual('mix');
