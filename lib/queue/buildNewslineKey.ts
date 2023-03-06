@@ -69,12 +69,12 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
 
     }
     if (!newslineKey) {
-        console.log("No newsline key after userslug and sessionid")
+       // console.log("No newsline key after userslug and sessionid")
         const defaultNewslineKey: RedisKey = `newsline-${newsline}`;
         const defaultUnsortedNewsline = await redis.smembers(defaultNewslineKey);
 
         defaultNewsline = defaultUnsortedNewsline.sort() as unknown as Set<string>;
-        l(chalk.cyan(js({defaultNewsline,defaultNewslineKey})))
+     //   l(chalk.cyan(js({defaultNewsline,defaultNewslineKey})))
         if (!defaultNewsline || !defaultNewsline.size) {
             const defaultNewslineDefinition = await getNewslineDefaultTags({ threadid, newsline }); //sorted array of {name,tag,icon}
             if (defaultNewslineDefinition) {
@@ -89,7 +89,7 @@ const buildNewslineKey = async ({ newsline, userslug, sessionid, redis, threadid
 
         if (!newslineKey)
             throw ('cant create a newsline 3');
-        l(chalk.magenta.bold("##################  newslineKey",newslineKey))
+       // l(chalk.magenta.bold("##################  newslineKey",newslineKey))
     }
     return newslineKey;
 }

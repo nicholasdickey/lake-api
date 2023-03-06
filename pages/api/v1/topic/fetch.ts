@@ -31,7 +31,7 @@ export default async function handler(
     });
 
     const { slug, withBody, userslug, sessionid, tag, ack }: Query = req.query as unknown as Query;
-    // l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
+   //  l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
@@ -54,7 +54,7 @@ export default async function handler(
                 //l('txid--:',key)
                 txid = await redis.get(key) || '';
             }
-            // l(chalk.yellow.bold("tttxid:",txid))
+          //  l(chalk.yellow.bold("tttxid:",txid))
 
             if (txid) {
                /* const key = `ntjson-${withBody + '-'}${txid}`;
@@ -70,15 +70,15 @@ export default async function handler(
         }
         if (!json) {
             // get from db
-            //l(chalk.green.bold("GET Qwiket from DB"));
+          //  l(chalk.green.bold("GET Qwiket from DB",threadid));
             json = await getQwiket({ threadid, slug, withBody, tag })
-            // l(chalk.green.bold("GET Qwiket from DB22",json));
+           // l(chalk.green.bold("GET Qwiket from DB22",json));
             if (json && withBody) {
                 // l('withBody',json)
                 json.body = processBody(json);
                 const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
-                // console.log("kkkey:",key,jsonRaw)
+             //   console.log("kkkey:",key,jsonRaw)
                 try{
                   await redis.setex(key, 7 * 24 * 3600, jsonRaw);
                 }

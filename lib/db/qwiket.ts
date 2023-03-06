@@ -75,6 +75,7 @@ export const getQwiket = async ({
     tag?: string
 }): Promise<Qwiket | null> => {
     let sql, rows, qwiket;
+  //  l('getQwiket db', js({ slug, tag, threadid }))
     let query = await dbGetQuery("povdb", threadid);
     if (slug) {
         const parts = slug.split('-');
@@ -107,22 +108,32 @@ export const getQwiket = async ({
         }
     }
     else if (tag) {
-        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}' order by t.xid desc limit 1`;
-        // l(chalk.green(sql))
-        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? order by t.xid desc limit 1`, [tag]);
-        // console.log("ALTERNATIVE QWIKET",sql,rows)
-        if (withBody) {
-            qwiket = rows[0];
-            const qwiketid = qwiket['threadid'];
-            sql = `SELECT * from q6 where \`key\` ='${qwiketid}' limit 1`;
-            rows = await query(`SELECT * from q6 where \`key\`=?  limit 1`, [qwiketid]);
-            let json = rows[0]?.value;
-            if (json)
-                qwiket = json ? JSON.parse(json) : {};
-            else {
+        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view6 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}' and reshare!=102 order by t.published_time desc limit 1`;
+       // l(chalk.green(sql))
+        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view6 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
+       // console.log("ALTERNATIVE QWIKET", sql, rows)
+        if (rows && rows.length > 0) {
+            if (withBody) {
+                qwiket = rows[0];
+                const qwiketid = qwiket['threadid'];
+                sql = `SELECT * from q6 where \`key\` ='${qwiketid}' limit 1`;
+                rows = await query(`SELECT * from q6 where \`key\`=?  limit 1`, [qwiketid]);
+                let json = rows[0]?.value;
+                if (json)
+                    qwiket = json ? JSON.parse(json) : {};
+            }
+        }
+        else {
+            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}'and reshare!=102 order by t.published_time desc limit 1`;
+           // l(chalk.green(sql))
+            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
+         //   console.log("ALTERNATIVE QWIKET51", sql, rows)
+            if (withBody) {
+                qwiket = rows[0];
+                const qwiketid = qwiket['threadid'];
                 sql = `SELECT * from q51 where \`key\` ='${qwiketid}' limit 1`;
                 rows = await query(`SELECT * from q51 where \`key\`=?  limit 1`, [qwiketid]);
-                json = rows[0]?.value;
+                let json = rows[0]?.value;
                 if (json)
                     qwiket = json ? JSON.parse(json) : {};
             }
@@ -165,7 +176,7 @@ export const getPost = async ({
             success: false
         }
     const react = rows[0];
-    const {thread,author_username,subscr_status,author_name,author_avatar,thread_url,body,createdat,id} = react;
+    const { thread, author_username, subscr_status, author_name, author_avatar, thread_url, body, createdat, id } = react;
 
     let millis = microtime();
     sql = `SELECT * from pov_threads_map2 where thread=${thread}  limit 1`;
@@ -188,33 +199,33 @@ export const getPost = async ({
         sql
     );
     if (rows && rows.length) {
-        const {xid,description,author,title,url,image,cat_icon,cat_name,tag} = rows[0];
-        l(chalk.yellow.bold('rows[0]:'),js(rows[0]))
-        const react={
+        const { xid, description, author, title, url, image, cat_icon, cat_name, tag } = rows[0];
+        l(chalk.yellow.bold('rows[0]:'), js(rows[0]))
+        const react = {
             qpostid,
             cat_name,
             cat_icon,
-            category:tag,
+            category: tag,
             subscr_status,
             author_username,
             author_avatar,
             author_name,
-            username:author_username,
-            thread_url:url,
-            thread_image:image,
-            threadid:slug,
+            username: author_username,
+            thread_url: url,
+            thread_image: image,
+            threadid: slug,
             description,
-            title:title,
-            thread_title:title,
-            thread_xid:xid,
-            thread_author:author,
-            thread_description:description,
+            title: title,
+            thread_title: title,
+            thread_xid: xid,
+            thread_author: author,
+            thread_description: description,
             createdat,
             id,
             body
 
         }
-        l(chalk.magenta.bold('react:',js(react)))
+        l(chalk.magenta.bold('react:', js(react)))
         return {
             success: true,
             react
@@ -225,4 +236,22 @@ export const getPost = async ({
 
     }
 
+}
+export const unpublishQwiket = async ({
+    threadid,
+    slug,
+}: {
+    threadid: number,
+    slug: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    if (slug) {
+        const parts = slug.split('-');
+        let silo = parts[0];
+        const table = `pov_threads_view${silo}`;
+        sql = `UPDATE ${table} set reshare=102 where threadid='${slug}'`;
+        rows = await query(sql);
+        return rows;
+    }
 }
