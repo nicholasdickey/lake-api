@@ -1,17 +1,14 @@
-
-
+//./pages/api/v1/user/accept.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { updateUserAck, updateSessionAck } from "../../../../lib/db/user"
-import { dbLog, dbEnd } from "../../../../lib/db"
-import { processLayout } from "../../../../lib/layout"
-type Data = any
+import { dbEnd } from "../../../../lib/db"
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -19,17 +16,15 @@ export default async function handler(
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
-   // l(chalk.yellow("fetch user"));
-    let { userslug, sessionid, tag } = req.query;
 
+    let { userslug, sessionid, tag } = req.query;
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
   
     try {
-        const ackKey = `ack-${userslug || sessionid}-${tag}`;
-        l("USER ACK",userslug,sessionid,tag)
+        const ackKey = `ack-${userslug || sessionid}-${tag}`; //TMP do not delete
         if (userslug)
             await updateUserAck({ threadid, userslug: userslug as string || '', tag: tag as string || '' });
         else

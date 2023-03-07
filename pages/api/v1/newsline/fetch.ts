@@ -1,4 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+//./pages/api/v1/newsline/fetch.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import NextCors from 'nextjs-cors';
@@ -18,14 +18,11 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-
-    // console.log("inside fetchExplore handler",req.body)
     let body = req.body;
     if (!body || !body.newsline)
         body = req.query;
     let { sessionid, userslug, newsline, update }: { sessionid?: string, userslug?: string, newsline: string, update?: number } = body;
 
-    const id = userslug || sessionid;
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
 
@@ -33,7 +30,7 @@ export default async function handler(
         return res.status(500).json({ msg: "Unable to create redis" });
     try {
         const defaultOverlayNewslineDefinition = await fetchNewsline({ redis, threadid, sessionid, userslug, newsline, update });
-        //console.log("========================================== fetch newsline end:",sessionid,js(defaultOverlayNewslineDefinition))
+      
         return res.status(200).json({
             success: true,
             newsline: defaultOverlayNewslineDefinition

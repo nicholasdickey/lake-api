@@ -1,11 +1,10 @@
-
+//./pages/api/v1/submit/[...slug].ts
 
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../../lib/common";
 import { getRedisClient } from "../../../../../lib/redis"
-import { getUser } from "../../../../../lib/db/user"
-import { dbLog, dbEnd } from "../../../../../lib/db"
+import { dbEnd } from "../../../../../lib/db"
 import { getPublicationNewslines, getNewslineForumAndDomain } from "../../../../../lib/db/newsline"
 import { submitCurrentSitemap } from "../../../../../lib/google/submitCurrentSitemap"
 import { indexUrl } from "../../../../../lib/google/indexUrl"
@@ -14,9 +13,6 @@ const { getISODay, addDays, startOfDay, formatISO } = require("date-fns");
 
 function getDayInPast(targetISODay: number, fromDate = startOfDay(new Date())) {
     //7-Sunday,1-Monday -- ISO
-
-    // dayOfWeekMap[dayOfWeek] get the ISODay for the desired dayOfWeek
-    // const targetISODay =// dayOfWeekMap[dayOfWeek] as number;
     const fromISODay = getISODay(fromDate);
     if (fromISODay == targetISODay) {
         const res = formatISO(fromDate)
@@ -35,11 +31,10 @@ function getDayInPast(targetISODay: number, fromDate = startOfDay(new Date())) {
     return res.substring(0, res.length - 1);
 }
 
-type Data = any
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -73,11 +68,9 @@ export default async function handler(
             //1. Add directly to GOOGLE index
             //2. Resubmit current sitemap
             //   2.1 Construct the last Sunday ISO date
-
             await indexUrl(url);
             await submitCurrentSitemap(sitemapName,domain);
             res.status(200).json({ success: true, date })
-
         })
     }
     catch (x) {
@@ -88,5 +81,4 @@ export default async function handler(
         await redis.quit();
         dbEnd(threadid);
     }
-
 }

@@ -1,4 +1,4 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+//./pages/api/v1/newsline/updateAll.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import NextCors from 'nextjs-cors';
@@ -18,10 +18,7 @@ export default async function handler(
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
-
-   
-
-   // console.log("===*** &&& === inside newsline update all handler",req.body)
+ 
     const body = req.body;
     let { sessionid, userslug, newsline, switch: switchParam, tag,filters,q }: { sessionid?: string, userslug?: string, newsline: string, switch: 'on' | 'off', tag: string, filters: string[], q?: string } = body;
 
@@ -34,16 +31,10 @@ export default async function handler(
     if (!id)
         return res.status(200).json({ success: false, msg: "userslug or sessionid is missing" })
     try {
-
         const userNewslineKey = `user-definition-newsline-${newsline}-${id}`;
-      //  l(chalk.green.bold(js({userNewslineKey,userslug,sessionid,id})));
-       
         await updateUserNewsline({type:userslug?'user':'session',newsline,sessionid,userslug, threadid, key: `${newsline}-${id}`, tag, switchParam })
-
-       
         await redis.del(userNewslineKey);  //next fetch would repopulate redis from db.   
         const publications=await fetchAll({redis,threadid,sessionid,userslug,newsline,filters,q})
-       // l(chalk.yellow.bold("================>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Result myNewsline:", js(publications)));
         return res.status(200).json({
             success: true,
             publications
@@ -57,6 +48,4 @@ export default async function handler(
         dbEnd(threadid);
         await redis.quit();
     }
-
-    res.status(200).json({})
 }

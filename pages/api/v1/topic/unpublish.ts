@@ -1,14 +1,10 @@
+//./pages/api/v1/topic/unpublish.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis";
-import { dbLog, dbEnd } from "../../../../lib/db";
-import { getQwiket } from "../../../../lib/db/qwiket";
-import { processBody } from "../../../../lib/processBody";
-import { Qwiket } from "../../../../lib/types/qwiket";
+import { dbEnd } from "../../../../lib/db";
 import { unpublishQwiket } from "../../../../lib/db/qwiket"
-
-type Data = any
 
 interface Query {
     slug?: string,
@@ -20,7 +16,7 @@ interface Query {
 }
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -28,27 +24,22 @@ export default async function handler(
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
-
     const { slug, tag }: Query = req.query as unknown as Query;
-    l(chalk.green.bold("INPUBLISH",js({slug,  tag })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to connect to redis" });
 
     try {
-        let txid: string = '';
-
+        let txid = '';
         const key = `txid-${slug}`;
-        //l('txid--:',key)
-        txid = await redis.get(key) || '';
 
-        l(chalk.yellow.bold("tttxid:", slug,txid))
+        txid = await redis.get(key) || '';
 
         if (txid) {
             const keyTagPublished = `tids-cat-published-${tag}`;
             const keyTagShared = `tids-cat-shared-${tag}`;
-            l(chalk.green.bold("removing",js({keyTagPublished,keyTagShared})));
+
             await redis.zrem(keyTagPublished, txid);
             await redis.zrem(keyTagShared, txid);
             await unpublishQwiket({ threadid, slug: slug || "" })
@@ -59,13 +50,13 @@ export default async function handler(
                 if (newsline.indexOf(tag || "") >= 0) {
                     const keyPublished = `tids-${newsline}-published`;
                     const keyShared = `tids-${newsline}-shared`;
-                    l(chalk.green.bold("removing",js({i,keyPublished,keyShared})));
+ 
                     await redis.zrem(keyPublished, txid);
                     await redis.zrem(keyShared, txid);
                 }
             }
         }
-        res.status(200).json({ success: true, });
+       return  res.status(200).json({ success: true, });
     }
     catch (x) {
         l(chalk.red.bold(x));
@@ -75,5 +66,4 @@ export default async function handler(
         await redis?.quit();
         dbEnd(threadid);
     }
-
 }

@@ -1,4 +1,4 @@
-
+//./pages/api/v1/topic/fetch.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
@@ -8,8 +8,6 @@ import { getQwiket } from "../../../../lib/db/qwiket";
 import { processBody } from "../../../../lib/processBody";
 import { Qwiket } from "../../../../lib/types/qwiket";
 import { verifyAck } from "../../../../lib/db/user"
-
-type Data = any
 
 interface Query {
     slug?: string,
@@ -21,7 +19,7 @@ interface Query {
 }
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -31,7 +29,6 @@ export default async function handler(
     });
 
     const { slug, withBody, userslug, sessionid, tag, ack }: Query = req.query as unknown as Query;
-   //  l(chalk.green.bold("FETCH TOPIC",js({slug, withBody, userslug, tag })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
@@ -46,23 +43,10 @@ export default async function handler(
                 const keyTxid = `tids-cat-published-${tag}`;
                 const range = await redis.zrevrange(keyTxid, 0, 0);
                 txid = range[0];
-                // l(chalk.yellow.bold("NO SLUG",js({keyTxid,range,txid})))
-
             }
             else {
                 const key = `txid-${slug}`;
-                //l('txid--:',key)
                 txid = await redis.get(key) || '';
-            }
-          //  l(chalk.yellow.bold("tttxid:",txid))
-
-            if (txid) {
-               /* const key = `ntjson-${withBody + '-'}${txid}`;
-                //l(chalk.green.bold("GET Qwiket from CACHE", key));
-                const jsonRaw = await redis.get(key);
-                //l(chalk.green.bold("RESULT:"), jsonRaw)
-                if (jsonRaw)
-                    json = JSON.parse(jsonRaw);*/
             }
         }
         catch (x) {
@@ -70,23 +54,17 @@ export default async function handler(
         }
         if (!json) {
             // get from db
-          //  l(chalk.green.bold("GET Qwiket from DB",threadid));
             json = await getQwiket({ threadid, slug, withBody, tag })
-           // l(chalk.green.bold("GET Qwiket from DB22",json));
             if (json && withBody) {
-                // l('withBody',json)
                 json.body = processBody(json);
                 const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
-             //   console.log("kkkey:",key,jsonRaw)
-                try{
-                  await redis.setex(key, 7 * 24 * 3600, jsonRaw);
+                try {
+                    await redis.setex(key, 7 * 24 * 3600, jsonRaw);
                 }
-                catch(x){
+                catch (x) {
                     l(chalk.red.bold(x))
                 }
-                // l(76548)
-                // l(chalk.cyan.bold("withBody after processed",js({withBody,key,json})))
             }
         }
         const item = json;
@@ -94,7 +72,6 @@ export default async function handler(
             l(chalk.red("TOPIC NOT FOUND", slug, tag))
             return res.status(200).json({ success: false, msg: "Topic doesn't exist" });
         }
-        // console.log(js(item))
         let common: Qwiket = {
             catName: item.catName,
             catIcon: item.catIcon,
@@ -117,17 +94,12 @@ export default async function handler(
          */
         if (item.body) {
             const ackKey = `ack-${userslug || sessionid}-${tag}`;
-           
             let hasAck = ack || await redis.get(ackKey);
-        
             if (!hasAck) {
                 const ackAllKey = `ack-${userslug || sessionid}-all`;
-             
                 hasAck = await redis.get(ackAllKey);
-             
                 if (!hasAck) {
                     hasAck = (await verifyAck({ threadid, userslug, sessionid, tag: tag || '' })) ? "1" : null;
-                   
                     if (hasAck) {
                         //TMP  await redis.setex(ackKey, 24 * 3600, "1")
                     }
@@ -143,11 +115,8 @@ export default async function handler(
                 common.hasBody = true;
             }
         }
-        //  l(chalk.yellow(js(common)))
-        res.status(200).json({ success: true, item: common });
-
+        return res.status(200).json({ success: true, item: common });
     }
-
     catch (x) {
         l(chalk.red.bold(x));
         res.status(501).json(x);
@@ -156,5 +125,4 @@ export default async function handler(
         await redis?.quit();
         dbEnd(threadid);
     }
-
 }

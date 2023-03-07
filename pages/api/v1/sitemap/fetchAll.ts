@@ -1,18 +1,13 @@
-
-
+//./pages/api/v1/sitemap/fetchAll.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
-import { getRedisClient } from "../../../../lib/redis"
-import { dbLog, dbEnd } from "../../../../lib/db"
-import { getRssNewsline } from "../../../../lib/db/qwiket"
 import { formatISO, addDays, parseISO, sub } from 'date-fns'
-import fetchAll from "../../../../lib/fetchAll"
-type Data = any
+
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -31,7 +26,6 @@ export default async function handler(
     if(!domain)
         domain='am1.news';
     while (true) {
-
         let sitemap= `https://${domain}/sitemap_${newsline}_${forum}_${formatISO(dateStart)}`;
         sitemap= sitemap.substring(0, sitemap.length - 1);
         sitemaps.push(sitemap);
@@ -41,10 +35,5 @@ export default async function handler(
         if(count++>1000)
             break;    
     }
-
-    res.status(200).json({ success: true, sitemaps })
-
-
-
-
+    return res.status(200).json({ success: true, sitemaps })
 }

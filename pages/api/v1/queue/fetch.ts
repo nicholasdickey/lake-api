@@ -1,20 +1,15 @@
-
-
+//./pages/api/v1/queue/fetch.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { getSessionLayout, getUserLayout, getChannelConfig } from "../../../../lib/db/config"
-import { dbLog, dbEnd } from "../../../../lib/db"
-import { processLayout } from "../../../../lib/layout"
+import { dbEnd } from "../../../../lib/db"
 import { fetchQueue } from "../../../../lib/queue/fetchQueue"
 import { processPostBody } from '../../../../lib/processPostBody';
 
-type Data = any
-
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -23,53 +18,30 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { newsline, forum, tag, userslug, sessionid, type, countonly, lastid, tail, page, test, qwiketid, size, solo, debug } = req.query;
-    if (!countonly)
-        countonly = '0';
-    if (!tail)
-        tail = '0';
-    if (!page)
-        page = '0';
+    let { newsline, forum, tag, userslug, sessionid, type, countonly = 0, lastid, tail = 0, page = 0, test, qwiketid, size = 0, solo, debug } = req.query;
 
-    if (+(size || '0') == 0)
+    if (!+size)
         size = type == 'hot' ? '9' : '4';
-
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to create redis" })
 
-
     const countOnlyParam = +countonly;
     const tailParam = +tail;
     const pageParam = +page;
     try {
-        // l(chalk.magenta.bold("fetchQueue", js({newsline,forum,lastid,type, tag, page,countonly})))
         let ret: any = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
         ret.type = type;
-        // l('ret:',js(ret))
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
-            // if(type=='mix')
-            // l('ret',js({count:items.length,tail:ret.tail,firstItem:items[0]}))
-            //   l("ret:", ret.items.map(r=>r.item))
             const newItems = items.filter((p: any) => p != null).map(({ item }: any) => {
                 if (!item)
                     return null;
-                if (type == 'reacts')
-                    l("item after filter", js(item))
-                /* if (!item.catIcon) {
-                     l(chalk.red.bold("=========================<>>>>   NO CAT ICON",item))
-                 }*/
-                //  l(1111)
                 const isPost = item.qpostid ? true : false;
-                // l(11222,isPost)
-
                 let processedBody = item.body;
                 if (isPost) {
-                    //l(chalk.yellow.bold("POST:", js(item.body)))
                     processedBody = processPostBody(item.body)
-                    // l(chalk.yellow.bold("POST2:", js(processedBody)))
                 }
                 let description = item.description.substring(0, 196);
                 if (description.length == 196)
@@ -90,8 +62,6 @@ export default async function handler(
                     image: item.image,
                     tag: isPost ? item.category : item.cat,
                 }
-                //  if(type=='mix'&&isPost)
-                //  console.log("mix item",js({isPost,title:common.title,postBody:common.postBody}))
                 if (isPost) {
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;
@@ -103,31 +73,13 @@ export default async function handler(
                     common['createdat'] = item.createdat;
                     common['subscr_status'] = item.subscr_status;
                     common['id'] = item.id;
-
-
-
-                }
-                if (type == 'reacts') {
-                    l(chalk.yellow("returning common", js(common)))
                 }
                 return common;
-
             })
-            // l(newItems)
             ret.items = newItems.filter((p: any) => p != null);
-            // if(type=='mix')
-            //l(chalk.green.bold("return from fetchQueue", js(ret)))
         }
-        // if (type == 'mix')
-        //  l(chalk.magenta.bold(js(ret)))
-        if (countonly) {
-            // console.log('count:',ret.newItems)
-        }
-
-        // l(chalk.cyan.bold("444",js(ret)))
-        res.status(200).json(ret)
+        return res.status(200).json(ret)
     }
-
     catch (x) {
         l(chalk.red.bold(x))
         res.status(501).json(x);
@@ -136,5 +88,4 @@ export default async function handler(
         await redis.quit();
         dbEnd(threadid);
     }
-
 }

@@ -1,17 +1,14 @@
-
-
+//./pages/api/v1/user/updateSession.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
-import { getUserSession, saveUserSession } from "../../../../lib/db/user"
-import { dbLog, dbEnd } from "../../../../lib/db"
-
-type Data = any
+import {  saveUserSession } from "../../../../lib/db/user"
+import {  dbEnd } from "../../../../lib/db"
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     await NextCors(req, res, {
         // Options
@@ -35,21 +32,16 @@ export default async function handler(
         const userSession = JSON.stringify(options);
         await saveUserSession({ threadid, userslug: userslug as string, options: userSession });
         redis.setex(userKey, 365 * 24 * 3600, userSession);
-
         if (!userSession)
             return res.status(501).json({ msg: "Unable to parse user" });
-
-        res.status(200).json({ success: true, userSession })
+        return res.status(200).json({ success: true, userSession })
     }
-
     catch (x) {
         l(chalk.red.bold(x));
         res.status(500).json({ success: false })
-
     }
     finally {
         await redis.quit();
         dbEnd(threadid);
     }
-
 }
