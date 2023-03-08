@@ -1,5 +1,6 @@
-// __tests__/api.test.js
-// 🚨 Remember to keep your `*.test.js` files out of your `/pages` directory!
+// __tests__/api.test.ts
+//@ts-nocheck
+
 import { createMocks } from 'node-mocks-http';
 import fetch from '../pages/api/v1/queue/fetch';
 import { l, chalk, microtime, js, ds } from "../lib/common";

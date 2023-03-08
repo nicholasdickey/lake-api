@@ -1,4 +1,6 @@
-// __tests__/api.test.js
+// __tests__/api.test.ts
+// @ts-nocheck
+
 import { createMocks } from 'node-mocks-http';
 import fetch from '../pages/api/v1/queue/fetch';
 import { l, chalk, microtime, js, ds, sleep } from "../lib/common";

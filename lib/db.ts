@@ -59,7 +59,7 @@ const dbGetQuery = async (name:String, threadid:number) => {
                 database: name,
             }
  
-            var connection = mysql.createConnection(server)
+            var connection = mysql.createConnection(server as any)
             const query = util.promisify(connection.query).bind(connection)
             try {
                 connection.connect(function (err:any) {

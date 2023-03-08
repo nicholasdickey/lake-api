@@ -1,4 +1,5 @@
 // __tests__/api.test.js
+//@ts-nocheck
 import { createMocks } from 'node-mocks-http';
 import fetchAll from '../pages/api/v1/sitemap/fetchAll';
 
