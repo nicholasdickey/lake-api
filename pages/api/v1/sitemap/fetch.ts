@@ -6,7 +6,7 @@ import { getRedisClient } from "../../../../lib/redis"
 import { dbEnd } from "../../../../lib/db"
 import {getRssNewsline} from "../../../../lib/db/qwiket"
 import {formatISO,addDays,parseISO,sub} from 'date-fns'
-import fetchAll from "../../../../lib/fetchAll"
+import fetchAll from "../../../../lib/fetch-all"
 
 export default async function handler(
     req: NextApiRequest,

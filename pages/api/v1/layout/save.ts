@@ -11,7 +11,7 @@ export default async function handler(
     res: NextApiResponse<any>
 ) {
 
-    const { channel, sessionid, userslug, pageType, thick, dense, layoutNumber } = req.query;
+    const { channel, sessionid='', userslug='' } = req.query;
 
     let userLayout: any = null;
     let threadid = Math.floor(Math.random() * 100000000)
@@ -25,7 +25,7 @@ export default async function handler(
                 userConfigKey
             )
             if (!userLayout) {
-                userLayout = await getUserLayout({ threadid, slug: userslug })
+                userLayout = await getUserLayout({ threadid, slug: userslug as string })
                 await redis.setex(userConfigKey, 7 * 24 * 3600, userLayout)
             }
             userLayout = JSON.parse(userLayout);
@@ -38,7 +38,7 @@ export default async function handler(
                 userConfigKey
             )
             if (!userLayout) {
-                userLayout = await getSessionLayout({ threadid, sessionid })
+                userLayout = await getSessionLayout({ threadid, sessionid:sessionid as string })
                 redis.setex(userConfigKey, 24 * 3600, userLayout);
             }
             userLayout = JSON.parse(userLayout);
@@ -47,7 +47,7 @@ export default async function handler(
         const channelConfigKey = `channel-${channel}-layout`;
         let channelLayout = await redis.get(channelConfigKey);
         if (!channelLayout) {
-            const channelConfig = await getChannelConfig({ threadid, channel })   
+            const channelConfig = await getChannelConfig({ threadid, channel:channel as string })   
             const layout = channelConfig.config.layout;
             channelLayout = JSON.stringify(layout);
             redis.setex(channelConfigKey, 365 * 24 * 3600, channelLayout);

@@ -17,17 +17,17 @@ export default async function handler(
         methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
         origin: '*',
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-     });
+    });
 
-    let { channel, sessionid, userslug, pageType, thick, dense, layoutNumber,leftOverride } = req.query;
-    if(dense=='1')
-    thick='1';
+    let { channel, sessionid = '', userslug='', pageType='', thick, dense, layoutNumber='', leftOverride } = req.query;
+    if (dense == '1')
+        thick = '1';
     let userConfigKey = null;
     let userLayout = null;
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
-    if(!redis)
-        return res.status(500).json({msg:"Unable to connect to redis"});
+    if (!redis)
+        return res.status(500).json({ msg: "Unable to connect to redis" });
     try {
         if (userslug) {
             userConfigKey = `${userslug}-config`;
@@ -35,7 +35,7 @@ export default async function handler(
                 userConfigKey
             )
             if (!userLayout) {
-                userLayout = await getUserLayout({ threadid, slug: userslug })
+                userLayout = await getUserLayout({ threadid, slug:userslug as string })
                 await redis?.setex(userConfigKey, 7 * 24 * 3600, userLayout)
             }
             userLayout = JSON.parse(userLayout);
@@ -47,44 +47,44 @@ export default async function handler(
                 userConfigKey
             )
             if (!userLayout) {
-                userLayout = await getSessionLayout({ threadid, sessionid })
+                userLayout = await getSessionLayout({ threadid, sessionid:sessionid as string})
                 redis?.setex(userConfigKey, 24 * 3600, userLayout);
             }
             userLayout = JSON.parse(userLayout);
         }
         const channelConfigKey = `channel-${channel}-config`;
         let channelConfig = await redis.get(channelConfigKey);
-     
+
         let jsonChannelConfig;
         if (!channelConfig) {
-            jsonChannelConfig = await getChannelConfig({ threadid, channel })
-            jsonChannelConfig.config=JSON.parse(jsonChannelConfig.config);
-            channelConfig=JSON.stringify(jsonChannelConfig);
-            if(channelConfig)
-            redis?.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
+            jsonChannelConfig = await getChannelConfig({ threadid, channel:channel as string })
+            jsonChannelConfig.config = JSON.parse(jsonChannelConfig.config);
+            channelConfig = JSON.stringify(jsonChannelConfig);
+            if (channelConfig)
+                redis?.setex(channelConfigKey, 365 * 24 * 3600, channelConfig);
         }
         else {
-            jsonChannelConfig=JSON.parse(channelConfig);
+            jsonChannelConfig = JSON.parse(channelConfig);
         }
-        if(!jsonChannelConfig)
-            return res.status(500).json({msg:"Unable to parse channel config"})
-      
-        const channelLayout =jsonChannelConfig.config.layout;
+        if (!jsonChannelConfig)
+            return res.status(500).json({ msg: "Unable to parse channel config" })
+
+        const channelLayout = jsonChannelConfig.config.layout;
         if (!thick)
             thick = "0";
         if (!dense)
             dense = "0";
 
         let density = +thick ? +dense ? "dense" : "thick" : "normal";
-        const layout = processLayout({ channelLayout, userLayout, pageType, density, layoutNumber,leftOverride })
+        const layout = processLayout({ channelLayout, userLayout, pageType:pageType as string, density, layoutNumber:layoutNumber as string, leftOverride:leftOverride as string })
         res.status(200).json(layout)
     }
     catch (x) {
-        l(chalk.red.bold(x)); 
-        res.status(501).json(x);      
+        l(chalk.red.bold(x));
+        res.status(501).json(x);
     }
-    finally{
+    finally {
         redis?.quit();
         dbEnd(threadid);
-    } 
+    }
 }

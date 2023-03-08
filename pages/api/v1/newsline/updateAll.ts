@@ -6,7 +6,7 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbLog, dbEnd } from "../../../../lib/db"
-import fetchAll from '../../../../lib/fetchAll';
+import fetchAll from '../../../../lib/fetch-all';
 
 export default async function handler(
     req: NextApiRequest,

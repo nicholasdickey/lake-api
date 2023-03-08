@@ -5,7 +5,7 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis";
 import { dbLog, dbEnd } from "../../../../lib/db";
 import { getQwiket } from "../../../../lib/db/qwiket";
-import { processBody } from "../../../../lib/processBody";
+import { processBody } from "../../../../lib/process-body";
 import { Qwiket } from "../../../../lib/types/qwiket";
 import { verifyAck } from "../../../../lib/db/user"
 
@@ -28,26 +28,33 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    const { slug, withBody, userslug, sessionid, tag, ack }: Query = req.query as unknown as Query;
+    let { slug='', withBody, userslug, sessionid, tag, ack }: Query = req.query as unknown as Query;
+    
+    l('slug',slug,js(req.query))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
         return res.status(500).json({ msg: "Unable to connect to redis" });
-
+    l(121)
     try {
         let json: any;
         let txid: string = '';
+        l(1,slug)
         try {
-            if (!slug) {
-                //home mode, the latest topic from feed
-                const keyTxid = `tids-cat-published-${tag}`;
-                const range = await redis.zrevrange(keyTxid, 0, 0);
-                txid = range[0];
-            }
-            else {
+            if(slug!=''){
+                l(33)
                 const key = `txid-${slug}`;
                 txid = await redis.get(key) || '';
             }
+            else {
+                //home mode, the latest topic from feed
+                l(2)
+                const keyTxid = `tids-cat-published-${tag}`;
+                const range = await redis.zrevrange(keyTxid, 0, 0);
+                txid = range[0];
+                l(chalk.green("home",js({txid,range,keyTxid,tag})))
+            }
+           
         }
         catch (x) {
             l(chalk.red.bold(x))

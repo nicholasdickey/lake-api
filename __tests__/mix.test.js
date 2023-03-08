@@ -1,11 +1,12 @@
 // __tests__/api.test.js
-// 🚨 Remember to keep your `*.test.js` files out of your `/pages` directory!
 import { createMocks } from 'node-mocks-http';
 import fetch from '../pages/api/v1/queue/fetch';
 import { l, chalk, microtime, js, ds, sleep } from "../lib/common";
 import { dbEnd, dbGetQuery, dbLog } from "../lib/db";
 import axios from 'axios';
+
 const threadid = Math.floor(Math.random() * 100000000)
+
 describe('Test Mix', () => {
     beforeAll(() => { jest.setTimeout(90 * 1000); jest.useFakeTimers('legacy') })
 
@@ -69,27 +70,22 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
                 data = res.data;
             }
-           // l("returned data", data);
+
             expect(data.success).toEqual(true);
             expect(data.lastid).toEqual(lastid);
             expect(data.type).toEqual('mix');
 
             const items = data.items;
             const itemsIds = items.map(i => i.qpostid || i.slug)
-
-            //  l(chalk.yellow(js(itemsIds)))
-
             expect(items.length == size);
 
             let dbItems = [];
             let o = offset + 1;
             for (let i = 0; i <= page; i++) {
-                //count size qwikets per page
+
                 let count = 0;
                 while (count < size) {
-                    // l("getting item ",js({o,i,count}))
                     const item = rows[o++];
-                    // l("item =",js(item))
                     if (i == page) {
                         dbItems.push(item)
                     }
@@ -97,11 +93,8 @@ describe('Test Mix', () => {
                         count++;
                 }
             }
-            // l(chalk.red(js({dbItems})))
-            // const dbItems = rows.slice(offset + page * size, 10 + page * size + 4);
             const dbItemsIds = dbItems.map(i => i.slug);
 
-            l(chalk.cyan(js(dbItemsIds)));
             var good = false;
             if (dbItemsIds.length == itemsIds.length) {
                 var good = false;
@@ -120,12 +113,10 @@ describe('Test Mix', () => {
                     }
                     good = true;
                 }
-
             }
             l(chalk.yellow(js(itemsIds)))
             expect(itemsIds).toEqual(dbItemsIds)
         }
-
     });
     test('mix, page0', async () => {
         jest.setTimeout(90 * 1000)
@@ -138,8 +129,7 @@ describe('Test Mix', () => {
             let query = await dbGetQuery("povdb", threadid);
             sql = `SELECT * from (select threadid as slug, shared_time as \`time\`,'qwiket' as qtype,xid FROM povdb.pov_threads_view6 where category_xid in (SELECT DISTINCT c.xid from povdb.pov_v30_newsline_default_tags dt, pov_categories c where c.shortname=dt.tag and newsline='qwiket')  order by  shared_time desc limit 100) as a
                 UNION ALL 
-            SELECT * from (select qpostid as slug, createdat as \`time\`,'react' as qtype,qpostid as xid from pov_channel_posts order by createdat desc limit 100) as b
-                
+            SELECT * from (select qpostid as slug, createdat as \`time\`,'react' as qtype,qpostid as xid from pov_channel_posts order by createdat desc limit 100) as b 
             order by \`time\` desc`;
             rows = await query(sql);
         }
@@ -147,7 +137,6 @@ describe('Test Mix', () => {
             const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-mix`);
             expect(res.data.success == true);
             rows = res.data.rows;
-            //l(chalk.green.bold(js({ rows })))
         }
 
 
@@ -163,7 +152,6 @@ describe('Test Mix', () => {
                         forum: 'usconservative',
                         type: 'mix',
                         sessionid: 'test',
-
                         page,
                         size
                     },
@@ -179,17 +167,13 @@ describe('Test Mix', () => {
                 const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=0&page=${page}&size=${size}`);
                 data = res.data;
             }
-            l("returned data", data.lastid, data.tail, data.type);
+
             expect(data.success).toEqual(true);
             expect(+data.lastid > 0).toEqual(true)
 
             expect(data.type == 'mix').toEqual(true);
-
             const items = data.items;
             itemsIds = items.map(i => i.qpostid || i.slug)
-
-            l(chalk.yellow(js(itemsIds)))
-
 
             let dbItems = [];
             let o = offset;
@@ -197,9 +181,7 @@ describe('Test Mix', () => {
                 //count size qwikets per page
                 let count = 0;
                 while (count < size) {
-                    //l("getting item ",js({o,i,count}))
                     const item = rows[o++];
-                    // l("item =",js(item))
                     if (i == page) {
                         dbItems.push(item)
                     }
@@ -213,15 +195,10 @@ describe('Test Mix', () => {
                 l("comparing tail", slug,dbItems[0])
                 expect(data.tail).toEqual(slug);
             }
-
-            // l(chalk.red(js({dbItems})))
-            // const dbItems = rows.slice(offset + page * size, 10 + page * size + 4);
             dbItemsIds = dbItems.map(i => i.slug);
 
-            l(chalk.cyan(js(dbItemsIds)));
             if (dbItemsIds.length == itemsIds.length)
                 break;;
-            l(chalk.red.bold("******************* RETRY **************", retry))
             await sleep(1000)
             retry--;
         }
@@ -243,18 +220,8 @@ describe('Test Mix', () => {
                 }
                 good = true;
             }
-
         }
-
-        l(chalk.yellow(js(itemsIds)))
         expect(itemsIds).toEqual(dbItemsIds)
-
-        /*expect(JSON.parse(res._getData())).toEqual(
-          expect.objectContaining({
-            message: 'Your favorite animal is dog',
-          }),
-        );*/
-        // dbEnd(threadid);
     });
 });
 afterAll((done) => {

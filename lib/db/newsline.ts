@@ -1,8 +1,7 @@
-import { l, chalk, microtime, js, ds } from "../common";
-import { dbGetQuery, dbLog } from "../db";
+//./lib/db/newsline.ts
+import { l, chalk,  js } from "../common";
+import { dbGetQuery } from "../db";
 import { Newsline, NewslineDefinition, Tag, Publications, TagDefinition } from "../types/newsline"
-
-
 
 export const getNewslineDefaultTags = async ({
     threadid,
@@ -16,16 +15,17 @@ export const getNewslineDefaultTags = async ({
 
     sql = `SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n 
     INNER JOIN pov_categories c  on c.shortname=n.tag 
-    INNER JOIN pov_v30_publications d on d.tag=n.tag   and d.newsline=n.newsline
+    LEFT OUTER JOIN pov_v30_publications d on d.tag=n.tag   and d.newsline=n.newsline
     where n.newsline='${newsline}' order by c.text`;
-    //l(chalk.green("12311 getNewslineDefaultTags",sql));
+
     rows = await query(`SELECT n.tag, c.text as name, c.icon, d.description from pov_v30_newsline_default_tags n 
     INNER JOIN pov_categories c on c.shortname=n.tag 
-    INNER JOIN pov_v30_publications d on d.tag=n.tag and d.newsline=n.newsline
+    LEFT OUTER JOIN pov_v30_publications d on d.tag=n.tag and d.newsline=n.newsline
     where n.newsline=? order by c.text`, [newsline]);
-  //  l(chalk.green(sql,js(rows)))
+
     return rows;
 }
+
 export const getUserTags = async ({
     type,
     threadid,
@@ -40,10 +40,10 @@ export const getUserTags = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT tag,switch as switchParam from ${table} where \`key\`='${key}' `;
-    rows = await query(`SELECT tag,switch as switchParam from ${table} where \`key\`=?`, [key]);
- //  l(chalk.green(sql, rows))
+    rows = await query(`SELECT tag,switch as switchParam from ${table} where \`key\`=?`, [key]); 
     return rows;
 }
+
 export const getUserNewslineTags = async ({
     threadid,
     key
@@ -55,8 +55,7 @@ export const getUserNewslineTags = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_user_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key='${key}' order by c.text`;
-    rows = await query(`SELECT n.tag,n.switch,c.text as name , c.icon from pov_v30_user_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]);
-   // l(chalk.green(sql, rows))
+    rows = await query(`SELECT n.tag,n.switch,c.text as name , c.icon from pov_v30_user_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]);  
     return rows;
 }
 
@@ -69,10 +68,9 @@ export const getSessionNewslineTags = async ({
 }): Promise<NewslineDefinition> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-   // l("getSessionNewslineTags")
+ 
     sql = `SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key='${key}' order by c.text`;
-    rows = await query(`SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]);
-   // l(chalk.green(sql, js(rows)))
+    rows = await query(`SELECT n.tag,n.switch,c.text as name, c.icon from pov_v30_session_tags n INNER JOIN pov_categories c ON c.shortname=n.tag  where n.key=? order by c.text`, [key]); 
     return rows;
 }
 
@@ -88,9 +86,9 @@ export const getNewslinePublications = async ({
     q?: string
 }): Promise<Publications> => {
     let sql, rows;
-     l("getNewslinePublications");
+  
     let inStr = "('" + filters?.join("','") + "')";
-  //  console.log("insStr", inStr)
+  
     let query = await dbGetQuery("povdb", threadid);
     if (filters && filters.length > 0 && !q) {
         sql = `SELECT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.tag in ${inStr} and c.newsline='${newsline}' and p.category_tag=c.tag and p.newsline='${newsline}'  order by cc.text asc `;
@@ -111,8 +109,7 @@ export const getNewslinePublications = async ({
         sql = `SELECT DISTINCT cc.text as name, cc.icon,p.tag, p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag and c.newsline='${newsline}'  and p.category_tag=c.tag and p.newsline='${newsline}'  order by cc.text asc `;
         l(chalk.green(sql))
         rows = await query(`SELECT DISTINCT cc.text as name, cc.icon,p.tag,p.description, c.tag as category_tag, c.name as category_name from pov_v30_publications p, pov_v30_publication_categories c,pov_categories cc where cc.shortname=p.tag  and c.newsline=?  and p.category_tag=c.tag and p.newsline=? order by cc.text asc `, [newsline, newsline]);
-    }
-    l(chalk.green(sql, js(rows)))
+    } 
     return rows;
 }
 
@@ -138,57 +135,34 @@ export const updateUserNewsline = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     const table = `pov_v30_${type}_tags`;
-   /* console.log("UPDATE USER NEWSLINE ", js(({
-        type,
-        table,
-        threadid,
-        sessionid,
-        key,
-        switchParam,
-        tag
-    })));*/
 
     sql = `SELECT xid from pov_v30_newsline_default_tags where newsline='${newsline}' and tag='${tag}'`;
-   // l(chalk.green("Checking default newsline for the tag", sql))
     rows = await query(`SELECT xid from pov_v30_newsline_default_tags where newsline=? and tag=?`, [newsline, tag])
-   // l(chalk.green(sql, js(rows)))
     const isDefault = rows && rows.length;
 
     sql = `SELECT xid from ${table} where \`key\`='${key}' and tag='${tag}'`;
-   // l(chalk.green("!!!", sql))
     rows = await query(`SELECT xid from ${table} where \`key\`=? and tag=?`, [key, tag])
-   // l(chalk.green(sql, rows))
     if (rows && rows.length > 0) {
         if (switchParam == 'off' && !isDefault || switchParam == 'on' && isDefault) {
             sql = `DELETE from  ${table} where \`key\`='${key}' and tag='${tag}'`;
-            //l(chalk.green(sql))
             rows = await query(`DELETE from ${table}  where \`key\`=? and tag=?`, [key, tag])
-           // l(chalk.green(sql, rows));
         }
         else {
             sql = `UPDATE ${table} set \`switch\`='${switchParam}' where \`key\`='${key}' and tag='${tag}'`;
-           // l(chalk.green(sql))
             rows = await query(`UPDATE ${table} set \`switch\`=? where \`key\`=? and tag=?`, [switchParam, key, tag])
-           //l(chalk.green(sql, rows))
         }
     }
     else {
         if (type == 'session') {
             sql = `INSERT into ${table} (sessionid,\`key\`,\`switch\`,tag) VALUES ('${sessionid}','${key}','${switchParam}','${tag}')`;
-           // l(chalk.green(sql))
             rows = await query(`INSERT into ${table} (sessionid,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`, [sessionid, key, switchParam, tag])
-           // l(chalk.green(sql, rows))
         }
         else {
             sql = `INSERT into ${table} (userslug,\`key\`,\`switch\`,tag) VALUES ('${userslug}','${key}','${switchParam}','${tag}')`;
-           // l(chalk.green(sql))
             rows = await query(`INSERT into ${table} (userslug,\`key\`,\`switch\`,tag) VALUES (?,?,?,?)`, [userslug, key, switchParam, tag])
-           // l(chalk.green(sql, rows))
         }
     }
 }
-
-
 
 export const updateDefaultNewsline = async ({
     threadid,
@@ -200,7 +174,7 @@ export const updateDefaultNewsline = async ({
     defaultNewsline: Newsline
 
 }) => {
-    let sql, rows;
+    let sql;
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `DELETE  from pov_v30_newsline_default_tags where newsline='${newsline}' limit 1000;`;
@@ -208,9 +182,9 @@ export const updateDefaultNewsline = async ({
     defaultNewsline.forEach(async (tag: Tag) => {
         sql = `INSERT into pov_v30_newsline_default_tags (newsline,tag) VALUES ('${newsline}','${tag}') `;
         await query(`INSERT into pov_v30_newsline_default_tags (newsline,tag) VALUES (?,?}')`, [newsline, tag]);
-       // l(chalk.green(sql));
     })
 }
+
 export const getTagDefinition = async ({
     threadid,
     tag
@@ -222,11 +196,10 @@ export const getTagDefinition = async ({
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT shortname as tag, text as name, icon, description from pov_categories where shortname='${tag}'`;
-    l(chalk.green(sql))
     rows = await query(`SELECT shortname as tag, text as name, icon, description from pov_categories where shortname=?`, [tag]);
-    l(chalk.green(sql, js(rows[0])))
     return rows[0];
 }
+
 export const getNewslinePublicationCategories = async ({
     threadid,
     newsline
@@ -236,13 +209,12 @@ export const getNewslinePublicationCategories = async ({
 }): Promise<string[]> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-   // l("PublicationCategories", newsline);
+ 
     sql = `SELECT name,tag from  pov_v30_publication_categories where newsline='${newsline}' order by xid`;
-   // l(chalk.green(sql))
     rows = await query(`SELECT name,tag from  pov_v30_publication_categories where newsline=? order by xid`, [newsline]);
-   // l(chalk.green(sql, rows))
     return rows;
 }
+
 export const getPublicationNewslines= async ({
     threadid,
     tag
@@ -252,13 +224,11 @@ export const getPublicationNewslines= async ({
 }): Promise<Array<{newsline:string}>> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-   // l("PublicationCategories", newsline);
     sql = `SELECT DISTINCT newsline from  pov_v30_publications where tag='${tag}'`;
-   // l(chalk.green(sql))
     rows = await query(`SELECT DISTINCT newsline from  pov_v30_publications where tag=? `, [tag]);
-   // l(chalk.green(sql, rows))
     return rows;
 }
+
 export const getNewslineForumAndDomain= async ({
     threadid,
     newsline
@@ -268,10 +238,7 @@ export const getNewslineForumAndDomain= async ({
 }): Promise<{domain:string,forum:string}|null> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-   // l("PublicationCategories", newsline);
     sql = `SELECT domain,forum from  pov_v30_forums where channel='${newsline}' `;
-   // l(chalk.green(sql))
     rows = await query(`SELECT domain,forum from  pov_v30_forums where channel=?`, [newsline]);
-   // l(chalk.green(sql, rows))
     return rows&&rows.length>0?rows[0]:null;
 }

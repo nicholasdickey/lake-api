@@ -5,7 +5,7 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { updateUserNewsline } from "../../../../lib/db/newsline"
 import { dbEnd } from "../../../../lib/db"
-import fetchNewsline from '../../../../lib/fetchNewsline';
+import fetchNewsline from '../../../../lib/fetch-newsline';
 import { updateSession } from "../../../../lib/db/user";
 
 export default async function handler(

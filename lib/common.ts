@@ -1,14 +1,16 @@
-
+//./lib.common.ts
 import chalk from "chalk";
-chalk.enabled = true;
+
 let lg = false;
 
 const allowLog = () => (lg = true);
+//@ts-ignore
 const l = (...args) => {
     if (lg) {
         console.log(...args);
     }
 };
+//@ts-ignore
 const js = o => JSON.stringify(o);
 const microtime = () => Math.abs(new Date().getTime());
 const apiUrl =
@@ -16,25 +18,25 @@ const apiUrl =
     process.env.API_HOST_PRIMARY +
     ":" +
     process.env.API_PORT_PRIMARY;
-
+//@ts-ignore
 function logTime({ t1, threadid, name }) {
-    const t2 = microtime(true);
+    //@ts-ignore
+    const t2 = microtime();
     l(chalk.green(`QAPI RETURN ${name}(${threadid}):${t2 - t1} ms`));
 }
 
-function logEnter(name, url) {
+function logEnter(name:string, url:string) {
     const threadid = Math.floor(Math.random() * 10000);
-    const t1 = microtime(true);
+    const t1 = microtime();
     l(chalk.blue(`QAPI ENTER ${name}(${threadid})`), { url });
     return { threadid, t1, name };
 }
 
-
-function sleep(ms) {
+function sleep(ms:number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function quoteFields(object) {
+function quoteFields(object:any) {
     let keys = Object.keys(object);
     keys.forEach(key => {
         let value = object[key];
@@ -45,7 +47,8 @@ function quoteFields(object) {
     });
     return object;
 }
-const ds = s => s || "";
+
+const ds = (s:string) => s || "";
 
 export {
     l,

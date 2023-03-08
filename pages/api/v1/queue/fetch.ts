@@ -5,7 +5,7 @@ import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { dbEnd } from "../../../../lib/db"
 import { fetchQueue } from "../../../../lib/queue/fetchQueue"
-import { processPostBody } from '../../../../lib/processPostBody';
+import { processPostBody } from '../../../../lib/process-post-body';
 
 export default async function handler(
     req: NextApiRequest,

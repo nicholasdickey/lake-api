@@ -5,7 +5,7 @@ import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { dbLog, dbEnd } from "../../../../lib/db"
-import fetchNewsline from "../../../../lib/fetchNewsline"
+import fetchNewsline from "../../../../lib/fetch-newsline"
 
 export default async function handler(
     req: NextApiRequest,

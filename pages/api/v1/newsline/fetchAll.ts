@@ -4,7 +4,7 @@ import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../lib/common";
 import { getRedisClient } from "../../../../lib/redis"
 import { dbEnd } from "../../../../lib/db"
-import fetchAll from "../../../../lib/fetchAll"
+import fetchAll from "../../../../lib/fetch-all"
 
 export default async function handler(
     req: NextApiRequest,

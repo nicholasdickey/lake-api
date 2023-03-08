@@ -1,3 +1,5 @@
+//./lib/types/newsline.ts
+
 /**
  * Keeps the state of an item in the newsline definition, both from Redis and db
  */

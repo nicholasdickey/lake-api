@@ -1,15 +1,4 @@
-/*export interface Qwiket{
-    description:string;
-    image:string;
-    site_name:string;
-    tag:string;
-    body?:string;
-    author:string;
-    slug:string;
-    published_time:string;
-    shared_time:string;
-}*/
-
+//./lib/types/qwiket.ts
 export interface Qwiket{
     catName?: string,
     catIcon?: string,
@@ -38,7 +27,6 @@ export interface Qwiket{
     subscr_status?:number,
     hasBody?:boolean,
     ack?:boolean
-
 }
 export interface React{
     cat_name?: string,
@@ -68,5 +56,4 @@ export interface React{
     subscr_status?:number,
     hasBody?:boolean,
     ack?:boolean
-
 }

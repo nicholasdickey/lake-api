@@ -6,8 +6,8 @@ import { l, chalk, js } from "../../../../../lib/common";
 import { getRedisClient } from "../../../../../lib/redis"
 import { dbEnd } from "../../../../../lib/db"
 import { getPublicationNewslines, getNewslineForumAndDomain } from "../../../../../lib/db/newsline"
-import { submitCurrentSitemap } from "../../../../../lib/google/submitCurrentSitemap"
-import { indexUrl } from "../../../../../lib/google/indexUrl"
+import { submitCurrentSitemap } from "../../../../../lib/google/submit-current-sitemap"
+import { indexUrl } from "../../../../../lib/google/index-url"
 const { getISODay, addDays, startOfDay, formatISO } = require("date-fns");
 
 
@@ -69,6 +69,7 @@ export default async function handler(
             //2. Resubmit current sitemap
             //   2.1 Construct the last Sunday ISO date
             await indexUrl(url);
+            l(chalk.green.bold("After submit"))
             await submitCurrentSitemap(sitemapName,domain);
             res.status(200).json({ success: true, date })
         })

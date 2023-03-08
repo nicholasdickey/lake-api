@@ -17,7 +17,7 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { slug } = req.query;
+    let { slug='' } = req.query;
 
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
@@ -29,7 +29,7 @@ export default async function handler(
         let channelConfig = await redis.get(channelConfigKey);
         let jsonChannelConfig;
         if (!channelConfig) {
-            jsonChannelConfig = await getChannelConfig({ threadid, channel: slug })
+            jsonChannelConfig = await getChannelConfig({ threadid, channel: slug as string })
             jsonChannelConfig.config = JSON.parse(jsonChannelConfig.config);
             channelConfig = JSON.stringify(jsonChannelConfig);
             if (channelConfig)
