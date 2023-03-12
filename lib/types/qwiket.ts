@@ -26,7 +26,8 @@ export interface Qwiket{
     thread_author?:string,
     subscr_status?:number,
     hasBody?:boolean,
-    ack?:boolean
+    ack?:boolean,
+    headless?:number
 }
 export interface React{
     cat_name?: string,

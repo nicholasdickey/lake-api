@@ -72,7 +72,7 @@ export const getQwiket = async ({
     withBody?: [0, 1],
     tag?: string
 }): Promise<Qwiket | null> => {
-    let sql, rows, qwiket;
+    let sql, rows, qwiket,tq;
  
     let query = await dbGetQuery("povdb", threadid);
     if (slug) {
@@ -84,27 +84,37 @@ export const getQwiket = async ({
             return null;
         else if (!silo && silo == 'cc')
             return null;
-        const table = `q${silo}`;
+        const qtable = `q${silo}`;
         const qwiketid = `${slug}.qwiket`;
 
-        sql = `SELECT * from ${table} where \`key\` ='${qwiketid}' limit 1`;
-        rows = await query(`SELECT * from ${table} where \`key\`=?  limit 1`, [qwiketid]);
+        sql = `SELECT * from ${qtable} where \`key\` ='${qwiketid}' limit 1`;
+        rows = await query(`SELECT * from ${qtable} where \`key\`=?  limit 1`, [qwiketid]);
         const json = rows[0]?.value;
         if (json)
-            qwiket = json ? JSON.parse(json) : {};
-        else {
+           //TMP qwiket = json ? JSON.parse(json) : {};
+            tq = json ? JSON.parse(json) : {};
+        //TMP else {
             const table = `pov_threads_view${silo}`;
-            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t, pov_categories c where t.category_xid=c.xid and \`threadid\` ='${slug}' limit 1`;
+            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as 
+            cat, c,headless  
+            from ${table} t, 
+            pov_categories c where t.category_xid=c.xid and \`threadid\` ='${slug}' limit 1`;
 
-            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
+            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
             qwiket = rows[0];
-            if (qwiket)
-                qwiket.body = '';
-        }
+            l(chalk.green(js({qwiket})))
+            if (qwiket){
+                if(tq)
+                    qwiket.body=tq.body;
+                else
+                    qwiket.body = '';
+            }
+                
+       // }
     }
     else if (tag) {
-        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view6 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}' and reshare!=102 order by t.published_time desc limit 1`;
-        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view6 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
+        sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat,c.headless from pov_threads_view6 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}' and reshare!=102 order by t.published_time desc limit 1`;
+        rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from pov_threads_view6 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
         if (rows && rows.length > 0) {
             if (withBody) {
                 qwiket = rows[0];
@@ -117,8 +127,8 @@ export const getQwiket = async ({
             }
         }
         else {
-            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}'and reshare!=102 order by t.published_time desc limit 1`;
-            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
+            sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}'and reshare!=102 order by t.published_time desc limit 1`;
+            rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless  from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
             if (withBody) {
                 qwiket = rows[0];
                 const qwiketid = qwiket['threadid'];

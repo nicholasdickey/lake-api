@@ -34,7 +34,7 @@ export default async function handler(
         return res.status(500).json({ msg: "Unable to connect to redis" });
     try {
         let json: any;
-        let txid: string = '';
+     let txid: string = '';
         try {
             if(slug!=''){
                 const key = `txid-${slug}`;
@@ -85,7 +85,8 @@ export default async function handler(
             author: item.author,
             image: item.image,
             tag: item.cat,
-            body: item.body
+            body: item.body,
+            headless:item.headless
         }
         /**
          * Check the user acceptances
@@ -113,6 +114,7 @@ export default async function handler(
                 common.hasBody = true;
             }
         }
+        console.log("return common",js(common.headless))
         return res.status(200).json({ success: true, item: common });
     }
     catch (x) {

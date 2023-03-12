@@ -1,5 +1,4 @@
 //./pages/api/v1/submit/[...slug].ts
-
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../../lib/common";
@@ -49,27 +48,24 @@ export default async function handler(
     try {
         const params = req.query?.slug as string[];
         const [tag, slug] = params || ['', '',];
-        l(chalk.green("lll",js({tag,slug})))
         /**
          * Now need to get domain / newsline / forum
          * 1. Get tag/newsline from pov_30_publications
          * 2. Get the row from pov_30_forums for channel=newsline
          */
         const newslineObjs = await getPublicationNewslines({ threadid, tag });
-        l('newslineObjs',js(newslineObjs))
+
         newslineObjs.forEach(async ({ newsline }) => {
-            l("processing newsline",newsline)
             const { forum, domain } = await getNewslineForumAndDomain({ threadid, newsline }) || { forum: 'escape', domain: 'qwiket.com' }
             const date = getDayInPast(7);
             const sitemapName = `sitemap_${newsline}_${forum}_${date}`
             const url=`https://${domain}/${forum}/topic/${tag}/${slug}`;
-            l(chalk.yellow("SEO",js({url,slug, date, newsline, forum, domain,sitemapName}))); // slug=/[forum]/[topic]/[tag]/[threadid]/
 
             //1. Add directly to GOOGLE index
             //2. Resubmit current sitemap
             //   2.1 Construct the last Sunday ISO date
             await indexUrl(url);
-            l(chalk.green.bold("After submit"))
+
             await submitCurrentSitemap(sitemapName,domain);
             res.status(200).json({ success: true, date })
         })

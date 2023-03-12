@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../../../q3server"
+		},
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../../../var/www/qwiket-api"
+		},
+		{
+			"path": "../../../../prod-lake"
+		}
+	],
+	"settings": {}
+}
