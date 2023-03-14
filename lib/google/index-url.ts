@@ -30,8 +30,12 @@ export const indexUrl = async (url: string) => {
     },
 
   }
-  l(chalk.green("submitting the request to google",js(options)))
+  l(chalk.green("submitting the request to google", js(options)))
 
- // @ts-ignore
-  const { body } = await request(options);
+  // @ts-ignore
+  await request(options);
+  const bingUrl = `https://www.bing.com/indexnow?url=${encodeURIComponent(url)}&key=8d8708d26eaf43bab09eedbae2f3943a`;
+  l(chalk.magenta.bold("=======> SUBMIT URL TO BING:", bingUrl))
+  const { body } = await request(bingUrl)
+  l("bingdresponse=",js(body))
 }
