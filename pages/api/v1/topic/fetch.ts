@@ -67,7 +67,6 @@ export default async function handler(
         }
         const item = json;
         if (!item) {
-            l(chalk.red("TOPIC NOT FOUND", slug, tag))
             return res.status(200).json({ success: false, msg: "Topic doesn't exist" });
         }
         let common: Qwiket = {
@@ -114,7 +113,6 @@ export default async function handler(
                 common.hasBody = true;
             }
         }
-        console.log("return common",js(common.headless))
         return res.status(200).json({ success: true, item: common });
     }
     catch (x) {

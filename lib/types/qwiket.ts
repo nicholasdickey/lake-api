@@ -27,7 +27,8 @@ export interface Qwiket{
     subscr_status?:number,
     hasBody?:boolean,
     ack?:boolean,
-    headless?:number
+    headless?:number,
+    moderate_flag?:string
 }
 export interface React{
     cat_name?: string,
@@ -56,5 +57,6 @@ export interface React{
     thread_author?:string,
     subscr_status?:number,
     hasBody?:boolean,
-    ack?:boolean
+    ack?:boolean,
+    moderate_flag?:string
 }

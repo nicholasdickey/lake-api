@@ -35,7 +35,8 @@ export default async function handler(
         ret.type = type;
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
-            const newItems = items.filter((p: any) => p != null).map(({ item }: any) => {
+            let newItems = items.filter((p: any) => p != null)
+            newItems = await Promise.all(newItems.map(async ({ item }: any) => {
                 if (!item)
                     return null;
                 const isPost = item.qpostid ? true : false;
@@ -55,7 +56,7 @@ export default async function handler(
                     shared_time: item.shared_time,
                     slug: item.threadid,
                     title: item.title,
-                    site_name: item.site_name,
+                    site_name: item.site_name || '',
                     url: item.url,
                     description: description,
                     author: item.author,
@@ -63,6 +64,9 @@ export default async function handler(
                     tag: isPost ? item.category : item.cat,
                 }
                 if (isPost) {
+
+                    const moderateFlag = await redis.get(`flag-${item.author_username}`) || '';
+                    common['moderate_flag'] = moderateFlag;
                     common['author_username'] = item.username;
                     common['author_avatar'] = item.author_avatar;
                     common['author_name'] = item.author_name;
@@ -75,7 +79,7 @@ export default async function handler(
                     common['id'] = item.id;
                 }
                 return common;
-            })
+            }))
             ret.items = newItems.filter((p: any) => p != null);
         }
         return res.status(200).json(ret)

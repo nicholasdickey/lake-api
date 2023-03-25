@@ -20,7 +20,7 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid, page, siz
         const posts = await fetchPosts({ threadid, forum, size: 1000 });
         posts.forEach(post => {
             const { qpostid, createdat } = post;
-            //TODO 
+            //TODO cache healing
         })
     }
     let count = 0;
@@ -29,7 +29,6 @@ const scanReacts = async ({ reactsKey, lastid, forum, redis, threadid, page, siz
             const test = await redis.zrevrange(reactsKey, count, count);
             const qpostid = (await redis.zrevrange(reactsKey, count, count))[0];
             if (qpostid == lastid) {
-                l("match")
                 break;
             }
             if (count++ > 1000)
