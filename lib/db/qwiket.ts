@@ -17,7 +17,7 @@ export const getRssNewsline = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
 
-    sql = `select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+    sql = `select * from (SELECT DISTINCT t.threadid,c.shortname as tag,shared_time FROM povdb.pov_threads_view51 t,  
             povdb.pov_categories c 
 
             where c.xid=t.category_xid and c.shortname in (${key}) 
@@ -25,7 +25,7 @@ export const getRssNewsline = async ({
             and t.shared_time<=${timeEnd}
             order by t.xid desc) as a
             UNION ALL
-            select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view6 t,  
+            select * from (SELECT DISTINCT t.threadid,c.shortname as tag ,shared_timeFROM povdb.pov_threads_view6 t,  
             povdb.pov_categories c 
 
             where c.xid=t.category_xid and c.shortname in (${key}) 
@@ -36,7 +36,7 @@ export const getRssNewsline = async ({
             limit 50000 `;
 
     rows = await query(`
-            select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view51 t,  
+            select * from (SELECT DISTINCT t.threadid,c.shortname as tag,shared_time FROM povdb.pov_threads_view51 t,  
             povdb.pov_categories c 
             
             where c.xid=t.category_xid and c.shortname in (${key}) 
@@ -44,7 +44,7 @@ export const getRssNewsline = async ({
             and t.shared_time<=${timeEnd}
             order by t.xid desc) as a
             UNION ALL
-            select * from (SELECT DISTINCT t.threadid,c.shortname as tag FROM povdb.pov_threads_view6 t,  
+            select * from (SELECT DISTINCT t.threadid,c.shortname as tag,shared_time FROM povdb.pov_threads_view6 t,  
             povdb.pov_categories c 
             
             where c.xid=t.category_xid and c.shortname in (${key}) 

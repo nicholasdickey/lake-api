@@ -16,8 +16,9 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { newsline, forum,domain } = req.query;
-    const startDate = '2023-01-29T00:00:00';
+    let { newsline, forum,domain,format } = req.query;
+    console.log("domain",newsline,domain)
+    const startDate = newsline=='qwiket'?'2023-01-29T00:00:00':'2023-02-26T00:00:00';
     let dateStart = parseISO(startDate as string)
 
     const now = Date.now();
@@ -27,7 +28,8 @@ export default async function handler(
         domain='am1.news';
     while (true) {
         let sitemap= `https://${domain}/sitemap_${newsline}_${forum}_${formatISO(dateStart)}`;
-        sitemap= sitemap.substring(0, sitemap.length - 1);
+        sitemap= `${sitemap.substring(0, sitemap.length - 1)}.${format}`;
+        console.log("sitemap",sitemap)
         sitemaps.push(sitemap);
         dateStart = addDays(dateStart, 7);
         if (dateStart.getTime() > now)

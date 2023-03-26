@@ -26,6 +26,6 @@ export const submitCurrentSitemap = async (currentMapName:string, domain:string)
   })
   await client.sitemaps.submit({
     siteUrl: `sc-domain:${domain}`,
-    feedpath: `https://${domain}/${currentMapName}.txt`//'https://am1.news/sitemap_qwiket_usconservative_2023-02-05T00:00:00.txt'
+    feedpath: `https://${domain}/${currentMapName}.xml`//'https://am1.news/sitemap_qwiket_usconservative_2023-02-05T00:00:00.txt'
   })
 }
