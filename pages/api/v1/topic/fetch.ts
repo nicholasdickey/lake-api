@@ -50,11 +50,13 @@ export default async function handler(
         catch (x) {
             l(chalk.red.bold(x))
         }
-        if (!json) {
+        if (true) {
             // get from db
             json = await getQwiket({ threadid, slug, withBody, tag })
             if (json && withBody) {
+                l("json1:",js(json.body))
                 json.body = processBody(json);
+                l("json2:",js(json.body))
                 const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {
