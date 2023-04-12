@@ -54,9 +54,7 @@ export default async function handler(
             // get from db
             json = await getQwiket({ threadid, slug, withBody, tag })
             if (json && withBody) {
-                l("json1:",js(json.body))
                 json.body = processBody(json);
-                l("json2:",js(json.body))
                 const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {

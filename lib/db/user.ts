@@ -156,3 +156,56 @@ export const verifyAck = async ({
         return true
     return false;
 }
+
+export const saveSessionSubscription = async ({
+    threadid,
+    sessionid,
+    subscription,
+    subscriptionOptions
+}:{
+    threadid:number,
+    sessionid:string,
+    subscription:string,
+    subscriptionOptions:string
+}) => {
+    let sql;
+
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT xid from pov_v30_session_subscriptions where sessionid='${sessionid}'`;
+    l(chalk.green.bold(sql))
+    let rows = await query(`SELECT xid pov_v30_session_subscriptions pov_v30_session_subscriptions where sessionid=?`,[sessionid]);
+
+    if(rows&&rows.length>0){
+        sql=`UPDATE pov_v30_session_subscriptions set subscription='${subscription}', subscription_options='${subscriptionOptions}' subscription_time=now() where sessionid='${sessionid}'`;
+        l(chalk.green.bold(sql))
+        await query(`UPDATE pov_v30_session_subscriptions set subscription=?,subscription_options=?,subscription_time=now() where sessionid=?`,[subscription,subscriptionOptions,sessionid]);
+    }
+    else {
+        sql=`INSERT INTO pov_v30_session_subscriptions (sessionid,subscription,subscription_options,subscription_time) VALUES ('${sessionid}','${subscription}','${subscriptionOptions}',now())`;
+        l(chalk.green.bold(sql))
+        await query(`INSERT INTO pov_v30_session_subscriptions (sessionid,subscription,subscription_options,subscription_time) VALUES (?,?,?,now())`,[sessionid,subscription,subscriptionOptions]);
+    }
+}
+
+export const getSessionSubscriptionOptions= async ({
+    threadid,
+    sessionid
+}:{
+    threadid:number,
+    sessionid:string
+}) => {
+    let sql;
+
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT * from pov_v30_session_subscriptions where sessionid='${sessionid}'`;
+    let rows = await query(`SELECT * from pov_v30_session_subscriptions where sessionid=?`,[sessionid]);
+
+    if(rows&&rows.length>0){
+      const options=rows['subscription_options']
+      return {
+        subscription:true,
+        options
+      }
+    }
+   return {success:false};
+}
