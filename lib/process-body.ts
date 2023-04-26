@@ -115,6 +115,7 @@ export function processBody({ body }: { body: any }) {
                         case "iframe":
                             block.type = "iframe"
                     }
+                   // l(chalk.green(js(block)))
                     if (block.type)
                         htmlBlocks.push(block);
 

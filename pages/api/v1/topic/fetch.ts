@@ -52,16 +52,19 @@ export default async function handler(
         }
         const key = `ntjson-${withBody + '-'}${txid}`;
         const jsonRaw = await redis.get(key);
-        if (jsonRaw)
+        if (jsonRaw){
             json = JSON.parse(jsonRaw)
+            //l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
+        }
         if (!json) {
             // get from db
             json = await getQwiket({ threadid, slug, withBody, tag })
+        
             if (json && withBody) {
-                l("json1:", js(json.body))
+               // l("json1:", js(json.body))
                 json.body = processBody(json);
-                l("json2:", js(json.body))
-                const key = `ntjson-${withBody + '-'}${txid}`;
+               // l("json2:", js(json.body))
+                //const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {
                     await redis.setex(key, 7 * 24 * 3600, jsonRaw);

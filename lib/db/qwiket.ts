@@ -102,7 +102,7 @@ export const getQwiket = async ({
 
             rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
             qwiket = rows[0];
-            l(chalk.green(js({qwiket})))
+            l(chalk.green('cache miss, to db:',js({qwiket})))
             if (qwiket){
                 if(tq)
                     qwiket.body=tq.body;

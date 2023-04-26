@@ -35,7 +35,7 @@ const fetchPublications = async ({ redis, threadid, sessionid, userslug, newslin
         const userNewslineKey = id ? `user-definition-newsline-${newsline}-${id}` : `definition-newsline-${newsline}`;
         let userNewslineModified = false;
         let newslineObjectRaw //TMP = await redis.get(userNewslineKey);
-        l(chalk.blue.bold("fetchAll", js({ userNewslineKey, newslineObjectRaw })))
+       // l(chalk.blue.bold("fetchAll", js({ userNewslineKey, newslineObjectRaw })))
 
         let userNewsline: any;
         if (newslineObjectRaw) {
