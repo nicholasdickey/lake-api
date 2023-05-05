@@ -45,7 +45,7 @@ export default async function handler(
                 if (isPost) {
                     processedBody = processPostBody(item.body)
                 }
-                let description = item.description.substring(0, 196);
+                let description = item.description;//.substring(0, 196);
                 if (description.length == 196)
                     description += "...";
                 let common: any = {
@@ -79,6 +79,7 @@ export default async function handler(
                     common['subscr_status'] = item.subscr_status;
                     common['id'] = item.id;
                 }
+                console.log("ITEM:",common)
                 return common;
             }))
             ret.items = newItems.filter((p: any) => p != null);
