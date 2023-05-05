@@ -37,3 +37,4 @@ next-env.d.ts
 
 client_secrets.json
 .googleanalytics.txt
+start.json
