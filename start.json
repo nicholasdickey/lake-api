@@ -7,7 +7,7 @@
             "instances": "3",
             "exec_mode": "cluster",
             "env": {
-                "OPENAI_API_KEY":"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"
+              
               }     
         }
     ]
