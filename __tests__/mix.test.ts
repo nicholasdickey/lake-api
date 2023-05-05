@@ -28,7 +28,7 @@ describe('Test Mix', () => {
             rows = await query(sql);
         }
         else {
-            const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/test/fetch-mix`);
+            const res = await axios.get(`http://dev-lake-api.qwiket.com/api/v1/test/fetch-mix`);
             expect(res.data.success == true);
             rows = res.data.rows;
             //  l(chalk.green.bold(js({ rows })))
@@ -68,8 +68,8 @@ describe('Test Mix', () => {
                 data = JSON.parse(dataString);
             }
             else {
-                l('axios', `https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`)
-                const res = await axios.get(`https://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
+                l('axios', `http://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`)
+                const res = await axios.get(`http://dev-lake-api.qwiket.com/api/v1/queue/fetch?newsline=qwiket&forum=usconservative&type=mix&sessionid=test&lastid=${lastid}&page=${page}&size=${size}`);
                 data = res.data;
             }
 

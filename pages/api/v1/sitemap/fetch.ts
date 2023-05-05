@@ -24,7 +24,7 @@ export default async function handler(
     let dateEnd = sub(addDays(dateStart, 7), { seconds: 1 });
     const timeStart = dateStart.getTime() / 1000 | 0;
     const timeEnd = dateEnd.getTime() / 1000 | 0;
-    l(chalk.green("sitemap", js({ newsline, startDate, format, timeStart, timeEnd })))
+   // l(chalk.green("sitemap", js({ newsline, startDate, format, timeStart, timeEnd })))
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
     if (!redis)
@@ -33,14 +33,14 @@ export default async function handler(
         const allPublications = await fetchAll({ redis, threadid, sessionid: '', userslug: '', newsline: newsline as string, filters: [] })
         const key = `'${allPublications?.map(p => p.tag).join(`','`)}'`
         const range = await getRssNewsline({ threadid, key, timeStart, timeEnd });
-        console.log("range", js(range))
+       // console.log("range", js(range))
 
         if (format == 'xml') {
             const sitemap = range.map((m: any) => `<url><loc>https://${domain}/${forum}/topic/${m.tag}/${m.threadid}</loc><lastmod>${ff(new Date(m.shared_time * 1000), 'yyy-MM-dd')}</lastmod></url>`).join('\r\n');
             const fullFile = `<?xml version="1.0" encoding="UTF-8"?>
         <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         ${sitemap}</urlset>`;
-            console.log(chalk.green(fullFile))
+           // console.log(chalk.green(fullFile))
             return res.status(200).json({ success: true, sitemap: fullFile })
         }
         else {

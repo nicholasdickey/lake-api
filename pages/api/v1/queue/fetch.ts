@@ -33,6 +33,7 @@ export default async function handler(
     try {
         let ret: any = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
         ret.type = type;
+       
         if (!countonly || (countonly == '0')) {
             const items = ret.items;
             let newItems = items.filter((p: any) => p != null)
