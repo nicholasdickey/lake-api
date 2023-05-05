@@ -29,8 +29,9 @@ export default async function handler(
     if(tokens>3000)
     text=text.substring(0,14000);
     console.log(chalk.yellow("tokens=",tokens))
+    console.log("KEY=",configuration.apiKey)
     const messages:ChatCompletionRequestMessage[]=[{ "role": "user", "content":`Please summarize in two paragraphs or less in the style of Mark Twain:${text}` },];
-  console.log("req.body", configuration.apiKey,messages)
+    console.log("req.body", configuration.apiKey,messages)
   await sleep(10000);
   let completion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
