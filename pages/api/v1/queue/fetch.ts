@@ -79,7 +79,7 @@ export default async function handler(
                     common['subscr_status'] = item.subscr_status;
                     common['id'] = item.id;
                 }
-                console.log("ITEM:",common)
+                //console.log("ITEM:",common)
                 return common;
             }))
             ret.items = newItems.filter((p: any) => p != null);
