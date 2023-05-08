@@ -159,7 +159,7 @@ export const fetchPosts = async ({
 }): Promise<Array<React>> => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    sql = `SELECT * FROM povdb.pov_channel_posts where forum='${forum}' order by qpostid desc limit ${size}`;
+    sql = `SELECT * FROM povdb.pov_channel_posts where forum='${forum}' and body not like '%[ChatGPT]:%' order by qpostid desc limit ${size}`;
     rows = await query(sql);
     return rows;
 }
