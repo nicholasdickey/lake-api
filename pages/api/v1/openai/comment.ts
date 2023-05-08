@@ -137,7 +137,7 @@ export default async function handler(
     }
 
   }
-  messages.push({ role: "user", content: `Please respond to the last comment in the context of the original article and the subsequent comments.` })
+  messages.push({ role: "user", content: `Please respond to the last comment, if need be considering the context of the original article and the subsequent comments.` })
   console.log("messages:", configuration.apiKey, messages)
   
   let completion=null ;
@@ -151,6 +151,7 @@ export default async function handler(
       if (completion) {
         break;
       }
+      l("no completion loop",i)
     }
     catch (x) {
       l('SLEEP', x);
