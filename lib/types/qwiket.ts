@@ -15,7 +15,7 @@ export interface Qwiket{
     author?:string,
     image?: string,
     tag?: string,
-    body?:String,
+    body?:object,
     createdat?:number,
     author_username?:string,
     author_avatar?:string,

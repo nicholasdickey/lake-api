@@ -73,7 +73,7 @@ export const getQwiket = async ({
     tag?: string
 }): Promise<Qwiket | null> => {
     let sql, rows, qwiket,tq;
- 
+    l(chalk.yellow.bold("getQwiket:",slug,withBody))
     let query = await dbGetQuery("povdb", threadid);
     if (slug) {
         const parts = slug.split('-');
@@ -90,10 +90,12 @@ export const getQwiket = async ({
         sql = `SELECT * from ${qtable} where \`key\` ='${qwiketid}' limit 1`;
         rows = await query(`SELECT * from ${qtable} where \`key\`=?  limit 1`, [qwiketid]);
         const json = rows[0]?.value;
+        
         if (json)
            //TMP qwiket = json ? JSON.parse(json) : {};
             tq = json ? JSON.parse(json) : {};
         //TMP else {
+            l(chalk.yellowBright(`getQwiket, result from :${qtable}`,js(tq)))
             const table = `pov_threads_view${silo}`;
             sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as 
             cat, c,headless  
@@ -102,13 +104,14 @@ export const getQwiket = async ({
 
             rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
             qwiket = rows[0];
-            l(chalk.green('cache miss, to db:',js({qwiket})))
+           
             if (qwiket){
                 if(tq)
                     qwiket.body=tq.body;
                 else
                     qwiket.body = '';
             }
+            l(chalk.green('cache miss, to db:',js({qwiket})))
                 
        // }
     }
