@@ -137,7 +137,7 @@ export default async function handler(
     }
 
   }
-  messages.push({ role: "user", content: `Please respond to the last comment, if need be considering the context of the original article and the subsequent comments.` })
+  messages.push({ role: "user", content: `Please respond to the last comment, if need be considering the context of the original article and the subsequent comments, as well as broader knowledge you have.` })
   console.log("messages:", configuration.apiKey, messages)
   
   let completion=null ;
