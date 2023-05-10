@@ -5,7 +5,8 @@ import NextCors from 'nextjs-cors';
 import cheerio from "whacko"
 import { l, chalk, js, sleep } from "../../../../lib/common";
 import { getQwiket } from "../../../../lib/db/qwiket";
-import { getPost } from "../../../../lib/db/post";
+import { getPost, checkChatbotPost, setChatbotPost } from "../../../../lib/db/post";
+import { id } from "date-fns/locale";
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -29,9 +30,11 @@ export default async function handler(
   //get all parent posts from a recursive function
   const postid = rawPostid as number;
   const slug = rawSlug as string;
- // l(chalk.green('comment.ts: slug:', slug, 'postid:', postid))
+  // l(chalk.green('comment.ts: slug:', slug, 'postid:', postid))
   if (!postid || !slug)
     return res.status(403).json({ error: 'missing postid or slug' });
+  if (await checkChatbotPost({ threadid, postid }))
+    res.status(200).json({ result: '' })
   const withBody: [0, 1] = 1 as any;
   const qwiket = await getQwiket({ threadid, slug, withBody });
   let description = qwiket?.description;
@@ -44,12 +47,12 @@ export default async function handler(
       summary = '';
   }
   //summary = encodeEntities(summary);
-
+  l(chalk.green.bold("POSTID=",postid))
   let rawBody: any = qwiket?.body;
   let text = ''
 
   if (rawBody) {
-    l(chalk.red('rawBody:', js(rawBody), typeof (rawBody)))
+   // l(chalk.red('rawBody:', js(rawBody), typeof (rawBody)))
     // const body=JSON.parse(rawBody);
     const blocks = rawBody['blocks'];
     //l(chalk.cyan('blocks:', js(blocks)))
@@ -65,7 +68,7 @@ export default async function handler(
 
     }
   }
- // l("TEXT:", text)
+  // l("TEXT:", text)
   let tokens = text.split(" ").length;
   if (tokens > 3000)
     text = text.substring(0, 22000);
@@ -75,8 +78,8 @@ export default async function handler(
   tokens = text.split(" ").length;
   if (tokens > 3000)
     text = text.substring(0, 14000);
-// console.log(chalk.yellow("tokens=", tokens))
- // console.log("KEY=", configuration.apiKey)
+  // console.log(chalk.yellow("tokens=", tokens))
+  // console.log("KEY=", configuration.apiKey)
   let messages: ChatCompletionRequestMessage[] = [{ "role": "user", "content": `Please summarize in two short paragraphs or less in the style of Ernst Hemingway:${text}` }, { "role": "assistant", "content": summary }];
   //implement stack for posts 
   interface Post {
@@ -139,10 +142,10 @@ export default async function handler(
   }
   messages.push({ role: "user", content: `Please respond to the last comment, if need be considering the context of the original article and the subsequent comments, as well as broader knowledge you have.` })
   console.log("messages:", configuration.apiKey, messages)
-  
-  let completion=null ;
+
+  let completion = null;
   for (let i = 0; i < 4; i++) {
-    l(chalk.cyan.bold("CALLING AI",i))
+    l(chalk.cyan.bold("CALLING AI", i))
     try {
       completion = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
@@ -151,7 +154,7 @@ export default async function handler(
       if (completion) {
         break;
       }
-      l("no completion loop",i)
+      l("no completion loop", i)
     }
     catch (x) {
       l('SLEEP', x);
@@ -163,7 +166,9 @@ export default async function handler(
   }
   const content = `<p>${completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>')}</p>`;
   console.log("result:", js(content))
-
+  if (content) {
+    setChatbotPost({ threadid, postid });
+  }
   res.status(200).json({ result: content })
-  
+
 }

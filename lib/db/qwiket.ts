@@ -73,7 +73,7 @@ export const getQwiket = async ({
     tag?: string
 }): Promise<Qwiket | null> => {
     let sql, rows, qwiket,tq;
-    l(chalk.yellow.bold("getQwiket:",slug,withBody))
+   // l(chalk.yellow.bold("getQwiket:",slug,withBody))
     let query = await dbGetQuery("povdb", threadid);
     if (slug) {
         const parts = slug.split('-');
@@ -95,7 +95,7 @@ export const getQwiket = async ({
            //TMP qwiket = json ? JSON.parse(json) : {};
             tq = json ? JSON.parse(json) : {};
         //TMP else {
-            l(chalk.yellowBright(`getQwiket, result from :${qtable}`,js(tq)))
+           // l(chalk.yellowBright(`getQwiket, result from :${qtable}`,js(tq)))
             const table = `pov_threads_view${silo}`;
             sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as 
             cat, c,headless  
@@ -111,7 +111,7 @@ export const getQwiket = async ({
                 else
                     qwiket.body = '';
             }
-            l(chalk.green('cache miss, to db:',js({qwiket})))
+          //  l(chalk.green('cache miss, to db:',js({qwiket})))
                 
        // }
     }
