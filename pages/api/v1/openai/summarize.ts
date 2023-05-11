@@ -30,7 +30,7 @@ export default async function handler(
     text=text.substring(0,14000);
     console.log(chalk.yellow("tokens=",tokens))
     console.log("KEY=",configuration.apiKey)
-    const messages:ChatCompletionRequestMessage[]=[{ "role": "user", "content":`Please summarize in under 210 characters total, if possible, in the style of Ernst Hemingway:${text}` },];
+    const messages:ChatCompletionRequestMessage[]=[{ "role": "user", "content":`Please summarize in two short paragraphs or less, in the style of Ernst Hemingway:${text}` },];
     console.log("req.body", configuration.apiKey,messages)
   //await sleep(10000);
   let completion = await openai.createChatCompletion({
