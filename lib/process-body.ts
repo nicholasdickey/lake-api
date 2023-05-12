@@ -2,6 +2,7 @@
 //@ts-ignore
 import cheerio from "whacko"
 import { l, chalk, js } from "./common";
+import { json } from "stream/consumers";
 
 export function processBody({ body }: { body: any }) {
     if (body) {
@@ -9,10 +10,18 @@ export function processBody({ body }: { body: any }) {
         let htmlBlocks: { type: string, content: string }[] = [];
         blocks.forEach((b: any) => {
             let html;
-            if (b.blockType == 'html') {
+            l(chalk.yellowBright("b", js(b)));
+               if (b.blockType == 'html') {
                 html = b.html;
             }
             if (html) {
+                l(chalk.green("html", js(html)));
+                if(html.blocks&&html.blocks[0].blockType=='digest'){
+                    body.blocks=html.blocks;
+                   // b.json=html.blocks?.json;
+                   // b.blockType='digest';
+                    return;
+                }
                 if (html.indexOf('<table') == 0){
                     html = `<div>${html}</div>`
                 }
@@ -122,6 +131,7 @@ export function processBody({ body }: { body: any }) {
                 })
             }
         })
+        l(chalk.greenBright("after blocks", js({blocks:body.blocks})))
         return htmlBlocks;
     }
     return null;

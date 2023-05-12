@@ -39,6 +39,7 @@ export default async function handler(
             if (slug != '') {
                 const key = `txid-${slug}`;
                 txid = await redis.get(key) || '';
+                l('txid:',key,txid)
             }
             else {
                 //home mode, the latest topic from feed
@@ -50,23 +51,34 @@ export default async function handler(
         catch (x) {
             l(chalk.red.bold(x))
         }
-        const key = `ntjson-${withBody + '-'}${txid}`;
-        const jsonRaw = await redis.get(key);
-        if (jsonRaw){
-            json = JSON.parse(jsonRaw)
-            //l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
-        }
+        const key = txid?`ntjson-${withBody + '-'}${txid}`:'';
+       /* if(key){
+            const jsonRaw = await redis.get(key);
+            if (jsonRaw){
+                json = JSON.parse(jsonRaw)
+                l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
+            }
+        }*/
         if (!json) {
             // get from db
+            l("calling getQwiket",slug,withBody,tag)
             json = await getQwiket({ threadid, slug, withBody, tag })
         
             if (json && withBody) {
-               // l("json1:", js(json.body))
-                json.body = processBody(json);
-               // l("json2:", js(json.body))
+                l("json1:", js(json.body))
+                const b= processBody(json);
+              //  l("json11:", js(json.body),b)
+               if(b&&b.length>0)
+                json.body=b;
+                else {
+                    json.body=json.body.blocks;
+                    json.url=`https://am1.news/usconservative/topic/fq/${slug}`
+                }
+                l("json2:", js(json.body))
                 //const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {
+                    if(key)
                     await redis.setex(key, 7 * 24 * 3600, jsonRaw);
                 }
                 catch (x) {
@@ -113,7 +125,7 @@ export default async function handler(
                 }
             }
             if (!hasAck) {
-                common.body = '';
+               // common.body = '';
                 common.hasBody = true;
                 common.ack = false;
             }
