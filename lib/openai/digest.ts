@@ -185,21 +185,25 @@ export default async function handler(
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.toLowerCase().includes('#immigration')) {
                 text2.replaceAll('#immigration', '');
+                article.text=text2;
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#politics')) {
                 text2.replaceAll('#politics', '');
+                article.text=text2;
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#social')) {
                 text2.replaceAll('#social', '');
+                article.text=text2;
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#ukrainewar')) {
                 text2.replaceAll('#ukrainewar', '');
+                article.text=text2;          
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -210,11 +214,13 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#foreignaffairs')) {
                 text2.replace('#foreignaffairs', '');
+                article.text=text2;
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#military')) {
                 text2.replaceAll('#military', '');
+                article.text=text2;
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -225,15 +231,18 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#history')) {
                 text2.replaceAll('#history', '');
+                article.text=text2;
                 history.push(article)
             }
             else if (text2.toLowerCase().includes('#health')) {
                 text2.replace('#health', '');
+                article.text=text2;
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
                 text2.replaceAll('#education', '');
+                article.text=text2;
                 education.push(article)
             }
             else if (text2.toLowerCase().includes('#criminal')) {
@@ -243,20 +252,24 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#sports')) {
                 text2.replace('#sports', '');
+                article.text=text2;
                 sports.push(article)
             }
             else if (text2.toLowerCase().includes('#science')) {
                 text2.replace('#science', '');
+                article.text=text2;
                 science.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#outdoors')) {
                 text2.replaceAll('#outdoors', '');
+                article.text=text2;
                 outdoors.push(article);
                 combinedText += `\n${text2}`;
             }
             else {
                 text2.replaceAll('#other', '');
+                article.text=text2;
                 other.push(article)
             }
 
