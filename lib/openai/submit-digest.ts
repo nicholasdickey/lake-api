@@ -100,7 +100,7 @@ export default async ({ newsline, minutes }: { newsline: string, minutes: number
     const url = `https://dev-lake-api.qwiket.com/api/v1/openai/digest?newsline=rss-qwiket&minutes=${minutes}`;
     let now = Math.floor(Date.now() / 1000);
     const label=generateLabel();
-    const bottomOfTheHour=label.timeIndex.indexOf('30')>-1?true:false;
+    const bottomOfTheHour=label.timeIndex.indexOf('30')>0?true:false;
     
 //@ts-ignore
     const image=hourImages[label.timeIndex];
