@@ -150,70 +150,80 @@ export default async function handler(
             if (tokens > 3000)
                 text = text.substring(0, 14000);
             let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukrainewar,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal,#sports,#science): ${text}` }];
-            const completion = await openai.createChatCompletion({
-                model: "gpt-3.5-turbo",
-                messages: qwiketMessages,
-                max_tokens: 200,
-
-            })
-            let text2 = completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>') || '';
-            l(chalk.greenBright("push", text2))
+            let text2='';
+            for (let i = 0; i < 4; i++) {
+                try {
+                    const completion = await openai.createChatCompletion({
+                        model: "gpt-3.5-turbo",
+                        messages: qwiketMessages,
+                        max_tokens: 200,
+                    })
+                    text2 = completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>') || '';
+                    if (text2)
+                        break;
+                } catch (ex) {
+                    l(chalk.redBright("ex:", ex))
+                    l("sleeping");
+                    await sleep(30000);
+                }
+            }
             // stack.push({text:text2})
-          
+            l(chalk.greenBright("push", text2))
+
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
-            if (text2.includes('#immigration')){
+            if (text2.includes('#immigration')) {
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#politics')){
+            else if (text2.includes('#politics')) {
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#social')){
+            else if (text2.includes('#social')) {
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#ukrainewar')){
+            else if (text2.includes('#ukrainewar')) {
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#economy')){
+            else if (text2.includes('#economy')) {
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#foreignaffairs')){
+            else if (text2.includes('#foreignaffairs')) {
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#military')){
+            else if (text2.includes('#military')) {
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#culture')){
+            else if (text2.includes('#culture')) {
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#history')){
+            else if (text2.includes('#history')) {
                 history.push(article)
             }
-            else if (text2.includes('#health')){
+            else if (text2.includes('#health')) {
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#education')){
+            else if (text2.includes('#education')) {
                 education.push(article)
             }
-            else if (text2.includes('#criminal')){
+            else if (text2.includes('#criminal')) {
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#sports')){
+            else if (text2.includes('#sports')) {
                 sports.push(article)
             }
-            else if (text2.includes('#science')){
+            else if (text2.includes('#science')) {
                 science.push(article);
                 combinedText += `\n${text2}`;
-                
+
             }
 
             else
@@ -222,7 +232,7 @@ export default async function handler(
 
             //stack.push({ title: q.title, url: q.url, text: text2, publication: q.site_name || '' })
         }
-
+       
     };
     let html = ''
     let json: any = {}
@@ -388,7 +398,7 @@ export default async function handler(
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
     console.log(chalk.magenta.bold("combinedText", combinedText));
-    messages.push({ "role": "user", "content": `Please summarize the following in the style of Hemingway:${combinedText}` });
+    messages.push({ "role": "user", "content": `Please summarize with in a brief narrative the following in the style of Hemingway:${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;
     for (let i = 0; i < 4; i++) {

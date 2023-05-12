@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, OpenAIApi, ChatCompletionRequestMessage, CreateChatCompletionResponse } from "openai";
 import NextCors from 'nextjs-cors';
 import digest from '../../../../lib/openai/submit-digest';
+import generateLabel from '../../../../lib/openai/generate-label';
+import {checkDigest,insertDigest} from '../../../../lib/db/digest';
 
 
 const configuration = new Configuration({
@@ -25,7 +27,17 @@ export default async function handler(
     // l(chalk.green('comment.ts: slug:', slug, 'postid:', postid))
     if (!newsline || !minutes)
         return res.status(403).json({ error: 'missing newsline or minutes' });
-    const ret=await digest({newsline:newsline as string,minutes:+minutes})    
+    const label=generateLabel();
+    const combinedLabel=`${label.date}-${label.timeIndex}`;
+    const r=await checkDigest({threadid,label:combinedLabel})
+    if(r){
+        console.log("digest already exists");
+        return res.status(200).json({success:false,msg:'digest already exists'});
+    }
+    const ret=await digest({newsline:newsline as string,minutes:+minutes})  
+    console.log("calling insertDigest");
+    await insertDigest({threadid,label:combinedLabel}); 
+    console.log("calling insertDigest2"); 
     res.status(200).json(ret);
 
 }

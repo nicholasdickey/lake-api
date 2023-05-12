@@ -30,6 +30,13 @@ export default async function handler(
     const countOnlyParam = +countonly;
     const tailParam = +tail;
     const pageParam = +page;
+    l("newsline=",newsline);
+    if(newsline=='rss-digest'){
+        type='tag';
+        tag='fq';
+        size=4;
+        newsline='qwiket';
+    }
     try {
         let ret: any = await fetchQueue({ type, newsline, forum, tag, lastid, firstid: 0, page: pageParam, sessionid, countonly: countOnlyParam, userslug, tail: tailParam, qwiketid, size, solo, test, debug, threadid, redis })
         ret.type = type;

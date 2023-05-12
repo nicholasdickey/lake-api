@@ -197,7 +197,7 @@ export default async function handler(
 
             //stack.push({ title: q.title, url: q.url, text: text2, publication: q.site_name || '' })
         }
-
+    await sleep (5000);
     };
     let html = ''
     let json:any={}
