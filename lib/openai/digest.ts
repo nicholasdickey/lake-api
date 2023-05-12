@@ -103,6 +103,7 @@ export default async function handler(
     let criminal: Article[] = [];
     let sports: Article[] = [];
     let science: Article[] = [];
+    let outdoors: Article[] = [];
     let other: Article[] = [];
     let combinedText = '';
     for (let i = 0; i < qwikets.length; i++) {
@@ -149,7 +150,7 @@ export default async function handler(
             tokens = text.split(" ").length;
             if (tokens > 3000)
                 text = text.substring(0, 14000);
-            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukrainewar,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal,#sports,#science): ${text}` }];
+            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukrainewar,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal,#sports,#science,#outdoors): ${text}` }];
             let text2='';
             for (let i = 0; i < 4; i++) {
                 try {
@@ -174,63 +175,81 @@ export default async function handler(
             
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.includes('#immigration')) {
+                text2.replace('#immigration', '');
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#politics')) {
+                text2.replace('#politics', '');
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#social')) {
+                text2.replace('#social', '');
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#ukrainewar')) {
+                text2.replace('#ukrainewar', '');
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#economy')) {
+                text2.replace('#economy', '');
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#foreignaffairs')) {
+                text2.replace('#foreignaffairs', '');
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#military')) {
+                text2.replace('#military', '');
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#culture')) {
+                text2.replace('#culture', '');
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#history')) {
+                text2.replace('#history', '');
                 history.push(article)
             }
             else if (text2.includes('#health')) {
+                text2.replace('#health', '');
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
+                text2.replace('#education', '');
                 education.push(article)
             }
             else if (text2.includes('#criminal')) {
+                text2.replace('#criminal', '');
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#sports')) {
+                text2.replace('#sports', '');
                 sports.push(article)
             }
             else if (text2.includes('#science')) {
+                text2.replace('#science', '');
                 science.push(article);
                 combinedText += `\n${text2}`;
-
             }
-
-            else
+            else if (text2.includes('#outdoors')) {
+                text2.replace('#outdoors', '');
+                outdoors.push(article);
+                combinedText += `\n${text2}`;
+            }
+            else{
+                text2.replace('#other', '');
                 other.push(article)
-
+            }
 
             //stack.push({ title: q.title, url: q.url, text: text2, publication: q.site_name || '' })
         }
@@ -357,13 +376,23 @@ export default async function handler(
             html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
         })
         html += `</div>`;
-    } if (science.length > 0) {
+    } 
+    if (science.length > 0) {
         json.science = { items: [] };
 
         html += `<div class='digest-science'><div class='digest-hashtag'>#science</div>\n`
         science.forEach(a => {
             json.criminal.items.push(a);
             html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+        })
+        html += `</div>`;
+    }
+    if (outdoors.length > 0) {
+        json.outdoors = { items: [] };
+        html += `<div class='digest-outdoors'><div class='digest-hashtag'>#outdoors</div>\n`
+        science.forEach(a => {
+            json.outdoors.items.push(a);
+            html += `<span class='digest-outdoors'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
