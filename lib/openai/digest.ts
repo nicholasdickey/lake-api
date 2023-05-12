@@ -151,7 +151,7 @@ export default async function handler(
             if (tokens > 3000)
                 text = text.substring(0, 14000);
             let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukrainewar,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal,#sports,#science,#outdoors): ${text}` }];
-            let text2='';
+            let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
                     const completion = await openai.createChatCompletion({
@@ -169,91 +169,100 @@ export default async function handler(
                 }
             }
             // stack.push({text:text2})
-            if(!text2)
+            if (!text2)
                 continue;
             l(chalk.greenBright("push", text2))
-            
+
+
+            String.prototype.replaceAll = function (strReplace, strWith) {
+                // See http://stackoverflow.com/a/3561711/556609
+                //@ts-ignore
+                var esc = strReplace.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                var reg = new RegExp(esc, 'ig');
+                //@ts-ignore
+                return this.replace(reg, strWith);
+            };
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
-            if (text2.includes('#immigration')) {
-                text2.replace('#immigration', '');
+            if (text2.toLowerCase().includes('#immigration')) {
+                text2.replaceAll('#immigration', '');
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#politics')) {
-                text2.replace('#politics', '');
+            else if (text2.toLowerCase().includes('#politics')) {
+                text2.replaceAll('#politics', '');
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#social')) {
-                text2.replace('#social', '');
+            else if (text2.toLowerCase().includes('#social')) {
+                text2.replaceAll('#social', '');
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#ukrainewar')) {
-                text2.replace('#ukrainewar', '');
+            else if (text2.toLowerCase().includes('#ukrainewar')) {
+                text2.replaceAll('#ukrainewar', '');
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#economy')) {
-                text2.replace('#economy', '');
+            else if (text2.toLowerCase().includes('#economy')) {
+                text2.replaceAll('#economy', '');
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#foreignaffairs')) {
+            else if (text2.toLowerCase().includes('#foreignaffairs')) {
                 text2.replace('#foreignaffairs', '');
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#military')) {
-                text2.replace('#military', '');
+            else if (text2.toLowerCase().includes('#military')) {
+                text2.replaceAll('#military', '');
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#culture')) {
-                text2.replace('#culture', '');
+            else if (text2.toLowerCase().includes('#culture')) {
+                text2.replaceAll('#culture', '');
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#history')) {
-                text2.replace('#history', '');
+            else if (text2.toLowerCase().includes('#history')) {
+                text2.replaceAll('#history', '');
                 history.push(article)
             }
-            else if (text2.includes('#health')) {
+            else if (text2.toLowerCase().includes('#health')) {
                 text2.replace('#health', '');
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
-                text2.replace('#education', '');
+                text2.replaceAll('#education', '');
                 education.push(article)
             }
-            else if (text2.includes('#criminal')) {
+            else if (text2.toLowerCase().includes('#criminal')) {
                 text2.replace('#criminal', '');
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#sports')) {
+            else if (text2.toLowerCase().includes('#sports')) {
                 text2.replace('#sports', '');
                 sports.push(article)
             }
-            else if (text2.includes('#science')) {
+            else if (text2.toLowerCase().includes('#science')) {
                 text2.replace('#science', '');
                 science.push(article);
                 combinedText += `\n${text2}`;
             }
-            else if (text2.includes('#outdoors')) {
-                text2.replace('#outdoors', '');
+            else if (text2.toLowerCase().includes('#outdoors')) {
+                text2.replaceAll('#outdoors', '');
                 outdoors.push(article);
                 combinedText += `\n${text2}`;
             }
-            else{
-                text2.replace('#other', '');
+            else {
+                text2.replaceAll('#other', '');
                 other.push(article)
             }
 
             //stack.push({ title: q.title, url: q.url, text: text2, publication: q.site_name || '' })
         }
-       
+
     };
     let html = ''
     let json: any = {}
@@ -376,7 +385,7 @@ export default async function handler(
             html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
         })
         html += `</div>`;
-    } 
+    }
     if (science.length > 0) {
         json.science = { items: [] };
 
