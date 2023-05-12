@@ -265,7 +265,6 @@ export default async function handler(
                 text2.replaceAll('#outdoors', '');
                 article.text=text2;
                 outdoors.push(article);
-                combinedText += `\n${text2}`;
             }
             else {
                 text2.replaceAll('#other', '');
