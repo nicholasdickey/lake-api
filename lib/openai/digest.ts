@@ -168,8 +168,10 @@ export default async function handler(
                 }
             }
             // stack.push({text:text2})
+            if(!text2)
+                continue;
             l(chalk.greenBright("push", text2))
-
+            
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.includes('#immigration')) {
                 immigration.push(article);
@@ -408,8 +410,6 @@ export default async function handler(
             completion = await openai.createChatCompletion({
                 model: "gpt-3.5-turbo",
                 messages: messages,
-
-
             })
             l(chalk.cyan.bold("AI RESULT", i), completion.data.choices[0]?.message?.conten)
             if (completion) {

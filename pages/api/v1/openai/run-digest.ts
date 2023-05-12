@@ -34,10 +34,11 @@ export default async function handler(
         console.log("digest already exists");
         return res.status(200).json({success:false,msg:'digest already exists'});
     }
-    const ret=await digest({newsline:newsline as string,minutes:+minutes})  
     console.log("calling insertDigest");
     await insertDigest({threadid,label:combinedLabel}); 
     console.log("calling insertDigest2"); 
+    
+    const ret=await digest({newsline:newsline as string,minutes:+minutes})  
     res.status(200).json(ret);
 
 }
