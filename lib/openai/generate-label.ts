@@ -1,6 +1,7 @@
 export default ()=>{
     var currentdate = new Date();
     const datetime =currentdate.toLocaleString('en-US', { timeZone: 'America/Chicago' })// formatDate(new Date());
+    const ampm=datetime.indexOf('AM')>0?'AM':'PM';
     const dateParts=datetime.split(',');
     const date=dateParts[0];
     const timeParts=dateParts[1].split(':');
@@ -13,6 +14,7 @@ export default ()=>{
     const timeIndex=hoursPart*100+minutesPart;
     return {
         date,
-        timeIndex:""+timeIndex
+        timeIndex:""+timeIndex,
+        ampm
     }
 }
