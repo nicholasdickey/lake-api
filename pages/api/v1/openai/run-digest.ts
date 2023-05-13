@@ -28,7 +28,7 @@ export default async function handler(
     if (!newsline || !minutes)
         return res.status(403).json({ error: 'missing newsline or minutes' });
     const label=generateLabel();
-    const combinedLabel=`${label.date}-${label.timeIndex}`;
+    const combinedLabel=`${label.date}-${label.timeIndex}-${label.ampm}`;
     const r=await checkDigest({threadid,label:combinedLabel})
     if(r){
         console.log("digest already exists");
