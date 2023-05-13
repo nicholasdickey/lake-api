@@ -208,7 +208,7 @@ export default async function handler(
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#economy')) {
-                text2.replaceAll('#economy', '');
+                text2=text2.replaceAll('#economy', '');
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -246,7 +246,7 @@ export default async function handler(
                 education.push(article)
             }
             else if (text2.toLowerCase().includes('#criminal')) {
-                text2.replace('#criminal', '');
+                text2= text2.replace('#criminal', '');
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
