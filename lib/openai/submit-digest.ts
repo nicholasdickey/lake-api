@@ -139,10 +139,11 @@ export default async ({ newsline, minutes }: { newsline: string, minutes: number
         return ret;
     const json = ret.json;
     const body = { blocks: [{ blockType: 'digest', json }] }
+    //${bottomOfTheHour?'Bottom of the Hour':'Top of the Hour'}
     const qwiket = {
         description: json.summary,
         body,
-        title: `${bottomOfTheHour?'Bottom of the Hour':'Top of the Hour'} Digest, ${label.date} @${label.timeIndex}${label.ampm}`,
+        title: `News Digest, ${label.date} @${label.timeIndex}${label.ampm}, CDT`,
         site_name: `America First News`,
         author: `ai.Q`,
         published_time: now,
