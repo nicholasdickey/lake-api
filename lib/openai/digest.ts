@@ -108,9 +108,32 @@ export default async function handler(
     let other: Article[] = [];
     let combinedText = '';
     let fullCombinedText = '';
+    interface Record{
+        url:string,
+        image:string,
+        title:string,
+    }
+    let records:Record[]=[];
     for (let i = 0; i < qwikets.length; i++) {
         const q = qwikets[i];
+        for(let j=0;j<records.length;j++){
+            const r=records[j];
+            let score=0;
+            if(q.url==r.url)
+                score++;    
+            if(q.image==r.image)
+                score++;
+            if(q.title==r.title)    
+                score++;
+            if(score>1){
+                l(chalk.red('DUPLICATE:',q.url))
+                continue;
+            }
+            else {
+                records.push({url:q.url,image:q.image,title:q.title}); 
+            }
 
+        }
 
         const qwiket = await getQwiket({ threadid, slug: q.slug, withBody })
 
