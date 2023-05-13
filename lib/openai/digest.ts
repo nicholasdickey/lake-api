@@ -121,26 +121,29 @@ export default async function handler(
             text=parts[1];
         else
             text=parts[0];*/
-
-
-        if (rawBody) {
-            // l(chalk.red('rawBody:', js(rawBody), typeof (rawBody)))
-            // const body=JSON.parse(rawBody);
-            const blocks = rawBody['blocks'];
-            //l(chalk.cyan('blocks:', js(blocks)))
-            for (let i = 0; i < blocks.length; i++) {
-                const block: { blockType: string, html: string | null } = blocks[i];
-                //l("blockType", block.blockType)
-                if (block.blockType == 'html') {
-                    const body = block.html || '';
-                    //@ts-ignore
-                    const $ = cheerio.load(`<html>${body}</html`);
-                    text = $(`html`).text().trim();
-                    break;;
+        const description = q.description;
+        const descrParts = description.split("{ai:summary}");
+        if (descrParts.length > 1)
+            text = descrParts[1]// to reduce the cost of tokens 
+        else
+            if (rawBody) {
+                // l(chalk.red('rawBody:', js(rawBody), typeof (rawBody)))
+                // const body=JSON.parse(rawBody);
+                const blocks = rawBody['blocks'];
+                //l(chalk.cyan('blocks:', js(blocks)))
+                for (let i = 0; i < blocks.length; i++) {
+                    const block: { blockType: string, html: string | null } = blocks[i];
+                    //l("blockType", block.blockType)
+                    if (block.blockType == 'html') {
+                        const body = block.html || '';
+                        //@ts-ignore
+                        const $ = cheerio.load(`<html>${body}</html`);
+                        text = $(`html`).text().trim();
+                        break;;
+                    }
                 }
-            }
 
-        }
+            }
 
         if (text) {
             let tokens = text.split(" ").length;
