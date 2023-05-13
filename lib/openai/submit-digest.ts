@@ -69,7 +69,7 @@ const pushOutputQwiket = async ({
  *        11:30: https://ucarecdn.com/163188aa-9ca0-4020-8b75-261b6f08c1e3/am1clock1130.png
  * 
  */
-const hourImages={
+/*const hourImages={
     "0": 'https://ucarecdn.com/3ef02855-4207-4632-8875-7216dd2f5d5a/am1clock0.png',
     "30": 'https://ucarecdn.com/9208c360-4917-4db9-846e-ba95efc43032/am1clock030.png',
     "100": 'https://ucarecdn.com/db753312-f036-4f15-baee-b93a9bde76a9/am1clock1.png',
@@ -94,6 +94,32 @@ const hourImages={
     "1030": 'https://ucarecdn.com/a2fd9401-c4fe-4f1c-8b46-b2aea88558e1/am1clock1030.png',
     "1100": 'https://ucarecdn.com/4f3be0b7-d903-49e6-99a5-3e4800ead17e/am1clock11.png',
     "1130": 'https://ucarecdn.com/163188aa-9ca0-4020-8b75-261b6f08c1e3/am1clock1130.png',
+}*/
+const hourImages={
+    "0": 'https://ucarecdn.com/ff4acdea-7a79-4496-a66d-ef757af80718/clock1200.png',
+    "30": 'https://ucarecdn.com/07353c18-cc42-4912-a5ee-2fb46ac24516/clock1230.png',
+    "100": 'https://ucarecdn.com/0a7257cf-5a99-49e4-b77a-c66156c50ed7/clock0100.png',
+    "130": 'https://ucarecdn.com/123c2553-73b6-4c45-ab68-b7798ed2ba40/clock0130.png',
+    "200": 'https://ucarecdn.com/c51d3978-06c5-43e6-8590-6e3acc54150a/clock0200.png',
+    "230": 'https://ucarecdn.com/d011174c-ca53-489c-80d8-fcd2a6c8c9d4/clock0230.png',
+    "300": 'https://ucarecdn.com/f3655e0b-61e5-4e5c-b452-9a12802a28da/clock0300.png',
+    "330": 'https://ucarecdn.com/3d78f314-ae8e-41bd-8379-d418a14a4fc6/clock0330.png',
+    "400": 'https://ucarecdn.com/7ba69821-73d1-4f19-b66c-3829e2addda6/clock0400.png',
+    "430": 'https://ucarecdn.com/3d78f314-ae8e-41bd-8379-d418a14a4fc6/clock0330.png',
+    "500": 'https://ucarecdn.com/55378259-ce6d-4c8d-a9ae-6f2c89822f44/clock0500.png',
+    "530": 'https://ucarecdn.com/bc718528-bd0f-4bb7-8094-8c53f0e316c3/clock0530.png',
+    "600": 'https://ucarecdn.com/e1003b66-6d73-443b-8422-ebbdc3221ce6/clock0600.png',
+    "630": 'https://ucarecdn.com/3988759c-af7b-475b-ba17-49e9b2e05fc1/clock0630.png',
+    "700": 'https://ucarecdn.com/5f1db230-39ed-4bed-8f4a-eafd4f277eec/clock0700.png',
+    "730": 'https://ucarecdn.com/86bca1df-ced8-4ada-8f99-3e2cdecd4974/clock0730.png',
+    "800": 'https://ucarecdn.com/16e126ff-26e2-487d-859a-15216fe804f9/clock0800.png',
+    "830": 'https://ucarecdn.com/cf54bc88-1d08-42b2-90fa-91f59931526c/clock0830.png',
+    "900": 'https://ucarecdn.com/f8a34d2d-ac9e-4f98-97e2-c035709bc8ef/clock0900.png',
+    "930": 'https://ucarecdn.com/00cf3397-2d18-4c7b-8044-9d7e7f6a4d5d/clock0930.png',
+    "1000": 'https://ucarecdn.com/7277052c-0e77-4bb5-82b9-5dda908bb601/clock1000.png',
+    "1030": 'hhttps://ucarecdn.com/8bb5f7d8-7999-4042-ad54-1a1f85485597/clock1030.png',
+    "1100": 'https://ucarecdn.com/aa26c4e7-73fa-41b9-b379-dd93df3d2051/clock1100.png',
+    "1130": 'https://ucarecdn.com/07614424-9106-4063-ac6d-180ce6fb0a9f/clock1130.png',
 }
 export default async ({ newsline, minutes }: { newsline: string, minutes: number }) => {
     //produce a 30 min digest
