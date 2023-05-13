@@ -125,7 +125,7 @@ export default async function handler(
         const descrParts = description.split("{ai:summary}");
         if (descrParts.length > 1)
             text = descrParts[1]// to reduce the cost of tokens 
-        else
+        else{
             if (rawBody) {
                 // l(chalk.red('rawBody:', js(rawBody), typeof (rawBody)))
                 // const body=JSON.parse(rawBody);
@@ -144,7 +144,7 @@ export default async function handler(
                 }
 
             }
-
+        }
         if (text) {
             let tokens = text.split(" ").length;
             if (tokens > 3000)

@@ -61,11 +61,11 @@ export default async function handler(
         }*/
         if (!json) {
             // get from db
-            l("calling getQwiket",slug,withBody,tag)
+           // l("calling getQwiket",slug,withBody,tag)
             json = await getQwiket({ threadid, slug, withBody, tag })
         
             if (json && withBody) {
-                l("json1:", js(json.body))
+                //l("json1:", js(json.body))
                 const b= processBody(json);
               //  l("json11:", js(json.body),b)
                if(b&&b.length>0)
@@ -74,7 +74,7 @@ export default async function handler(
                     json.body=json.body.blocks;
                     json.url=`https://am1.news/usconservative/topic/fq/${slug}`
                 }
-                l("json2:", js(json.body))
+               // l("json2:", js(json.body))
                 //const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {
