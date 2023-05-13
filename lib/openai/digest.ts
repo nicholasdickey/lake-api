@@ -135,7 +135,7 @@ export default async function handler(
                     const body = block.html || '';
                     //@ts-ignore
                     const $ = cheerio.load(`<html>${body}</html`);
-                    text = $(`html`).text();
+                    text = $(`html`).text().trim();
                     break;;
                 }
             }

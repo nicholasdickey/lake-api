@@ -145,7 +145,7 @@ export default async ({ newsline, minutes }: { newsline: string, minutes: number
     const qwiket = {
         description: json.summary,
         body,
-        title: `News Digest, ${label.date} @${label.timeIndex}${label.ampm}, CDT`,
+        title: `The Digest, ${label.date} @${label.timeIndex}${label.ampm}, CDT`,
         site_name: `America First News`,
         author: `ai.Q`,
         published_time: now,
