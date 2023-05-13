@@ -105,7 +105,7 @@ const hourImages={
     "300": 'https://ucarecdn.com/f3655e0b-61e5-4e5c-b452-9a12802a28da/clock0300.png',
     "330": 'https://ucarecdn.com/3d78f314-ae8e-41bd-8379-d418a14a4fc6/clock0330.png',
     "400": 'https://ucarecdn.com/7ba69821-73d1-4f19-b66c-3829e2addda6/clock0400.png',
-    "430": 'https://ucarecdn.com/3d78f314-ae8e-41bd-8379-d418a14a4fc6/clock0330.png',
+    "430": 'https://ucarecdn.com/d166315e-3299-4eb8-b2b5-f64648d1eee4/clock0430.png',
     "500": 'https://ucarecdn.com/55378259-ce6d-4c8d-a9ae-6f2c89822f44/clock0500.png',
     "530": 'https://ucarecdn.com/bc718528-bd0f-4bb7-8094-8c53f0e316c3/clock0530.png',
     "600": 'https://ucarecdn.com/e1003b66-6d73-443b-8422-ebbdc3221ce6/clock0600.png',
@@ -117,7 +117,7 @@ const hourImages={
     "900": 'https://ucarecdn.com/f8a34d2d-ac9e-4f98-97e2-c035709bc8ef/clock0900.png',
     "930": 'https://ucarecdn.com/00cf3397-2d18-4c7b-8044-9d7e7f6a4d5d/clock0930.png',
     "1000": 'https://ucarecdn.com/7277052c-0e77-4bb5-82b9-5dda908bb601/clock1000.png',
-    "1030": 'hhttps://ucarecdn.com/8bb5f7d8-7999-4042-ad54-1a1f85485597/clock1030.png',
+    "1030": 'https://ucarecdn.com/8bb5f7d8-7999-4042-ad54-1a1f85485597/clock1030.png',
     "1100": 'https://ucarecdn.com/aa26c4e7-73fa-41b9-b379-dd93df3d2051/clock1100.png',
     "1130": 'https://ucarecdn.com/07614424-9106-4063-ac6d-180ce6fb0a9f/clock1130.png',
 }
