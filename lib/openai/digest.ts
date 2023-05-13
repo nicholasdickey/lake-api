@@ -173,6 +173,8 @@ export default async function handler(
             // stack.push({text:text2})
             if (!text2)
                 continue;
+            if (text2.indexOf(':') == 0)
+                text2 = text2.substring(1);
             l(chalk.greenBright("push", text2))
 
 
@@ -275,6 +277,7 @@ export default async function handler(
                 text2 = text2.replaceAll('#other', '');
                 article.text = text2;
                 other.push(article)
+                combinedText += `\n${text2}`;
             }
             fullCombinedText += `\n${text2}`;
 
