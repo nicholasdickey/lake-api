@@ -100,7 +100,7 @@ const hourImages = {
     "30": 'https://ucarecdn.com/07353c18-cc42-4912-a5ee-2fb46ac24516/clock1230.png',
     "100": 'https://ucarecdn.com/0a7257cf-5a99-49e4-b77a-c66156c50ed7/clock0100.png',
     "130": 'https://ucarecdn.com/123c2553-73b6-4c45-ab68-b7798ed2ba40/clock0130.png',
-    "200": 'https://ucarecdn.com/c51d3978-06c5-43e6-8590-6e3acc54150a/clock0200.png',
+    "200": 'https://ucarecdn.com/902d18a1-f423-4e19-8c38-3ee858a13438/clock0200.png',
     "230": 'https://ucarecdn.com/d011174c-ca53-489c-80d8-fcd2a6c8c9d4/clock0230.png',
     "300": 'https://ucarecdn.com/f3655e0b-61e5-4e5c-b452-9a12802a28da/clock0300.png',
     "330": 'https://ucarecdn.com/3d78f314-ae8e-41bd-8379-d418a14a4fc6/clock0330.png',
