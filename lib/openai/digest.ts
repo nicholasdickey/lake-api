@@ -75,7 +75,8 @@ export default async function handler(
     //const m = +min;
     qwikets = qwikets.filter((p: { shared_time: number; }) => p.shared_time > now - minutes * 60);
     l(chalk.yellow("qwikets2:", qwikets.length));
-
+    if (!qwikets || !qwikets.length)
+        return ({ success: false, error: "No items found" });
     const withBody: [0, 1] = 1 as any;
     interface Article {
         title: string;
@@ -184,91 +185,91 @@ export default async function handler(
             };
             const article = { title: q.title, url: q.url, text: text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.toLowerCase().includes('#immigration')) {
-                text2=text2.replaceAll('#immigration', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#immigration', '');
+                article.text = text2;
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#politics')) {
-                text2= text2.replaceAll('#politics', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#politics', '');
+                article.text = text2;
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#social')) {
-                text2=text2.replaceAll('#social', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#social', '');
+                article.text = text2;
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#warinukraine')) {
-                text2=text2.replaceAll('#warinukraine', '');
-                article.text=text2;          
+                text2 = text2.replaceAll('#warinukraine', '');
+                article.text = text2;
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#economy')) {
-                text2=text2.replaceAll('#economy', '');
+                text2 = text2.replaceAll('#economy', '');
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#foreignaffairs')) {
-                text2=text2.replace('#foreignaffairs', '');
-                article.text=text2;
+                text2 = text2.replace('#foreignaffairs', '');
+                article.text = text2;
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#military')) {
                 text2.replaceAll('#military', '');
-                article.text=text2;
+                article.text = text2;
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#culture')) {
-                text2=text2.replaceAll('#culture', '');
+                text2 = text2.replaceAll('#culture', '');
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#history')) {
-                text2=text2.replaceAll('#history', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#history', '');
+                article.text = text2;
                 history.push(article)
             }
             else if (text2.toLowerCase().includes('#health')) {
-                text2=text2.replace('#health', '');
-                article.text=text2;
+                text2 = text2.replace('#health', '');
+                article.text = text2;
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
-                text2=text2.replaceAll('#education', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#education', '');
+                article.text = text2;
                 education.push(article)
             }
             else if (text2.toLowerCase().includes('#criminal')) {
-                text2= text2.replace('#criminal', '');
+                text2 = text2.replace('#criminal', '');
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#sports')) {
-                text2=text2.replace('#sports', '');
-                article.text=text2;
+                text2 = text2.replace('#sports', '');
+                article.text = text2;
                 sports.push(article)
             }
             else if (text2.toLowerCase().includes('#science')) {
-                text2= text2.replace('#science', '');
-                article.text=text2;
+                text2 = text2.replace('#science', '');
+                article.text = text2;
                 science.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#outdoors')) {
-                text2= text2.replaceAll('#outdoors', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#outdoors', '');
+                article.text = text2;
                 outdoors.push(article);
             }
             else {
-                text2= text2.replaceAll('#other', '');
-                article.text=text2;
+                text2 = text2.replaceAll('#other', '');
+                article.text = text2;
                 other.push(article)
             }
 
