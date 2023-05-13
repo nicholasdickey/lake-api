@@ -10,12 +10,12 @@ export function processBody({ body }: { body: any }) {
         let htmlBlocks: { type: string, content: string }[] = [];
         blocks.forEach((b: any) => {
             let html;
-            l(chalk.yellowBright("b", js(b)));
+           // l(chalk.yellowBright("b", js(b)));
                if (b.blockType == 'html') {
                 html = b.html;
             }
             if (html) {
-                l(chalk.green("html", js(html)));
+               // l(chalk.green("html", js(html)));
                 if(html.blocks&&html.blocks[0].blockType=='digest'){
                     body.blocks=html.blocks;
                    // b.json=html.blocks?.json;
@@ -131,7 +131,7 @@ export function processBody({ body }: { body: any }) {
                 })
             }
         })
-        l(chalk.greenBright("after blocks", js({blocks:body.blocks})))
+      //  l(chalk.greenBright("after blocks", js({blocks:body.blocks})))
         return htmlBlocks;
     }
     return null;

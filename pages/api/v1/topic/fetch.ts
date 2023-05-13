@@ -39,7 +39,7 @@ export default async function handler(
             if (slug != '') {
                 const key = `txid-${slug}`;
                 txid = await redis.get(key) || '';
-                l('txid:',key,txid)
+               // l('txid:',key,txid)
             }
             else {
                 //home mode, the latest topic from feed
