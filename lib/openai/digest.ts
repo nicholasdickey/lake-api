@@ -107,6 +107,7 @@ export default async function handler(
     let outdoors: Article[] = [];
     let other: Article[] = [];
     let combinedText = '';
+    let fullCombinedText = '';
     for (let i = 0; i < qwikets.length; i++) {
         const q = qwikets[i];
 
@@ -210,6 +211,7 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#economy')) {
                 text2 = text2.replaceAll('#economy', '');
+                article.text = text2;
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -227,6 +229,7 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#culture')) {
                 text2 = text2.replaceAll('#culture', '');
+                article.text = text2;
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -248,6 +251,7 @@ export default async function handler(
             }
             else if (text2.toLowerCase().includes('#criminal')) {
                 text2 = text2.replace('#criminal', '');
+                article.text = text2;
                 criminal.push(article);
                 combinedText += `\n${text2}`;
             }
@@ -272,6 +276,7 @@ export default async function handler(
                 article.text = text2;
                 other.push(article)
             }
+            fullCombinedText += `\n${text2}`;
 
             //stack.push({ title: q.title, url: q.url, text: text2, publication: q.site_name || '' })
         }
@@ -440,6 +445,8 @@ export default async function handler(
          }
  
      }*/
+    if (!combinedText)
+        combinedText = fullCombinedText;
     console.log(chalk.cyan.bold("inputText", combinedText));
     let tokens = combinedText.split(" ").length;
     if (tokens > 3000)
