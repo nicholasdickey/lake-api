@@ -95,7 +95,7 @@ const pushOutputQwiket = async ({
     "1100": 'https://ucarecdn.com/4f3be0b7-d903-49e6-99a5-3e4800ead17e/am1clock11.png',
     "1130": 'https://ucarecdn.com/163188aa-9ca0-4020-8b75-261b6f08c1e3/am1clock1130.png',
 }*/
-const hourImages={
+const hourImages = {
     "0": 'https://ucarecdn.com/ff4acdea-7a79-4496-a66d-ef757af80718/clock1200.png',
     "30": 'https://ucarecdn.com/07353c18-cc42-4912-a5ee-2fb46ac24516/clock1230.png',
     "100": 'https://ucarecdn.com/0a7257cf-5a99-49e4-b77a-c66156c50ed7/clock0100.png',
@@ -120,17 +120,19 @@ const hourImages={
     "1030": 'https://ucarecdn.com/8bb5f7d8-7999-4042-ad54-1a1f85485597/clock1030.png',
     "1100": 'https://ucarecdn.com/aa26c4e7-73fa-41b9-b379-dd93df3d2051/clock1100.png',
     "1130": 'https://ucarecdn.com/07614424-9106-4063-ac6d-180ce6fb0a9f/clock1130.png',
+    "1200": 'https://ucarecdn.com/ff4acdea-7a79-4496-a66d-ef757af80718/clock1200.png',
+    "1230": 'https://ucarecdn.com/07353c18-cc42-4912-a5ee-2fb46ac24516/clock1230.png'
 }
 export default async ({ newsline, minutes }: { newsline: string, minutes: number }) => {
     //produce a 30 min digest
     const url = `https://dev-lake-api.qwiket.com/api/v1/openai/digest?newsline=rss-qwiket&minutes=${minutes}`;
     let now = Math.floor(Date.now() / 1000);
-    const label=generateLabel();
-    const bottomOfTheHour=label.timeIndex.indexOf('30')>0?true:false;
-    
-//@ts-ignore
-    const image=hourImages[label.timeIndex];
-    l("IMAGEL",label.timeIndex,image);
+    const label = generateLabel();
+    const bottomOfTheHour = label.timeIndex.indexOf('30') > 0 ? true : false;
+
+    //@ts-ignore
+    const image = hourImages[label.timeIndex];
+    l("IMAGEL", label.timeIndex, image);
     var randomstring = () => Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 3);
 
     const ret = await digest(newsline, minutes)
