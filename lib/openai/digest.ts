@@ -105,32 +105,34 @@ export default async function handler(
     let sports: Article[] = [];
     let science: Article[] = [];
     let outdoors: Article[] = [];
+    let technology: Article[] = [];
+    let religion: Article[] = [];
     let other: Article[] = [];
     let combinedText = '';
     let fullCombinedText = '';
-    interface Record{
-        url:string,
-        image:string,
-        title:string,
+    interface Record {
+        url: string,
+        image: string,
+        title: string,
     }
-    let records:Record[]=[];
+    let records: Record[] = [];
     for (let i = 0; i < qwikets.length; i++) {
         const q = qwikets[i];
-        for(let j=0;j<records.length;j++){
-            const r=records[j];
-            let score=0;
-            if(q.url==r.url)
-                score++;    
-            if(q.image==r.image)
+        for (let j = 0; j < records.length; j++) {
+            const r = records[j];
+            let score = 0;
+            if (q.url == r.url)
                 score++;
-            if(q.title==r.title)    
+            if (q.image == r.image)
                 score++;
-            if(score>1){
-                l(chalk.red('DUPLICATE:',q.url))
+            if (q.title == r.title)
+                score++;
+            if (score > 1) {
+                l(chalk.red('DUPLICATE:', q.url))
                 continue;
             }
             else {
-                records.push({url:q.url,image:q.image,title:q.title}); 
+                records.push({ url: q.url, image: q.image, title: q.title });
             }
 
         }
@@ -181,16 +183,21 @@ export default async function handler(
             tokens = text.split(" ").length;
             if (tokens > 3000)
                 text = text.substring(0, 14000);
-            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal,#sports,#science,#outdoors): ${text}` }];
+            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
             let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
-                    const completion = await openai.createChatCompletion({
-                        model: "gpt-3.5-turbo",
-                        messages: qwiketMessages,
-                        max_tokens: 200,
-                    })
-                    text2 = completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>') || '';
+                    if (qwikets.length > 7) {
+                        const completion = await openai.createChatCompletion({
+                            model: "gpt-3.5-turbo",
+                            messages: qwiketMessages,
+                            max_tokens: 200,
+                        })
+                        text2 = completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>') || '';
+                    }
+                    else {
+                        text2 = text;
+                    }
                     if (text2)
                         break;
                 } catch (ex) {
@@ -217,128 +224,109 @@ export default async function handler(
             };
             const article = { title: q.title, url: q.url, text: hasSummary ? text : text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.toLowerCase().includes('#immigration')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#immigration', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#immigration', '');
+                article.text = text2;
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#politics')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#politics', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#politics', '');
+                article.text = text2;
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#social')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#social', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#social', '');
+                article.text = text2;
                 social.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#warinukraine')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#warinukraine', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#warinukraine', '');
+                article.text = text2;
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#economy')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#economy', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#economy', '');
+                article.text = text2;
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#foreignaffairs')) {
-                if (!hasSummary) {
-                    text2 = text2.replace('#foreignaffairs', '');
-                    article.text = text2;
-                }
+                text2 = text2.replace('#foreignaffairs', '');
+                article.text = text2;
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#military')) {
-                if (!hasSummary) {
-                    text2.replaceAll('#military', '');
-                    article.text = text2;
-                }
+                text2.replaceAll('#military', '');
+                article.text = text2;
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#culture')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#culture', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#culture', '');
+                article.text = text2;
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#history')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#history', '');
-                    article.text = text2;
-                }
-                history.push(article)
+                text2 = text2.replaceAll('#history', '');
+                article.text = text2;
+                history.push(article);
+                combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#health')) {
-                if (!hasSummary) {
-                    text2 = text2.replace('#health', '');
-                    article.text = text2;
-                    health.push(article);
-                }
+                text2 = text2.replace('#health', '');
+                article.text = text2;
+                health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#education', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#education', '');
+                article.text = text2;
                 education.push(article)
             }
-            else if (text2.toLowerCase().includes('#criminal')) {
-                if (!hasSummary) {
-                    text2 = text2.replace('#criminal', '');
-                    article.text = text2;
-                    criminal.push(article);
-                }
+            else if (text2.toLowerCase().includes('#crime')) {
+                text2 = text2.replace('#crime', '');
+                article.text = text2;
+                criminal.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#sports')) {
-                if (!hasSummary) {
-                    text2 = text2.replace('#sports', '');
-                    article.text = text2;
-                }
+                text2 = text2.replace('#sports', '');
+                article.text = text2;
                 sports.push(article)
             }
             else if (text2.toLowerCase().includes('#science')) {
-                if (!hasSummary) {
-                    text2 = text2.replace('#science', '');
-                    article.text = text2;
-                    science.push(article);
-                }
+                text2 = text2.replace('#science', '');
+                article.text = text2;
+                science.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#outdoors')) {
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#outdoors', '');
-                    article.text = text2;
-                }
+                text2 = text2.replaceAll('#outdoors', '');
+                article.text = text2;
                 outdoors.push(article);
+            }
+            else if (text2.toLowerCase().includes('#religion')) {
+                text2 = text2.replaceAll('#religion', '');
+                article.text = text2;
+                religion.push(article);
+                combinedText += `\n${text2}`;
+            }
+            else if (text2.toLowerCase().includes('#technology')) {
+                text2 = text2.replaceAll('#technology', '');
+                article.text = text2;
+                technology.push(article);
+                combinedText += `\n${text2}`;
             }
             else {
                 text2 = text2.replaceAll('#other', '');
-                if (!hasSummary) {
-                    text2 = text2.replaceAll('#other', '');
-                    article.text = text2;
-                    other.push(article)
-                }
+                article.text = text2;
+                other.push(article)
+
                 combinedText += `\n${text2}`;
             }
             fullCombinedText += `\n${text2}`;
@@ -410,6 +398,15 @@ export default async function handler(
         military.forEach(a => {
             json.military.items.push(a);
             html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split(`#military`)[0]}</p>\n`;
+        })
+        html += `</div>`;
+    }
+    if (religion.length > 0) {
+        json.religion = { items: [] };
+        html += `<div class='digest-religion'><div class='digest-hashtag'>#religion</div>\n`
+        religion.forEach(a => {
+            json.religion.items.push(a);
+            html += `<span class='digest-religion'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -488,6 +485,16 @@ export default async function handler(
         })
         html += `</div>`;
     }
+    if (technology.length > 0) {
+        json.technology = { items: [] };
+        html += `<div class='digest-technology'><div class='digest-hashtag'>#technology</div>\n`
+        technology.forEach(a => {
+            json.technology.items.push(a);
+            html += `<span class='digest-technology'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+        })
+        html += `</div>`;
+    }
+
 
 
     if (other.length > 0) {
