@@ -530,7 +530,7 @@ export default async function handler(
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
     console.log(chalk.magenta.bold("combinedText", combinedText));
-    messages.push({ "role": "user", "content": `Please summarize with in a brief narrative the following in the style of Hemingway:${combinedText}` });
+    messages.push({ "role": "user", "content": `Please summarize with in a brief narrative the following, putting the most important clickbait first:${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;
     for (let i = 0; i < 4; i++) {

@@ -41,7 +41,7 @@ export default async function handler(
       text = text.substring(0, 14000);
     console.log(chalk.yellow("tokens=", tokens))
     console.log("KEY=", configuration.apiKey)
-    const messages: ChatCompletionRequestMessage[] = [{ "role": "user", "content": `Please summarize in two very short paragraphs or less, keeping only the bare gist. Categorize using  one appropriate hash tag from this list (#immigration,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other). Attach the selected hashtag at the end of the summary.:${text}` },];
+    const messages: ChatCompletionRequestMessage[] = [{ "role": "user", "content": `Please summarize in two very short paragraphs or less, keeping only the bare gist,onliy minimal and essential. Make it brief. Categorize using  one appropriate hash tag from this list (#immigration,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other). Attach the selected hashtag to the end of the summary.:${text}` },];
     console.log("req.body", configuration.apiKey, messages)
     //await sleep(10000);
     let completion = await openai.createChatCompletion({
@@ -50,7 +50,7 @@ export default async function handler(
     })
     const content = `<p>${completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>')}</p>`;
     console.log("result:", js(content))
-    await redis?.setex(`${k}`, 3600*24,content);
+    await redis?.setex(`${k}`, 3600*24*7,content);
     res.status(200).json({ result: content })
   }
   catch (e) {
