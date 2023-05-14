@@ -10,27 +10,27 @@ const pushOutputQwiket = async ({
     let { qwiket, silo, primaryTag, now } = input
     let { url, shared_time } = qwiket
     let result
-    l("pushOutputQwiket", qwiket)
+   // l("pushOutputQwiket", qwiket)
 
-    l("qwiket stage 3", qwiket)
+  //  l("qwiket stage 3", qwiket)
     qwiket.accepted = 1
 
     qwiket.s_un = username
     qwiket.date = qwiket.shared_time
     qwiket.sort = qwiket.shared_time
     qwiket.primary = 1
-    l(chalk.yellow.bold("SILO 5 PUSHING", js(qwiket)))
+   // l(chalk.yellow.bold("SILO 5 PUSHING", js(qwiket)))
     const redis = await getRedisClient({});
 
 
     try {
 
-        l('redis.lpush', js(qwiket))
+      //  l('redis.lpush', js(qwiket))
         await redis?.lpush(
             `items_output`,
             js(qwiket)
         )
-        l(chalk.greenBright("adter lpush"));
+      //  l(chalk.greenBright("adter lpush"));
 
     } catch (x) {
         l(chalk.red.bold("CATCH18", x))
