@@ -209,7 +209,7 @@ export default async function handler(
             // stack.push({text:text2})
             if (!text2)
                 continue;
-            if (text2.indexOf(':') == 0)
+            if (text2.trim().indexOf(':') == 0)
                 text2 = text2.substring(1);
             l(chalk.greenBright("push", text2))
 
