@@ -638,7 +638,7 @@ export default async function handler(
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
     console.log(chalk.magenta.bold("combinedText", combinedText));
-    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with in a brief narrative, the essential gist only, the following, putting the most important clickbait first, prioritizing the most important to least important first to last,  removing all the category hashtags. Break it into small paragraphs, if appropriate. Do not use 'their' as a singular:${combinedText}` });
+    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with a brief narrative, the essential gist only, keep shorter than 1000 characters, the following, grouping and prioritizing the most important to least important first to last,  removing all the category hashtags. Break it into small paragraphs, if appropriate. Do not use 'their' as a singular:${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;
     for (let i = 0; i < 4; i++) {
