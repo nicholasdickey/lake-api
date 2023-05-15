@@ -124,7 +124,7 @@ export default async function handler(
                     }
                 }
             }
-            if (!hasAck) {
+            if (!hasAck&&item.title.indexOf('The Digest')<0) {
                 delete common.body;;
                 common.hasBody = true;
                 common.ack = false;

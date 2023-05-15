@@ -90,7 +90,7 @@ export default async function handler(
     const stack = new Stack<{ text: string }>();
     let messages: ChatCompletionRequestMessage[] = [];
 
-    let immigration: Article[] = [];
+    let illegals: Article[] = [];
     let politics: Article[] = [];
     let society: Article[] = [];
     let war: Article[] = [];
@@ -183,7 +183,7 @@ export default async function handler(
             tokens = text.split(" ").length;
             if (tokens > 3000)
                 text = text.substring(0, 14000);
-            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
+            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#illegals,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
             let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
@@ -223,16 +223,16 @@ export default async function handler(
                 return this.replace(reg, strWith);
             };
             const article = { title: q.title, url: q.url, text: hasSummary ? text : text2, publication: q.site_name || '', image: q.image, slug: q.slug };
-            if (text2.toLowerCase().includes('#immigration')) {
+            if (text2.toLowerCase().includes('#illegals')) {
                 if (!hasSummary) {
-                    text2 = text2.replaceAll('#immigration', '');
+                    text2 = text2.replaceAll('#illegals', '');
                     article.text = text2;
                 }
                 else {
-                    text = text.replaceAll('#immigration', '');
+                    text = text.replaceAll('#illegals', '');
                     article.text = text;
                 }
-                immigration.push(article);
+                illegals.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#politics')) {
@@ -445,12 +445,12 @@ export default async function handler(
     };
     let html = ''
     let json: any = {}
-    if (immigration.length > 0) {
-        json.immigration = { items: [] };
-        html += `<div class='digest-immigration'><div class='digest-hashtag'>#immigration</div>\n`
-        immigration.forEach(a => {
-            json.immigration.items.push({ title: a.title, url: a.url, text: a.text, publication: a.publication, image: a.image });
-            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split('#immigration')[0]}</p>\n`;
+    if (illegals.length > 0) {
+        json.illegals = { items: [] };
+        html += `<div class='digest-illegals'><div class='digest-hashtag'>#illegals</div>\n`
+        illegals.forEach(a => {
+            json.illegals.items.push({ title: a.title, url: a.url, text: a.text, publication: a.publication, image: a.image });
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split('#illegals')[0]}</p>\n`;
         })
         html += `</div>`;
     }

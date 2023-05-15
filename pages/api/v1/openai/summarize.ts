@@ -41,7 +41,7 @@ export default async function handler(
       text = text.substring(0, 14000);
     console.log(chalk.yellow("tokens=", tokens))
     console.log("KEY=", configuration.apiKey)
-    const messages: ChatCompletionRequestMessage[] = [{ "role": "user", "content": `In style of Raymond Chandler, please summarize in two very short paragraphs or less, keeping only the bare gist, only minimal and essential. Make it brief. Under 600 characters. Split into two paragraphs if possible. Categorize using  one appropriate hash tag from this list (#immigration,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other). Attach the selected hashtag to the end of the summary. Do not show any other tags. Do not show "other" tag either.:${text}` },];
+    const messages: ChatCompletionRequestMessage[] = [{ "role": "user", "content": `In style of Raymond Chandler, please summarize in two very short paragraphs or less, keeping only the bare gist, only minimal and essential. Make it brief. Under 600 characters. Split into two paragraphs if possible. Categorize using  one appropriate hash tag from this list (#illegals,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other). Attach the selected hashtag to the end of the summary. Do not show any other tags. Do not show "other" tag either.:${text}` },];
     console.log("req.body", configuration.apiKey, messages)
     //await sleep(10000);
     let completion = await openai.createChatCompletion({
