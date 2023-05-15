@@ -61,7 +61,7 @@ export default async function handler(
         }*/
         if (!json) {
             // get from db
-            l("calling getQwiket",slug,withBody,tag);
+           // l("calling getQwiket",slug,withBody,tag);
             json = await getQwiket({ threadid, slug, withBody, tag })
         
             if (json && withBody) {

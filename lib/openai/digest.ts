@@ -187,7 +187,7 @@ export default async function handler(
             let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
-                    if (qwikets.length > 17) {
+                    if (qwikets.length > 17||!hasSummary) {
                         const completion = await openai.createChatCompletion({
                             model: "gpt-3.5-turbo",
                             messages: qwiketMessages,
