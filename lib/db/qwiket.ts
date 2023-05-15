@@ -180,7 +180,7 @@ export const getQwiket = async ({
                     else
                         qwiket.body = '';
                 }
-               l(chalk.green('cache miss, to db:',js({qwiket})))
+              // l(chalk.green('cache miss, to db:',js({qwiket})))
                     
            // }
         }
