@@ -92,7 +92,7 @@ export default async function handler(
 
     let immigration: Article[] = [];
     let politics: Article[] = [];
-    let social: Article[] = [];
+    let society: Article[] = [];
     let war: Article[] = [];
     let economy: Article[] = [];
     let foreignaffairs: Article[] = [];
@@ -101,7 +101,7 @@ export default async function handler(
     let history: Article[] = [];
     let health: Article[] = [];
     let education: Article[] = [];
-    let criminal: Article[] = [];
+    let crime: Article[] = [];
     let sports: Article[] = [];
     let science: Article[] = [];
     let outdoors: Article[] = [];
@@ -183,11 +183,11 @@ export default async function handler(
             tokens = text.split(" ").length;
             if (tokens > 3000)
                 text = text.substring(0, 14000);
-            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
+            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
             let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
-                    if (qwikets.length > 7) {
+                    if (qwikets.length > 17) {
                         const completion = await openai.createChatCompletion({
                             model: "gpt-3.5-turbo",
                             messages: qwiketMessages,
@@ -224,109 +224,217 @@ export default async function handler(
             };
             const article = { title: q.title, url: q.url, text: hasSummary ? text : text2, publication: q.site_name || '', image: q.image, slug: q.slug };
             if (text2.toLowerCase().includes('#immigration')) {
-                text2 = text2.replaceAll('#immigration', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#immigration', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#immigration', '');
+                    article.text = text;
+                }
                 immigration.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#politics')) {
-                text2 = text2.replaceAll('#politics', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#politics', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#politics', '');
+                    article.text = text;
+                }
                 politics.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.toLowerCase().includes('#social')) {
-                text2 = text2.replaceAll('#social', '');
-                article.text = text2;
-                social.push(article)
+            else if (text2.toLowerCase().includes('#society')) {
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#society', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#society', '');
+                    article.text = text;
+                }
+                society.push(article)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#warinukraine')) {
-                text2 = text2.replaceAll('#warinukraine', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#warinukraine', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#warinukraine', '');
+                    article.text = text;
+                }
                 war.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#economy')) {
-                text2 = text2.replaceAll('#economy', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#economy', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#economy', '');
+                    article.text = text;
+                }
                 economy.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#foreignaffairs')) {
-                text2 = text2.replace('#foreignaffairs', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replace('#foreignaffairs', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#foreignaffairs', '');
+                    article.text = text;
+                }
                 foreignaffairs.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#military')) {
-                text2.replaceAll('#military', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2.replaceAll('#military', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#military', '');
+                    article.text = text;
+                }
                 military.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#culture')) {
-                text2 = text2.replaceAll('#culture', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#culture', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#culture', '');
+                    article.text = text;
+                }
                 culture.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#history')) {
-                text2 = text2.replaceAll('#history', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#history', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#history', '');
+                    article.text = text;
+                }
                 history.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#health')) {
-                text2 = text2.replace('#health', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replace('#health', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#health', '');
+                    article.text = text;
+                }
                 health.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
-                text2 = text2.replaceAll('#education', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#education', '');
+                    article.text = text2;
+                }
+                else {
+                    text2 = text2.replaceAll('#warinukraine', '');
+                    article.text = text2;
+                }
                 education.push(article)
             }
             else if (text2.toLowerCase().includes('#crime')) {
-                text2 = text2.replace('#crime', '');
-                article.text = text2;
-                criminal.push(article);
+                if (!hasSummary) {
+                    text2 = text2.replace('#crime', '');
+
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#crime', '');
+                    article.text = text;
+                }
+                crime.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#sports')) {
-                text2 = text2.replace('#sports', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replace('#sports', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#sports', '');
+                    article.text = text;
+                }
                 sports.push(article)
             }
             else if (text2.toLowerCase().includes('#science')) {
-                text2 = text2.replace('#science', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replace('#science', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#science', '');
+                    article.text = text;
+                }
                 science.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#outdoors')) {
-                text2 = text2.replaceAll('#outdoors', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#outdoors', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#outdoors', '');
+                    article.text = text;
+                }
                 outdoors.push(article);
             }
             else if (text2.toLowerCase().includes('#religion')) {
-                text2 = text2.replaceAll('#religion', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#religion', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#religion', '');
+                    article.text = text;
+                }
                 religion.push(article);
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#technology')) {
-                text2 = text2.replaceAll('#technology', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#technology', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#technology', '');
+                    article.text = text;
+                }
                 technology.push(article);
                 combinedText += `\n${text2}`;
             }
             else {
                 text2 = text2.replaceAll('#other', '');
-                article.text = text2;
+                if (!hasSummary) {
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#other', '');
+                    article.text = text;
+                }
                 other.push(article)
-
                 combinedText += `\n${text2}`;
             }
             fullCombinedText += `\n${text2}`;
@@ -355,13 +463,13 @@ export default async function handler(
         })
         html += `</div>`;
     }
-    if (social.length > 0) {
-        json.social = { items: [] };
-        html += `<div class='digest-social'><div class='digest-hashtag'>#social</div>\n`
-        social.forEach(a => {
-            json.social.items.push(a);
+    if (society.length > 0) {
+        json.society = { items: [] };
+        html += `<div class='digest-society'><div class='digest-hashtag'>#society</div>\n`
+        society.forEach(a => {
+            json.society.items.push(a);
 
-            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split(`#social`)[0]}</p>\n`;
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split(`#society`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -406,7 +514,7 @@ export default async function handler(
         html += `<div class='digest-religion'><div class='digest-hashtag'>#religion</div>\n`
         religion.forEach(a => {
             json.religion.items.push(a);
-            html += `<span class='digest-religion'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+            html += `<span class='digest-religion'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -446,13 +554,13 @@ export default async function handler(
         })
         html += `</div>`;
     }
-    if (criminal.length > 0) {
-        json.criminal = { items: [] };
+    if (crime.length > 0) {
+        json.crime = { items: [] };
 
-        html += `<div class='digest-criminal'><div class='digest-hashtag'>#criminal</div>\n`
-        criminal.forEach(a => {
-            json.criminal.items.push(a);
-            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+        html += `<div class='digest-crime'><div class='digest-hashtag'>#crime</div>\n`
+        crime.forEach(a => {
+            json.crime.items.push(a);
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -462,7 +570,7 @@ export default async function handler(
         html += `<div class='digest-sports'><div class='digest-hashtag'>#sports</div>\n`
         sports.forEach(a => {
             json.sports.items.push(a);
-            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -472,7 +580,7 @@ export default async function handler(
         html += `<div class='digest-science'><div class='digest-hashtag'>#science</div>\n`
         science.forEach(a => {
             json.science.items.push(a);
-            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -481,7 +589,7 @@ export default async function handler(
         html += `<div class='digest-outdoors'><div class='digest-hashtag'>#outdoors</div>\n`
         outdoors.forEach(a => {
             json.outdoors.items.push(a);
-            html += `<span class='digest-outdoors'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+            html += `<span class='digest-outdoors'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -490,7 +598,7 @@ export default async function handler(
         html += `<div class='digest-technology'><div class='digest-hashtag'>#technology</div>\n`
         technology.forEach(a => {
             json.technology.items.push(a);
-            html += `<span class='digest-technology'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#criminal`)[0]}</p>\n`;
+            html += `<span class='digest-technology'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p  class='digest-text'>${a.text.split(`#crime`)[0]}</p>\n`;
         })
         html += `</div>`;
     }
@@ -530,7 +638,7 @@ export default async function handler(
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
     console.log(chalk.magenta.bold("combinedText", combinedText));
-    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with in a brief narrative, the essential gist only, the following, putting the most important clickbait first:${combinedText}` });
+    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with in a brief narrative, the essential gist only, the following, putting the most important clickbait first, removing all the hashtags. Do not use 'their' as a singular:${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;
     for (let i = 0; i < 4; i++) {
