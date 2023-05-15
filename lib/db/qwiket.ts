@@ -130,6 +130,7 @@ export const getQwiket = async ({
             }
         }
         else {
+            tag='fq';
             sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from pov_threads_view51 t, pov_categories c where t.category_xid=c.xid and c.shortname='${tag}'and reshare!=102 order by t.published_time desc limit 1`;
             rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless  from pov_threads_view51 t,  pov_categories c where t.category_xid=c.xid and c.shortname=? and reshare!=102 order by t.published_time desc limit 1`, [tag]);
             if (withBody) {
@@ -142,6 +143,51 @@ export const getQwiket = async ({
                     qwiket = json ? JSON.parse(json) : {};
             }
         }
+        slug = qwiket?.threadid;
+        if (slug) {
+            const parts = slug.split('-');
+            let silo = parts[0];
+            if (slug == 'nro-is-moving-to-facebook-comments')
+                silo = '';
+            else if (!(+silo >= 0))
+                return null;
+            else if (!silo && silo == 'cc')
+                return null;
+            const qtable = `q${silo}`;
+            const qwiketid = `${slug}.qwiket`;
+    
+            sql = `SELECT * from ${qtable} where \`key\` ='${qwiketid}' limit 1`;
+            rows = await query(`SELECT * from ${qtable} where \`key\`=?  limit 1`, [qwiketid]);
+            const json = rows[0]?.value;
+            
+            if (json)
+               //TMP qwiket = json ? JSON.parse(json) : {};
+                tq = json ? JSON.parse(json) : {};
+            //TMP else {
+               // l(chalk.yellowBright(`getQwiket, result from :${qtable}`,js(tq)))
+                const table = `pov_threads_view${silo}`;
+                sql = `SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as 
+                cat, c,headless  
+                from ${table} t, 
+                pov_categories c where t.category_xid=c.xid and \`threadid\` ='${slug}' limit 1`;
+    
+                rows = await query(`SELECT t.*, c.text as catName, c.icon as catIcon, c.shortname as cat, c.headless from ${table} t,  pov_categories c where t.category_xid=c.xid and \`threadid\`=?  limit 1`, [slug]);
+                qwiket = rows[0];
+               
+                if (qwiket){
+                    if(tq)
+                        qwiket.body=tq.body;
+                    else
+                        qwiket.body = '';
+                }
+               l(chalk.green('cache miss, to db:',js({qwiket})))
+                    
+           // }
+        }
+
+
+
+
     }
     if (!withBody)
         delete qwiket?.body;

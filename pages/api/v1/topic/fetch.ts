@@ -30,6 +30,7 @@ export default async function handler(
     let { slug = '', withBody, userslug, sessionid, tag, ack }: Query = req.query as unknown as Query;
     let threadid = Math.floor(Math.random() * 100000000)
     const redis = await getRedisClient({});
+    l("slug=", slug, "withBody=", withBody, "userslug=", userslug, "sessionid=", sessionid, "tag=", tag, "ack=", ack)
     if (!redis)
         return res.status(500).json({ msg: "Unable to connect to redis" });
     try {
@@ -61,13 +62,13 @@ export default async function handler(
         }*/
         if (!json) {
             // get from db
-           // l("calling getQwiket",slug,withBody,tag);
+          //  l("calling getQwiket",slug,withBody,tag);
             json = await getQwiket({ threadid, slug, withBody, tag })
         
             if (json && withBody) {
-                //l("json1:", js(json.body))
+              //  l("json1:", js(json.body))
                 const b= processBody(json);
-              //  l("json11:", js(json.body),b)
+                l("json11:", js(json.body),b)
                if(b&&b.length>0)
                 json.body=b;
                 else {
