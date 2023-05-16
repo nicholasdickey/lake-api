@@ -331,7 +331,7 @@ export default async function handler(
          }
  
      }*/
-    console.log(chalk.cyan.bold("inputText", combinedText));
+   // console.log(chalk.cyan.bold("inputText", combinedText));
     let tokens = combinedText.split(" ").length;
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 22000);
@@ -341,7 +341,7 @@ export default async function handler(
     tokens = combinedText.split(" ").length;
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
-    console.log(chalk.magenta.bold("combinedText", combinedText));
+    //console.log(chalk.magenta.bold("combinedText", combinedText));
     messages.push({ "role": "user", "content": `Please summarize the following in the style of Hemingway:${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;

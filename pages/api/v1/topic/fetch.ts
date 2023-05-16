@@ -53,13 +53,13 @@ export default async function handler(
             l(chalk.red.bold(x))
         }
         const key = txid?`ntjson-${withBody + '-'}${txid}`:'';
-       /* if(key){
+        if(key){
             const jsonRaw = await redis.get(key);
             if (jsonRaw){
                 json = JSON.parse(jsonRaw)
-                l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
+             //   l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
             }
-        }*/
+        }
         if (!json) {
             // get from db
           //  l("calling getQwiket",slug,withBody,tag);

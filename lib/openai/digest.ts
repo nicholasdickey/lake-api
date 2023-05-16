@@ -317,6 +317,7 @@ export default async function handler(
                     article.text = text;
                 }
                 culture.push(article);
+                if(qwikets.length<20)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#history')) {
@@ -329,6 +330,7 @@ export default async function handler(
                     article.text = text;
                 }
                 history.push(article);
+                if(qwikets.length<20)
                 combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#health')) {
@@ -341,6 +343,7 @@ export default async function handler(
                     article.text = text;
                 }
                 health.push(article);
+                if(qwikets.length<24)
                 combinedText += `\n${text2}`;
             }
             else if (text2.includes('#education')) {
@@ -353,6 +356,8 @@ export default async function handler(
                     article.text = text2;
                 }
                 education.push(article)
+                if(qwikets.length<20)
+                combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#crime')) {
                 if (!hasSummary) {
@@ -377,6 +382,8 @@ export default async function handler(
                     article.text = text;
                 }
                 sports.push(article)
+                if(qwikets.length<12)
+                combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#science')) {
                 if (!hasSummary) {
@@ -388,7 +395,9 @@ export default async function handler(
                     article.text = text;
                 }
                 science.push(article);
+                if(qwikets.length<24)
                 combinedText += `\n${text2}`;
+              
             }
             else if (text2.toLowerCase().includes('#outdoors')) {
                 if (!hasSummary) {
@@ -400,6 +409,8 @@ export default async function handler(
                     article.text = text;
                 }
                 outdoors.push(article);
+                if(qwikets.length<10)
+                combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#religion')) {
                 if (!hasSummary) {
@@ -411,7 +422,10 @@ export default async function handler(
                     article.text = text;
                 }
                 religion.push(article);
+                if(qwikets.length<28)
                 combinedText += `\n${text2}`;
+
+              //  combinedText += `\n${text2}`;
             }
             else if (text2.toLowerCase().includes('#technology')) {
                 if (!hasSummary) {
@@ -423,6 +437,7 @@ export default async function handler(
                     article.text = text;
                 }
                 technology.push(article);
+                if(qwikets.length<34)
                 combinedText += `\n${text2}`;
             }
             else {
@@ -435,7 +450,9 @@ export default async function handler(
                     article.text = text;
                 }
                 other.push(article)
+                if(qwikets.length<14)
                 combinedText += `\n${text2}`;
+              //  combinedText += `\n${text2}`;
             }
             fullCombinedText += `\n${text2}`;
 
@@ -625,8 +642,9 @@ export default async function handler(
          }
  
      }*/
-    if (!combinedText)
+    if (!combinedText||combinedText.length<2048){
         combinedText = fullCombinedText;
+    }
     console.log(chalk.cyan.bold("inputText", combinedText));
     let tokens = combinedText.split(" ").length;
     if (tokens > 3000)
@@ -638,7 +656,7 @@ export default async function handler(
     if (tokens > 3000)
         combinedText = combinedText.substring(0, 14000);
     console.log(chalk.magenta.bold("combinedText", combinedText));
-    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with a brief narrative, the essential gist only, keep shorter than 1000 characters - very important!, grouping and prioritizing the most important to least important first to last,  removing all the category hashtags. Break it into small paragraphs, if needed. Do not use 'their' as a singular, put quotes around "far right" and "progressive":${combinedText}` });
+    messages.push({ "role": "user", "content": `In the style of Ernst Hemingway, please summarize with a brief narrative, the essential gist only, keep shorter than 1000 characters - very important, cut off the rest!, grouping and prioritizing the most important to least important first to last,  removing all the category hashtags. Break it into small paragraphs, if needed. Do not use 'their' as a singular, put quotes around "far right" and "progressive":${combinedText}` });
     //  console.log("messages:", configuration.apiKey, messages)
     let completion: any = null;
     for (let i = 0; i < 4; i++) {
