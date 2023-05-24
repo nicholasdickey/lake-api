@@ -17,12 +17,15 @@ export const getPJson = async ({ threadid, qpostid, forum, redis }: { threadid: 
 }
 export const getNtJson = async ({ threadid, xid, redis, withBody }: { threadid: number, xid: number, redis: any, withBody?: [0, 1] }) => {
     const ntJsonRaw = await redis.get(`ntjson-${xid}`);
+   // l(chalk.blueBright(`getNtJson: ${ntJsonRaw}`));
     let ntJson: Qwiket | null = null;
     if (!ntJsonRaw) {
+      //  l("going to db")
         ntJson = await getQwiket({ threadid, txid: xid, withBody })
     }
     else {
         ntJson = JSON.parse(ntJsonRaw);
     }
+    //l(chalk.bgCyan(`getNtJson: ${js(ntJson)}`));
     return ntJson;
 }

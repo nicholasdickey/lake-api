@@ -80,7 +80,7 @@ interface SecondaryCacheItem {
 const innerFunctionMix = async ({ threadid, newslineKey, lastid, forum, redis, page, size, tail, countonly }: { threadid: number, newslineKey: string, lastid: string, forum: string, redis: any, page: number, size: number, tail: number, countonly: number }) => {
     const t1 = Date.now();
     const commentsKey = `lpxids-${forum}`;
-
+    l(chalk.green("innerFunctionMix:",js({ threadid, newslineKey, lastid, forum,  page, size, tail, countonly })));
     let lastXid = + lastid;
     if (countonly == 1)
         return await getNewCount({ threadid, newslineKey, forum, commentsKey, lastXid, tail, redis })
@@ -100,6 +100,7 @@ const innerFunctionMix = async ({ threadid, newslineKey, lastid, forum, redis, p
     if (page > 0) {
         const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
         pageJsonRaw = await redis.get(pageKey);
+        l(chalk.yellow("pageJsonRaw:", pageJsonRaw));
         if (pageJsonRaw) {  //already in cache, just if page==0 prepend comments to tail (or end if no tail)
             redis.expire(pageKey, 600);
             pageJson = JSON.parse(pageJsonRaw);
@@ -141,6 +142,7 @@ const innerFunctionMix = async ({ threadid, newslineKey, lastid, forum, redis, p
     const end = page == 0 ? size - 1 : triggerPosition + (page + 1) * size;
 
     let newslineAll = await redis.zrevrange(newslineKey, start, end, "withscores");
+    l(chalk.yellow("newslineAll:", newslineAll));
     if (page > 0) {
         const [xid, createdAt] = await redis.zrevrange(newslineKey, start - 1, start - 1, 'withscores');
         prevCreatedAt = createdAt;
@@ -177,13 +179,16 @@ const innerFunctionMix = async ({ threadid, newslineKey, lastid, forum, redis, p
             }
         }
         const ntJson = await getNtJson({ threadid, xid, redis });
+        l(chalk.cyan("===>ntJson:",xid, ntJson?.tag, ntJson?.author_name));
         pageJson.push({ item: ntJson });
     }
     if (page > 0) {
         const pageKey = `2ndCache-mix-page-${page}-${newslineKey}-${lastXid}`;
         pageJsonRaw = JSON.stringify(pageJson);
+       
         await redis.setex(pageKey, 600, pageJsonRaw); // cahce for the next 10 mins;
     }
+   l(chalk.magenta("pageJson:", js(pageJson)));
     const ret = {
         success: true,
         type: "mix",
