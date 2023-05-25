@@ -23,28 +23,45 @@ export default async function handler(
 
   const redis = await getRedisClient({});
 
-  let { who, to, occasion, age, interests, style } = req.query;
+  let { from, to, occasion, reflections,age, interests, style,fresh,recovery } = req.query;
   const text = `Generate ${
     style ? `in a style of ${style}` : ""
   } a wish message on occasion of ${
     occasion
   } ${
     occasion == "Birthday" ? `aged ${age}` : ""
-  } from ${who?who:'[Your Name]'} ${
+  } from ${from?from:'[Your Name]'} ${
     to ? "to " + to : ""
   } ${
-    interests ? "who likes " + interests : ""
-  }. Do not refer to yourself as "AI Language Model". Below that, separately, after the signature line, list 5 gift ideas for this person(s) ${age?`age ${age},`:''}, putting amazon product search string in double quotes and a brief explanation. Title the gift section "Gift Sggestions"` ;   
+    reflections ? "also conside the following thoughts '" + reflections+"'" : ""
+  }. Do not refer to yourself as "AI Language Model". Below that, separately, after the signature line, list 10 gift ideas for this person(s) ${interests?`also consider for the gift recommendation the following: ${interests};`:''}, putting amazon product search string in double quotes and a brief explanation. Title the gift section "Gift Suggestions". The interests should be considered but not exclusively - consider other approriate ideas.` ;   
 
   const k = text;
-
+  const isFresh = fresh == '1';
+  const isRecovery = recovery == '1';
   try {
+    if(!isFresh){
     const cachedResult = await redis?.get(k);
     if (cachedResult) {
       console.log("cachedResult:", cachedResult);
       return res.status(200).json({ result: cachedResult });
     }
+    if(isRecovery){
+      let count=120
+      while(true){
+        const cachedResult = await redis?.get(k);
+        if (cachedResult) {
+          console.log("cachedResult:", cachedResult);
+          return res.status(200).json({ result: cachedResult });
+        }
+        if(count--<0) {
+          return res.status(501).json({ success:false });
+        };
+        await sleep(1000);
+      }
+    }
 
+    }
     console.log("KEY=", configuration.apiKey);
     const messages: ChatCompletionRequestMessage[] = [
       { role: "user", content: `${text}` },

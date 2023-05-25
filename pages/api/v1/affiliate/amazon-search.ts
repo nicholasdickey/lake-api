@@ -38,7 +38,7 @@ export default async (
     let items = new Array<Item>();
     results.each((i:any, el:any) => {
         const title = truncateString( $(el).find('h2').text(),96);
-        const price = $(el).find('.a-price-symbol').text()+$(el).find('.a-price-whole').text()+'.'+$(el).find('.a-price-fraction').text();
+        const price = $(el).find('.a-price-symbol').text()+$(el).find('.a-price-whole').text()+$(el).find('.a-price-fraction').text();
         const image = $(el).find('img').attr('src');
         const link = `https://amazon.com`+$(el).find('a').attr('href')+'&tag=qwiket-20';
         items.push({ title, price, image, link });
