@@ -22,21 +22,17 @@ export default async function handler(
   });
 
   const redis = await getRedisClient({});
-  console.log("wish-text called")
-  let {from, to, occasion, reflections,instructions,inastyleof,language,age, fresh,recovery } = req.query;
-  console.log("req.query", req.query);
-  const text = `Generate ${
-    inastyleof ? `in a style of ${inastyleof}` : ""
-  } a wish message on occasion of ${
+
+  let {from, to, occasion, reflections,age, interests, style,fresh,recovery } = req.query;
+  const text = `Generate gifts suggestions on occasion of ${
     occasion
-  } ${
-    occasion == "Birthday" ? `` : ""
-  } from ${from?from:'[Your Name]'} ${
+  } from ${from?from:''} ${
     to ? "to " + to : ""
   } ${
     reflections ? "also consider the following thoughts '" + reflections+"'" : ""
-  }."Keep it under 400 characters unless instructed otherwise. Do not add any meta information. No hashtags.${instructions?"Additional instructions:'"+instructions+"'.":""}${language?"Use language:"+language:""}` ;   
-  console.log("Full text:", text);
+  }.  list 3 gift ideas for this person(s) ${interests?
+    `,also consider for the gift recommendation, not exclusively, the following interests: ${interests}`:''}, putting the appropriate product search strings in double quotes. The interests should be considered but not exclusively - consider other approriate ideas.` ;   
+
   const k = text;
   const isFresh = fresh == '1';
   const isRecovery = recovery == '1';
@@ -69,7 +65,7 @@ export default async function handler(
     ];
     console.log("req.body", configuration.apiKey, messages);
 
-    let completion = null;
+    let completion;
     for (let i = 0; i < 4; i++) {
       try {
         completion = await openai.createChatCompletion({
