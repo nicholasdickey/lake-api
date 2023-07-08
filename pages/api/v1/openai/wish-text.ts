@@ -35,7 +35,7 @@ export default async function handler(
     to ? "to " + to : ""
   } ${
     reflections ? "also consider the following thoughts '" + reflections+"'" : ""
-  }."Keep it under 400 characters unless instructed otherwise. Do not add any meta information. No hashtags.${instructions?"Additional instructions:'"+instructions+"'.":""}${language?"Use language:"+language:""}` ;   
+  }."Keep it around 400 characters unless instructed otherwise. Do not add any meta information, like character count. No hashtags.${instructions?"Additional instructions:'"+instructions+"'.":""}${language?"Use language:"+language:""}` ;   
   console.log("Full text:", text);
   const k = text;
   const isFresh = fresh == '1';

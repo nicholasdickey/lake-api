@@ -30,7 +30,7 @@ export default async function handler(
     to ? "to " + to : ""
   } ${
     reflections ? "also consider the following thoughts '" + reflections+"'" : ""
-  }.  list 3 gift ideas for this person(s) ${interests?
+  }.  list 5 gift ideas for this person(s) ${interests?
     `,also consider for the gift recommendation, not exclusively, the following interests: ${interests}`:''}, putting the appropriate product search strings in double quotes. The interests should be considered but not exclusively - consider other approriate ideas.` ;   
 
   const k = text;

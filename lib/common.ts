@@ -49,7 +49,22 @@ function quoteFields(object:any) {
 }
 
 const ds = (s:string) => s || "";
-
+const fillInParams = (sql: string, params: any[]) => {
+    let filledSql = sql;
+    params.forEach((param, index) => {
+      const paramPlaceholder = `?${index + 1}`;
+      filledSql = filledSql.replace(paramPlaceholder, stringifyParam(param));
+    });
+    return filledSql;
+  }
+  
+  const stringifyParam = (param: any) => {
+    if (typeof param === 'string') {
+      return `'${param}'`;
+    }
+    return param;
+  }
+  
 export {
     l,
     allowLog,
@@ -62,4 +77,5 @@ export {
     quoteFields,
     js,
     ds,
+    fillInParams,
 };
