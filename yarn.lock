@@ -885,6 +885,13 @@
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
   integrity sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==
 
+"@types/express-rate-limit@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/express-rate-limit/-/express-rate-limit-6.0.0.tgz#11a314477895a8a888958f27650ed0d1ddad01b0"
+  integrity sha512-nZxo3nwU20EkTl/f2eGdndQkDIJYwkXIX4S3Vrp2jMdSdFJ6AWtIda8gOz0wiMuOFoeH/UUlCAiacz3x3eWNFA==
+  dependencies:
+    express-rate-limit "*"
+
 "@types/graceful-fs@^4.1.3":
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/@types/graceful-fs/-/graceful-fs-4.1.6.tgz#e14b2576a1c25026b7f02ede1de3b84c3a1efeae"
@@ -2282,6 +2289,16 @@ expect@^29.5.0:
     jest-matcher-utils "^29.5.0"
     jest-message-util "^29.5.0"
     jest-util "^29.5.0"
+
+express-rate-limit@*, express-rate-limit@^6.7.1:
+  version "6.7.1"
+  resolved "https://registry.yarnpkg.com/express-rate-limit/-/express-rate-limit-6.7.1.tgz#ca93de8eaa25878b539d478948fc94592742e526"
+  integrity sha512-eH4VgI64Nowd2vC5Xylx0lLYovWIp2gRFtTklWDbhSDydGAPQUjvr1B7aQ2/ZADrAi6bJ51qSizKIXWAZ1WCQw==
+
+express-slow-down@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/express-slow-down/-/express-slow-down-1.6.0.tgz#6af1cd98471c4928e43e97d02770fdfe03b894a1"
+  integrity sha512-M2+Gl6vtvHW5CiRwy82epoiMHWWDVsLws+YnhO2C0lY6eAbRSvRdCA1G1VxSY68y+Urfb74npTO0kdHgC6OPHg==
 
 extend@^3.0.2, extend@~3.0.2:
   version "3.0.2"

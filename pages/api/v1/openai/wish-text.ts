@@ -5,22 +5,25 @@ import { getRedisClient } from "../../../../lib/redis";
 import { l, chalk, js, sleep } from "../../../../lib/common";
 import { recordEvent } from "../../../../lib/db/wishtext";
 import { dbEnd } from "../../../../lib/db"
+import applyRateLimit from '../../../../lib/rate-limit';
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
-let threadid = Math.floor(Math.random() * 100000000)
+
 const openai = new OpenAIApi(configuration);
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
   await NextCors(req, res, {
     // Options
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     origin: "*",
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
+  try {
+    await applyRateLimit(req, res)
+  } catch {
+    return res.status(429).send('Too many requests')
+  }
   let threadid = Math.floor(Math.random() * 100000000);
 
   const redis = await getRedisClient({});
@@ -127,4 +130,6 @@ export default async function handler(
     redis?.quit();
     dbEnd(threadid)
   }
-}
+};
+export default handleRequest;
+

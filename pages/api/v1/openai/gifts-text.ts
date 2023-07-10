@@ -5,26 +5,30 @@ import { getRedisClient } from "../../../../lib/redis";
 import { l, chalk, js, sleep } from "../../../../lib/common";
 import { recordEvent } from "../../../../lib/db/wishtext";
 import { dbEnd } from "../../../../lib/db"
+
+import applyRateLimit from '../../../../lib/rate-limit';
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
   await NextCors(req, res, {
     // Options
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     origin: "*",
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
   });
+  try {
+    await applyRateLimit(req, res)
+  } catch {
+    return res.status(429).send('Too many requests')
+  }
   let threadid = Math.floor(Math.random() * 100000000);
   const redis = await getRedisClient({});
   try {
-    let { sessionid,from, to, occasion, reflections, age, interests, style, fresh, recovery } = req.query;
+    let { sessionid, from, to, occasion, reflections, age, interests, style, fresh, recovery } = req.query;
     const text = `Generate gifts suggestions on occasion of ${occasion
       } from ${from ? from : ''} ${to ? "to " + to : ""
       } ${reflections ? "also consider the following thoughts '" + reflections + "'" : ""
@@ -80,14 +84,14 @@ export default async function handler(
       }
 
       if (!completion) {
-        await recordEvent({ threadid, sessionid: process.env.event_env+":"+(sessionid as string || ""), params: messages.map(m=>m.content).join('***') + '===!@!!No Completion Possible', name: "giftsCompletion" });
+        await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===!@!!No Completion Possible', name: "giftsCompletion" });
 
         return res.status(200).json({ result: "no completion possible" });
       }
-   
+
       const content = `${completion.data.choices[0]?.message?.content}`;
       console.log("result:", js(content));
-      await recordEvent({ threadid, sessionid: process.env.event_env+":"+(sessionid as string || ""), params: messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "giftsCompletion" });
+      await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===>Completion:' + content, name: "giftsCompletion" });
 
       await redis?.setex(`${k}`, 3600 * 24 * 7, content);
       res.status(200).json({ result: content });
@@ -100,4 +104,5 @@ export default async function handler(
     redis?.quit();
     dbEnd(threadid)
   }
-}
+};
+export default handleRequest;
