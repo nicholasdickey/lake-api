@@ -219,8 +219,29 @@ export const deleteHistory = async ({
     const filledSql = fillInParams(sql, params);
     l(chalk.greenBright("deleteHistory", filledSql));
 }
+export const recordEvent = async ({
+    threadid,
+    name,
+    sessionid,
+    params
+}: {
+    threadid: number,
+    name: string,
+    sessionid: string,
+    params: string
+}) => {
+    let sql, result;
+    const millis=microtime();
+    let query = await dbGetQuery("wt", threadid);
+    sql = `INSERT INTO events (name,sessionid,params,millis,stamp) VALUES('${name}','${sessionid}','${params}','${millis}',now())`;
+    let rows = await query(`INSERT INTO events (name,sessionid,params,millis,stamp) VALUES(?,?,?,?,now())`, [name, sessionid, params, millis]);
+    l(chalk.greenBright("recordEvent", sql, rows));
+    const old=millis-10*24*3600*1000;
+    sql = `DELETE FROM events where millis<${old}`;
+    await query(`DELETE FROM events where millis<?`, [old]);
+}
 
-
+   
 
 
 
