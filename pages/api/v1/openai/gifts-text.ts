@@ -43,6 +43,8 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         const cachedResult = await redis?.get(k);
         if (cachedResult) {
           console.log("cachedResult:", cachedResult);
+          await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGiftsCompletion" });
+
           return res.status(200).json({ result: cachedResult });
         }
         if (isRecovery) {
