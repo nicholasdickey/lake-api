@@ -240,6 +240,31 @@ export const recordEvent = async ({
     sql = `DELETE FROM events where millis<${old}`;
     await query(`DELETE FROM events where millis<?`, [old]);
 }
+export const searchCombo = async ({
+    threadid,
+    id,
+    text,
+}: {
+    threadid: number,
+    id:string,
+    text: string,
+}) => {
+
+    let query = await dbGetQuery("wt", threadid);
+    let sql="";
+    if(id=="occasion"){
+        if(!text)
+        sql = `SELECT name from default_occasions order by name`;
+        else
+        sql = `SELECT name from default_occasions where name like '%${text}%' order by name`;
+    }
+    let rows = await query(sql);
+    l(chalk.greenBright("searchCombo", sql));
+    if (rows && rows.length > 0) {
+        return rows.map((row:any) => row['name']);
+    }
+    return [];
+}
 
    
 
