@@ -77,7 +77,6 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         }));
         console.log(chalk.yellow("assistantMessages:"), js(assistantMessages));
 
-
         // Add instruction to make the new message dissimilar from the cached results
         additionalInstructions = `Make the new message as dissimilar as possible from the previous messages. Avoid using same words and ideas, if possible. Be imaginative.`;
       }
@@ -105,13 +104,11 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
           await sleep(2000);
         }
       }
-
       if (!completion) {
         await recordEvent({ threadid, sessionid: process.env.event_env+":"+(sessionid as string || ""), params: ""+messages.map(m=>m.content).join('***') + '===!@!!No Completion Possible', name: "createChatCompletion" });
 
         return res.status(200).json({ result: "no completion possible" });
-      }
-     
+      }   
       const content = `${completion.data.choices[0]?.message?.content}`;
       console.log("result:", js(content));
       await recordEvent({ threadid, sessionid: process.env.event_env+":"+(sessionid as string || ""), params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });

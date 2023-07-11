@@ -7,7 +7,6 @@ import { fetchQueue } from "../../../../lib/queue/fetch-queue";
 import { getRedisClient } from "../../../../lib/redis";
 import { l, chalk, js, sleep } from "../../../../lib/common";
 import { getQwiket } from "../../../../lib/db/qwiket";
-import { getPost, checkChatbotPost, setChatbotPost } from "../../../../lib/db/post";
 import Stack from "../../../../lib/stack";
 
 

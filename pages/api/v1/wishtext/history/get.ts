@@ -20,8 +20,7 @@ export default async function handler(
 
     let threadid = Math.floor(Math.random() * 100000000)
     try{
-    const histories= await getHistories({threadid, username: username as string,page:page as number,pagesize:pagesize as number});
-       
+    const histories= await getHistories({threadid, username: username as string,page:page as number,pagesize:pagesize as number});  
         const ret = history?{
            success: true,
             histories

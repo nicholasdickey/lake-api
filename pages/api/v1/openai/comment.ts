@@ -6,7 +6,7 @@ import cheerio from "whacko"
 import { l, chalk, js, sleep } from "../../../../lib/common";
 import { getQwiket } from "../../../../lib/db/qwiket";
 import { getPost, checkChatbotPost, setChatbotPost } from "../../../../lib/db/post";
-import { id } from "date-fns/locale";
+
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,

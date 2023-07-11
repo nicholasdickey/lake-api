@@ -29,8 +29,7 @@ export default async function handler(
         l(chalk.red.bold(x));
         res.status(500).json({ success: false })
     }
-    finally {
-       
+    finally {      
         dbEnd(threadid);
     }
 }
