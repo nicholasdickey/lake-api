@@ -32,7 +32,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     const text = `Generate gifts suggestions on occasion of ${occasion
       } from ${from ? from : ''} ${to ? "to " + to : ""
       } ${reflections ? "also consider the following thoughts '" + reflections + "'" : ""
-      }.  list 5 gift ideas for this person(s) ${interests ?
+      }.  list 10 gift ideas for this person(s) ${interests ?
         `,also consider for the gift recommendation, not exclusively, the following interests: ${interests}` : ''}, putting the appropriate product search strings in double quotes. The interests should be considered but not exclusively - consider other approriate ideas.`;
 
     const k = text;
