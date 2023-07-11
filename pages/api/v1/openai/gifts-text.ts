@@ -42,7 +42,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       if (!isFresh) {
         const cachedResult = await redis?.get(k);
         if (cachedResult) {
-          console.log("cachedResult:", cachedResult);
+          //console.log("cachedResult:", cachedResult);
           await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGiftsCompletion" });
 
           return res.status(200).json({ result: cachedResult });
@@ -52,7 +52,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
           while (true) {
             const cachedResult = await redis?.get(k);
             if (cachedResult) {
-              console.log("cachedResult:", cachedResult);
+              //console.log("cachedResult:", cachedResult);
               return res.status(200).json({ result: cachedResult });
             }
             if (count-- < 0) {
@@ -63,11 +63,11 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         }
 
       }
-      console.log("KEY=", configuration.apiKey);
+     // console.log("KEY=", configuration.apiKey);
       const messages: ChatCompletionRequestMessage[] = [
         { role: "user", content: `${text}` },
       ];
-      console.log("req.body", configuration.apiKey, messages);
+    //  console.log("req.body", configuration.apiKey, messages);
 
       let completion;
       for (let i = 0; i < 4; i++) {
@@ -92,7 +92,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       const content = `${completion.data.choices[0]?.message?.content}`;
-      console.log("result:", js(content));
+    //  console.log("result:", js(content));
       await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===>Completion:' + content, name: "giftsCompletion" });
 
       await redis?.setex(`${k}`, 3600 * 24 * 7, content);
