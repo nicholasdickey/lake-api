@@ -89,7 +89,7 @@ export default async function handler(
 
     const stack = new Stack<{ text: string }>();
     let messages: ChatCompletionRequestMessage[] = [];
-
+    let ads: Article[] = [];
     let illegals: Article[] = [];
     let politics: Article[] = [];
     let society: Article[] = [];
@@ -460,8 +460,21 @@ export default async function handler(
         }
 
     };
+    const ad = { title: "Wish Text Composer", url: "https://www.wish-text.com?utm_medium=am1news", 
+    text: `Are you tired of struggling to find the right words and perfect gifts for various occasions? Look no further! With wish-text.com, our AI-powered assistant is here to make your life easier, and it's free!
+    Whether it's birthdays, graduations, holidays, or moments of illness or loss, wish-text.com provides personalized messages and thoughtful gift recommendations at no cost.  Try it today!`, publication:'wish-text.com', image: 'https://ucarecdn.com/d2cf70ef-7ffd-40d7-9e25-31e66927086e/wishtextad2.png', slug: 'wish-text-ad' };
+    ads.push(ad);       
     let html = ''
     let json: any = {}
+    if (ads.length > 0) {
+        json.illegals = { items: [] };
+        html += `<div class='digest-ads'><div class='digest-hashtag'>#sponsor</div>\n`
+        illegals.forEach(a => {
+            json.ads.items.push({ title: a.title, url: a.url, text: a.text, publication: a.publication, image: a.image });
+            html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split('#sponsor')[0]}</p>\n`;
+        })
+        html += `</div>`;
+    }
     if (illegals.length > 0) {
         json.illegals = { items: [] };
         html += `<div class='digest-illegals'><div class='digest-hashtag'>#illegals</div>\n`
