@@ -467,9 +467,9 @@ export default async function handler(
     let html = ''
     let json: any = {}
     if (ads.length > 0) {
-        json.illegals = { items: [] };
+        json.ads = { items: [] };
         html += `<div class='digest-ads'><div class='digest-hashtag'>#sponsor</div>\n`
-        illegals.forEach(a => {
+        ads.forEach(a => {
             json.ads.items.push({ title: a.title, url: a.url, text: a.text, publication: a.publication, image: a.image });
             html += `<span class='digest-title'><a href='${a.url}'>${a.publication}: ${a.title}</a></span><p class='digest-text'>${a.text.split('#sponsor')[0]}</p>\n`;
         })
