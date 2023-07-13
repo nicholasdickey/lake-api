@@ -69,7 +69,7 @@ export const updateSession = async ({
 }) => {
 
 
-
+    console.log("updateSession", sessionid, config);
     let query = await dbGetQuery("wt", threadid);
     let sql = `SELECT xid from session_configs where sessionid='${sessionid}'`;
     let rows = await query(`SELECT xid from session_configs where sessionid=?`, [sessionid]);
@@ -81,6 +81,7 @@ export const updateSession = async ({
         sql = `INSERT INTO session_configs (sessionid,lastUsed,config) VALUES ('${sessionid}',now(),'${config}')`;
         await query(`INSERT INTO session_configs (sessionid,lastUsed,config) VALUES (?,now(),?)`, [sessionid, config]);
     }
+    console.log("updateSession", sql);
 }
 export const fetchSession = async ({
     threadid,
@@ -91,7 +92,7 @@ export const fetchSession = async ({
     sessionid: string,
 
 }) => {
-
+    console.log("fetchSession API", sessionid);
     let query = await dbGetQuery("wt", threadid);
     const sql = `SELECT config from session_configs where sessionid='${sessionid}' `;
     let rows = await query(`SELECT config from session_configs where sessionid=?`, [sessionid]);
@@ -99,6 +100,7 @@ export const fetchSession = async ({
         await query(`UPDATE session_configs set lastUsed=now() where sessionid=?`, [sessionid]);
         return rows[0]['config']
     }
+    console.log
     return null;
 }
 
@@ -144,7 +146,7 @@ export const getHistories = async ({
     page: number,
     pagesize: number
 }) => {
-    const start=page*pagesize;
+    const start = page * pagesize;
     let query = await dbGetQuery("wt", threadid);
     const sql = `SELECT xid,username,time,\`to\`,greeting,occasion,image,gift from history where username='${username}' order by time desc limit ${start},${pagesize}`;
     let rows = await query(`SELECT xid,username,time,\`to\`,greeting,occasion,image,gift from history where username=? order by time desc limit ?,?`, [username, start, pagesize]);
@@ -174,8 +176,8 @@ export const upsertHistory = async ({
     image: string,
     gift: string
 }) => {
-    if(!time)
-    time=microtime();
+    if (!time)
+        time = microtime();
     let query = await dbGetQuery("wt", threadid);
     const sql = `
       INSERT INTO history (username, time, \`to\`, greeting, occasion, image, gift)
@@ -199,13 +201,13 @@ export const deleteHistory = async ({
     username,
     time,
     to,
-   
+
 }: {
     threadid: number,
     username: string,
     time: number,
     to: string,
-  
+
 }) => {
     let query = await dbGetQuery("wt", threadid);
     const sql = `
@@ -231,12 +233,12 @@ export const recordEvent = async ({
     params: string
 }) => {
     let sql, result;
-    const millis=microtime();
+    const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
     sql = `INSERT INTO events (name,sessionid,params,millis,stamp) VALUES('${name}','${sessionid}','${params}','${millis}',now())`;
     let rows = await query(`INSERT INTO events (name,sessionid,params,millis,stamp) VALUES(?,?,?,?,now())`, [name, sessionid, params, millis]);
     l(chalk.greenBright("recordEvent", sql, rows));
-    const old=millis-10*24*3600*1000;
+    const old = millis - 10 * 24 * 3600 * 1000;
     sql = `DELETE FROM events where millis<${old}`;
     await query(`DELETE FROM events where millis<?`, [old]);
 }
@@ -246,27 +248,32 @@ export const searchCombo = async ({
     text,
 }: {
     threadid: number,
-    id:string,
+    id: string,
     text: string,
 }) => {
 
     let query = await dbGetQuery("wt", threadid);
-    let sql="";
-    if(id=="occasion"){
-        if(!text)
-        sql = `SELECT name from default_occasions order by name`;
-        else
-        sql = `SELECT name from default_occasions where name like '%${text}%' order by name`;
+    let sql = "", rows: any[] = [];
+    if (id == "occasion") {
+        if (!text) {
+            sql = `SELECT DISTINCT name from default_occasions order by name`;
+            rows = await query(sql);
+
+        }
+        else {
+            sql = `SELECT name from default_occasions where name like ? order by name`;
+            rows = await query(sql, [`%${text}%`]);
+        }
     }
-    let rows = await query(sql);
-    l(chalk.greenBright("searchCombo", sql));
+
+    l(chalk.greenBright("searchCombo", sql, rows.map((row: any) => row['name'])));
     if (rows && rows.length > 0) {
-        return rows.map((row:any) => row['name']);
+        return rows.map((row: any) => row['name']);
     }
     return [];
 }
 
-   
+
 
 
 
