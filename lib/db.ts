@@ -57,6 +57,7 @@ const dbGetQuery = async (name:String, threadid:number) => {
                 port: _dbPort,
                 password: _dbPassword,
                 database: name,
+                charset: "utf8mb4",
             }
  
             var connection = mysql.createConnection(server as any)
