@@ -31,14 +31,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     console.log("wish-text called");
     let { sessionid, from, to, occasion, naive,reflections, instructions, inastyleof, language, age, fresh, recovery } = req.query;
     console.log("req.query", req.query);
-    const lighthearted=naive=='false'?true:false;
+    const lighthearted=naive=='false'?true:false; 
     console.log('lighthearted==>',lighthearted)
     const text = `Generate ${inastyleof ? `in a style of ${inastyleof}` : ""
       } a wish message on occasion of ${occasion
       } ${occasion == "Birthday" ? `` : ""
-      } from ${from ? from : "[Your Name]"} ${to ? "to " + to : ""
+      } from ${from ? from : ""} ${to ? "to " + to : ""
       } ${reflections ? "also consider the following thoughts '" + reflections + "'" : ""
-      }."Keep it around 400 characters unless instructed otherwise.${lighthearted?"Make it hallmark humorous, if possible.":""} Do not add any meta information, like character count. No hashtags.${instructions ? "Additional instructions:'" + instructions + "'." : ""}${language ? "Use language:" + language : ""}`;
+      }."Keep it around 400 characters unless instructed otherwise.Try to put a headline on a separate line.Like  Output github markdown. Use I or We , not third person.${lighthearted?"Make it hallmark humorous, if possible.":""} Do not add any meta information, like character count. No hashtags.${instructions ? "Additional instructions:'" + instructions + "'." : ""}${language ? "Use language:" + language : ""}`;
     
     console.log("Full text:", text);
     const k = sessionid + text;
