@@ -69,7 +69,7 @@ export const updateSession = async ({
 }) => {
 
 
-    console.log("updateSession", sessionid, config);
+    //console.log("updateSession", sessionid, config);
     let query = await dbGetQuery("wt", threadid);
     let sql = `SELECT xid from session_configs where sessionid='${sessionid}'`;
     let rows = await query(`SELECT xid from session_configs where sessionid=?`, [sessionid]);
@@ -81,7 +81,7 @@ export const updateSession = async ({
         sql = `INSERT INTO session_configs (sessionid,lastUsed,config) VALUES ('${sessionid}',now(),'${config}')`;
         await query(`INSERT INTO session_configs (sessionid,lastUsed,config) VALUES (?,now(),?)`, [sessionid, config]);
     }
-    console.log("updateSession", sql);
+  //  console.log("updateSession", sql);
 }
 export const fetchSession = async ({
     threadid,
@@ -92,7 +92,7 @@ export const fetchSession = async ({
     sessionid: string,
 
 }) => {
-    console.log("fetchSession API", sessionid);
+   // console.log("fetchSession API", sessionid);
     let query = await dbGetQuery("wt", threadid);
     const sql = `SELECT config from session_configs where sessionid='${sessionid}' `;
     let rows = await query(`SELECT config from session_configs where sessionid=?`, [sessionid]);
@@ -100,7 +100,7 @@ export const fetchSession = async ({
         await query(`UPDATE session_configs set lastUsed=now() where sessionid=?`, [sessionid]);
         return rows[0]['config']
     }
-    console.log
+   // console.log
     return null;
 }
 
@@ -237,7 +237,7 @@ export const recordEvent = async ({
     let query = await dbGetQuery("wt", threadid);
     sql = `INSERT INTO events (name,sessionid,params,millis,stamp) VALUES('${name}','${sessionid}','${params}','${millis}',now())`;
     let rows = await query(`INSERT INTO events (name,sessionid,params,millis,stamp) VALUES(?,?,?,?,now())`, [name, sessionid, params, millis]);
-    l(chalk.greenBright("recordEvent", sql, rows));
+   // l(chalk.greenBright("recordEvent", sql, rows));
     const old = millis - 10 * 24 * 3600 * 1000;
     sql = `DELETE FROM events where millis<${old}`;
     await query(`DELETE FROM events where millis<?`, [old]);
@@ -266,13 +266,74 @@ export const searchCombo = async ({
         }
     }
 
-    l(chalk.greenBright("searchCombo", sql, rows.map((row: any) => row['name'])));
+   // l(chalk.greenBright("searchCombo", sql, rows.map((row: any) => row['name'])));
     if (rows && rows.length > 0) {
         return rows.map((row: any) => row['name']);
     }
     return [];
 }
+export const recordSessionHistory = async ({
+    threadid,
+    greeting,
+    sessionid,
+    params
+}: {
+    threadid: number,
+    greeting: string,
+    sessionid: string,
+    params: string
+}) => {
+    let sql, rows;
+    const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    
+    sql=`SELECT max(num) as num from session_history where sessionid=?`;
+    rows = await query(sql,[sessionid]);
+    let num=0;
+    if(rows && rows.length>0){
+        num=rows[0]['num'];
+    }
+    num++;
+    sql = `INSERT INTO session_history (greeting,sessionid,params,num,stamp) VALUES(?,?,?,?,now())`;
+    await query(sql, [greeting, sessionid, params,num]);
+    l(chalk.redBright("recordSessionHistory", sql, rows));
+    return num;
+}
 
+export const getSessionHistory = async ({
+    threadid,
+    num,
+    sessionid,   
+}: {
+    threadid: number,
+    num: number,
+    sessionid: string,
+}) => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql=`SELECT greeting,params,stamp, max(num) as max from session_history where sessionid=? and num=?`;
+    let rows = await query(sql, [sessionid, num]);
+    const filledSql = fillInParams(sql,  [sessionid, num]);
+    l(chalk.greenBright("getSessionHistory", sessionid,num,filledSql, js(rows[0])));
+    return rows[0];
+}
+export const deleteSessionHistories = async ({
+    threadid,
+    sessionid,  
+}: {
+    threadid: number,
+    sessionid: string,
+}) => {
+    let query = await dbGetQuery("wt", threadid);
+    const sql = `
+        DELETE FROM session_history
+        WHERE sessionid = ?
+    `;
+    const params = [sessionid];
+    await query(sql, params);
+    const filledSql = fillInParams(sql, params);
+    l(chalk.greenBright("deleteSessionHistories", filledSql));
+}
 
 
 

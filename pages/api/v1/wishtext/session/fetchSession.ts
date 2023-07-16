@@ -25,7 +25,7 @@ export default async function handler(
 
     try {   
         const session =  await fetchSession({ threadid, sessionid: sessionid as string });
-        console.log("fetchSession", session)    
+       // console.log("fetchSession", session)    
         if(!session){
             return res.status(200).json({ success: true, session:null })  
         }

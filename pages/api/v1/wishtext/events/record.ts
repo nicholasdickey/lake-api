@@ -14,7 +14,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        console.log("events/record called");
+       // console.log("events/record called");
         let { sessionid, name, params } = req.query;
         await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""), params: params as string, name: name as string});
 

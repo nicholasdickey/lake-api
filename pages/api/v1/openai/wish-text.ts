@@ -3,7 +3,7 @@ import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from "openai";
 import NextCors from "nextjs-cors";
 import { getRedisClient } from "../../../../lib/redis";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { recordEvent } from "../../../../lib/db/wishtext";
+import { recordEvent,recordSessionHistory } from "../../../../lib/db/wishtext";
 import { dbEnd } from "../../../../lib/db"
 import applyRateLimit from '../../../../lib/rate-limit';
 const configuration = new Configuration({
@@ -55,8 +55,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if (cachedResult) {
           console.log("cachedResult:", cachedResult);
           await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGreetingCompletion" });
+          const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
+          const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult});
 
-          return res.status(200).json({ result: cachedResult });
+          return res.status(200).json({ result: cachedResult,num });
         }
         if (isRecovery) {
           let count = 120;
@@ -64,7 +66,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             const cachedResult = await redis?.get(k);
             if (cachedResult) {
               console.log("cachedResult:", cachedResult);
-              return res.status(200).json({ result: cachedResult });
+              const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
+              const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult});
+  
+              return res.status(200).json({ result: cachedResult,num });
             }
             if (count-- < 0) {
               return res.status(501).json({ success: false });
@@ -115,13 +120,16 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       const content = `${completion.data.choices[0]?.message?.content}`;
       console.log("result:", js(content));
       await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env+":"+(sessionid as string || ""), params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });
-
+      const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
+      const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:content});
+  
       // Store the latest result in Redis for one hour as part of the list
       await redis?.lpush(k, content);
       await redis?.ltrim(k, 0, 4);
       await redis?.expire(k, 600);
       await redis?.setex(`${text}`, 3600 * 24 * 7, content);
-      res.status(200).json({ result: content });
+      l(chalk.redBright("RETURN WISH-TEXT",num));
+      res.status(200).json({ result: content, num });
 
     } catch (e) {
       console.log("error:", e);

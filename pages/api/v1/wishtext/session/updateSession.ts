@@ -19,7 +19,7 @@ export default async function handler(
 
     const body = req.body;
     let { sessionid, config } =body;
-    console.log("update session",sessionid,config)
+   // console.log("update session",sessionid,config)
     let threadid = Math.floor(Math.random() * 100000000)
     try{
         await updateSession({ threadid, sessionid: sessionid as string, config: JSON.stringify(config) as string });

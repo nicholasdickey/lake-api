@@ -1,10 +1,10 @@
-//./pages/api/v1/user/fetchSession.ts
+
+// ./pages/api/v1/channel/fetch.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../../lib/common";
-import { getRedisClient } from "../../../../../lib/redis"
-import { searchCombo } from "../../../../../lib/db/wishtext"
-import { dbEnd } from "../../../../../lib/db"
+import {  dbEnd } from "../../../../../lib/db"
+import {getSessionHistory} from "../../../../../lib/db/wishtext"
 
 export default async function handler(
     req: NextApiRequest,
@@ -17,21 +17,27 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { id,text } = req.query;
+    let { sessionid='',num=0} = req.query;
+
     let threadid = Math.floor(Math.random() * 100000000)
-   
-   
-    try {
-     
-        const results =  await searchCombo({ threadid, id:(id as string)||"",text:( text as string)||""});
-      //  console.log("searchCombo", results);
-        return res.status(200).json({ success: true, results })
+    try{
+    const record= await getSessionHistory({threadid, sessionid: sessionid as string,num:num as number});  
+        const ret = record?{
+           success: true,
+            record
+        }:{
+            success: false,
+            msg: "Unable to get searchHistory for sessionid:", sessionid
+        }
+        res.status(200).json(ret)
     }
     catch (x) {
         l(chalk.red.bold(x));
-        res.status(500).json({ success: false })
+        res.status(501).json(x);
     }
     finally {
+     
         dbEnd(threadid);
+        return res.status(500);
     }
 }
