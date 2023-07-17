@@ -232,11 +232,15 @@ export const recordEvent = async ({
     sessionid: string,
     params: string
 }) => {
+    console.log("PARSING PARAMS",params);
+    let {fbclid,utm_content} = params.indexOf('{fbclid')==0?JSON.parse(params):params;
+    fbclid=ds(fbclid);
+    utm_content=ds(utm_content);
     let sql, result;
     const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
     sql = `INSERT INTO events (name,sessionid,params,millis,stamp) VALUES('${name}','${sessionid}','${params}','${millis}',now())`;
-    let rows = await query(`INSERT INTO events (name,sessionid,params,millis,stamp) VALUES(?,?,?,?,now())`, [name, sessionid, params, millis]);
+    let rows = await query(`INSERT INTO events (name,sessionid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,now(),?,?)`, [name, sessionid, params, millis,fbclid,utm_content]);
    // l(chalk.greenBright("recordEvent", sql, rows));
     const old = millis - 10 * 24 * 3600 * 1000;
     sql = `DELETE FROM events where millis<${old}`;
@@ -276,11 +280,13 @@ export const recordSessionHistory = async ({
     threadid,
     greeting,
     sessionid,
+    occasion,
     params
 }: {
     threadid: number,
     greeting: string,
     sessionid: string,
+    occasion:string,
     params: string
 }) => {
     let sql, rows;
@@ -296,7 +302,7 @@ export const recordSessionHistory = async ({
     num++;
     sql = `INSERT INTO session_history (greeting,sessionid,params,num,stamp) VALUES(?,?,?,?,now())`;
     await query(sql, [greeting, sessionid, params,num]);
-    l(chalk.redBright("recordSessionHistory", sql, rows));
+    //l(chalk.redBright("recordSessionHistory", sql, rows));
     return num;
 }
 
@@ -335,6 +341,23 @@ export const deleteSessionHistories = async ({
     l(chalk.greenBright("deleteSessionHistories", filledSql));
 }
 
+export const checkSessionHistory = async ({
+    threadid,
+    sessionid,  
+    occasion, 
+}: {
+    threadid: number,
+    sessionid: string,
+    occasion:string,
+}) => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql=`SELECT greeting from session_history where sessionid=? and occasion=?`;
+    let rows = await query(sql, [sessionid, occasion]);
+    const filledSql = fillInParams(sql,  [sessionid, occasion]);
+    l(chalk.greenBright("checkSessionHistory", sessionid,occasion,filledSql, js(rows)));
+    return rows;
+}
 
 
 

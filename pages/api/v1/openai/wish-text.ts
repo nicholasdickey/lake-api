@@ -3,7 +3,7 @@ import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from "openai";
 import NextCors from "nextjs-cors";
 import { getRedisClient } from "../../../../lib/redis";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { recordEvent,recordSessionHistory } from "../../../../lib/db/wishtext";
+import { recordEvent,recordSessionHistory,checkSessionHistory } from "../../../../lib/db/wishtext";
 import { dbEnd } from "../../../../lib/db"
 import applyRateLimit from '../../../../lib/rate-limit';
 const configuration = new Configuration({
@@ -47,7 +47,8 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     let assistantMessages: ChatCompletionRequestMessage[] = [];
     let additionalInstructions: string = '';
     try {
-      if (!isFresh) {
+      const history=await checkSessionHistory({sessionid:sessionid as string,threadid,occasion:occasion as string});
+      if (!history) {
         console.log("fetching from redis isFresh:", isFresh);
         const cachedResult = await redis?.get(text);
         console.log("cachedResult:", cachedResult);
@@ -56,7 +57,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
           console.log("cachedResult:", cachedResult);
           await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGreetingCompletion" });
           const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
-          const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult});
+          const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult,occasion:occasion as string});
 
           return res.status(200).json({ result: cachedResult,num });
         }
@@ -67,7 +68,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             if (cachedResult) {
               console.log("cachedResult:", cachedResult);
               const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
-              const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult});
+              const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult,occasion:occasion as string});
   
               return res.status(200).json({ result: cachedResult,num });
             }
@@ -78,10 +79,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
           }
         }
       } else {
-        const cachedResults = await redis?.lrange(k, 0, 4) || []; // Get the last 5 results from Redis as a list
-        assistantMessages = cachedResults.map((result: any) => ({
+       // const cachedResults = await redis?.lrange(k, 0, 4) || []; // Get the last 5 results from Redis as a list
+        assistantMessages = history.map((row: any) => ({
           role: "assistant",
-          content: result,
+          content: row["greeting"],
         }));
         console.log(chalk.yellow("assistantMessages:"), js(assistantMessages));
 
@@ -121,7 +122,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       console.log("result:", js(content));
       await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env+":"+(sessionid as string || ""), params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });
       const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
-      const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:content});
+      const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:content,occasion:occasion as string});
   
       // Store the latest result in Redis for one hour as part of the list
       await redis?.lpush(k, content);
