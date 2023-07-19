@@ -462,7 +462,7 @@ export default async function handler(
     };
     const ad = { title: "Wish Text Composer", url: "https://www.wish-text.com/landing?utm_content=am1news", 
     text: `Are you tired of struggling to find the right words and perfect gifts for various occasions? Look no further! With wish-text.com, our AI-powered assistant is here to make your life easier, and it's free!
-    Whether it's birthdays, graduations, holidays, or moments of illness or loss, <a href="https://wish-text.com/landing?utm_contnet=embed-digest">WISH-TEXT.COM</a> provides personalized messages and thoughtful gift recommendations at no cost.  Try it today!`, publication:'wish-text.com', image: 'https://ucarecdn.com/478cc99f-1fd7-4a2b-804b-32ebafcd1555/wtad3.png', slug: 'wish-text-ad' };
+    Whether it's birthdays, graduations, holidays, or moments of illness or loss, wish-text.com provides personalized messages and thoughtful gift recommendations at no cost.  Try it today!`, publication:'wish-text.com', image: 'https://ucarecdn.com/478cc99f-1fd7-4a2b-804b-32ebafcd1555/wtad3.png', slug: 'wish-text-ad' };
     ads.push(ad);       
     let html = ''
     let json: any = {}
