@@ -98,12 +98,28 @@ export const fetchSession = async ({
     let rows = await query(`SELECT config from session_configs where sessionid=?`, [sessionid]);
     if (rows && rows.length > 0) {
         await query(`UPDATE session_configs set lastUsed=now() where sessionid=?`, [sessionid]);
-        return rows[0]['config']
+        //blend in shared_images:
+        let configString= rows[0]['config'];
+        return configString;
     }
     // console.log
     return null;
 }
-
+export const fetchSharedImages=async({
+    threadid
+}:{
+    threadid:number
+})=>{
+    try{
+        let query = await dbGetQuery("wt", threadid);
+        const sql=`SELECT config from shared_images where tags like '%all%' order by ordinal`;
+        const sharedRows =await query(sql);
+        return sharedRows.map((r:{config:string})=>r['config']);
+    }
+    catch(x){
+        l(chalk.redBright(x));
+    }
+}
 export const fetchHistory = async ({
     threadid,
     username,
