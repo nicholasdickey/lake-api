@@ -234,7 +234,7 @@ export const recordEvent = async ({
 }) => {
     try {
         console.log("PARSING PARAMS", params);
-        let { fbclid, utm_content } = params.indexOf('{fbclid') == 0 ? JSON.parse(params) : params;
+        let { fbclid, utm_content } = params.trim().indexOf('{"fbclid"') == 0 ? JSON.parse(params) : params;
         fbclid = ds(fbclid);
         utm_content = ds(utm_content);
         let sql, result;
