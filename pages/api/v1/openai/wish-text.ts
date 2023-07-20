@@ -38,7 +38,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       } ${occasion == "Birthday" ? `` : ""
       } from ${from ? from : ""} ${to ? "to " + to : ""
       } ${reflections ? "also consider the following thoughts '" + reflections + "'" : ""
-      }."Keep it around 400 characters unless instructed otherwise.Try to put a headline on a separate line.Like  Output github markdown. Use I or We , not third person.${lighthearted?"Make it hallmark humorous, if possible.":""} Do not add any meta information, like character count. No hashtags.${instructions ? "Additional instructions:'" + instructions + "'." : ""}${language ? "Use language:" + language : ""}`;
+      }."Keep it around 400 characters unless instructed otherwise.Try to put a headline on a separate line. Output github markdown. Use I or We (first person) , not the third person.${lighthearted?"Make it hallmark humorous, if possible. Use many emojis.":""} Do not add any meta information, like character count. No hashtags.${instructions ? "Additional instructions:'" + instructions + "'." : ""}${language ? "Use language:" + language : ""}`;
     
     console.log("Full text:", text);
     const k = sessionid + text;
