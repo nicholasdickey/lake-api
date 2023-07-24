@@ -36,9 +36,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     const text = `Generate ${inastyleof ? `in a style of ${inastyleof}` : ""
       } a wish message on occasion of ${occasion
       } ${occasion == "Birthday" ? `` : ""
-      } from ${from ? from : ""} ${to ? "to " + to : ""
+      } The message is from ${from ? from : ""} ${to ? "to " + to : ""
       } ${reflections ? "also consider the following thoughts '" + reflections + "'" : ""
-      }."Keep it around 400 characters unless instructed otherwise.Try to put a headline on a separate line. Output github markdown. Use I or We (first person) , not the third person.${lighthearted?"Make it hallmark humorous, if possible. Use many emojis.":""} Do not add any meta information, like character count. No hashtags.${instructions ? "Additional instructions:'" + instructions + "'." : ""}${language ? "Use language:" + language : ""}`;
+      } ${instructions ? "Additional instructions:'" + instructions + "'." : `Keep it casual, very terse and acerbic, free of sloganeering, banalities, "let's", etc. Keep it real, like the real people talk.`} Keep it around 400 characters unless instructed otherwise.Try to put a headline on a separate line. Output github markdown. Use the first person, not the third person.${lighthearted?"Make it hallmark humorous, if possible. Use many emojis.":""} Do not add any meta information, like character count. No hashtags.${language ? "Use language:" + language : ""}`;
     
     console.log("Full text:", text);
     const k = sessionid + text;
