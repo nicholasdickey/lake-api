@@ -64,7 +64,8 @@ const fillInParams = (sql: string, params: any[]) => {
     }
     return param;
   }
-  
+  const randomstring = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+   
 export {
     l,
     allowLog,
@@ -78,4 +79,5 @@ export {
     js,
     ds,
     fillInParams,
+    randomstring
 };

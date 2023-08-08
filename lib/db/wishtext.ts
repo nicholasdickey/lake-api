@@ -1,5 +1,8 @@
-import { l, chalk, microtime, js, ds, fillInParams } from "../common";
+import { l, chalk, microtime, js, ds, fillInParams,randomstring } from "../common";
 import { dbGetQuery, dbLog } from "../db";
+import ImageData from "../types/image-data";
+import CardData from "../types/card-data";
+import { Cardo } from "@next/font/google";
 export const getUser = async ({
     threadid,
     slug
@@ -68,7 +71,7 @@ export const updateSession = async ({
     config: string
 }) => {
 
-
+    //TBD: parse images, make sure that images and session_images has all of them
     //console.log("updateSession", sessionid, config);
     let query = await dbGetQuery("wt", threadid);
     let sql = `SELECT xid from session_configs where sessionid='${sessionid}'`;
@@ -100,6 +103,7 @@ export const fetchSession = async ({
         await query(`UPDATE session_configs set lastUsed=now() where sessionid=?`, [sessionid]);
         //blend in shared_images:
         let configString= rows[0]['config'];
+      
         return configString;
     }
     // console.log
@@ -380,7 +384,163 @@ export const checkSessionHistory = async ({
     return rows;
 }
 
+export const recordSessionCard = async ({
+    threadid,
+    sessionid,
+    card
+}: {
+    threadid: number,
+    sessionid:string,
+    card:CardData
 
+}):Promise<{cardNum:number,linkid:string}> => {
+    const { image,num,signature,greeting} = card;
+    const linkid=randomstring();
+    l(chalk.yellowBright("recordSessionCard",sessionid,linkid,js(card),js(image)));
+    //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
+    const {url,publicId,height,width,thumbnailUrl,original_filename} = image;
+    l(chalk.yellowBright("recordSessionCard2",{url,publicId,height,width,thumbnailUrl,original_filename}));
+    let sql, rows;
+    const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    let xid=0;
+    sql=`SELECT xid from images where publicId=?`;
+    rows = await query(sql, [publicId]);
+    if(rows&&rows.length>0){
+        xid=rows[0]['xid'];
+    }
+    else {
+        sql=`INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
+        const result=await query(sql, [url,publicId,height,width,thumbnailUrl,original_filename]);
+        xid=result.insertId;
+    }
+    sql = `SELECT max(cardNum) as cardNum from session_cards where sessionid=?`;
+    rows = await query(sql, [sessionid]);
+    let cardNum = 0;
+    if (rows && rows.length > 0) {
+        cardNum = rows[0]['cardNum'];
+    }
+    cardNum++;
+    sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis) VALUES(?,?,?,now(),?,?,?,?)`;
+    await query(sql, [sessionid,num,signature,cardNum,xid,linkid,millis]);
+    
+    sql= `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis) VALUES(?,?,now(),?,?,?)`;
+    await query(sql, [signature,greeting,xid,linkid,millis]);
+    return {cardNum,linkid};
+}
 
+export const getSessionCards = async ({
+    threadid,
+    cardNum,
+    sessionid,
+}: {
+    threadid: number,
+    cardNum: number,
+    sessionid: string,
+}):Promise<CardData> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql = `SELECT c.num,c.signature,c.stamp, max(c.cardNum) as cardMax,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from session_cards c, images i where sessionid=? and c.imageid=i.xid and c.cardNum=?`;
+    let rows = await query(sql, [sessionid, cardNum]);
+    const filledSql = fillInParams(sql, [sessionid, cardNum]);
+    l(chalk.greenBright("getSessionCards", sessionid, cardNum, filledSql, js(rows[0])));
 
+    const image={url:rows[0]['url'],publicId:rows[0]['publicId'],height:rows[0]['height'],width:rows[0]['width'],thumbnailUrl:rows[0]['thumbnailUrl'],original_filename:rows[0]['original_filename']};
+    const card={num:rows[0]['num'],signature:rows[0]['signature'],image,cardNum,cardMax:rows[0]['cardMax'],linkid:rows[0]['linkid']};
+    card.image=image;
+    return card;
+}
+export const deleteSessionCards = async ({
+    threadid,
+    sessionid,
+}: {
+    threadid: number,
+    sessionid: string,
+}) => {
+    let query = await dbGetQuery("wt", threadid);
+    const sql = `
+        DELETE FROM session_cards
+        WHERE sessionid = ?
+    `;
+    const params = [sessionid];
+    await query(sql, params);
+    const filledSql = fillInParams(sql, params);
+    l(chalk.greenBright("deleteSessionCards", filledSql));
+}
+export const addSessionImage = async ({
+    threadid,
+    sessionid,
+    image
+}: {
+    threadid: number,
+    sessionid:string,
+    image:ImageData
+
+}):Promise<ImageData[]> => {
+    const { url,publicId,height,width,thumbnailUrl,original_filename} = image;
+;
+    l(chalk.yellowBright("addSessionImage",sessionid,publicId,js(image)));
+    //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
+  
+   // l(chalk.yellowBright("recordSessionCard2",{url,publicId,height,width,thumbnailUrl,original_filename}));
+    let sql, rows;
+   // const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    let xid=0;
+    sql=`SELECT xid from images where publicId=?`;
+    rows = await query(sql, [publicId]);
+    if(rows&&rows.length>0){
+        xid=rows[0]['xid'];
+    }
+    else {
+        sql=`INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
+        const result=await query(sql, [url,publicId,height,width,thumbnailUrl,original_filename]);
+        xid=result.insertId;
+    }
+    sql = `SELECT max(ordinal) as maxOrdinal from session_images where sessionid=?`;
+    rows = await query(sql, [sessionid]);
+    let maxOrdinal = 0;
+    if (rows && rows.length > 0) {
+        maxOrdinal = rows[0]['maxOrdinal'];
+    }
+    maxOrdinal++;
+    sql = `INSERT INTO session_images(sessionid,ordinal,imageid,stamp) VALUES(?,?,?,now())`;
+    await query(sql, [sessionid,maxOrdinal,xid]);
+
+    sql = `SELECT * from session_images si, images i where si.sessionid=? and si.imageid=i.xid order by  si.ordinal desc`;
+    rows=await query(sql, [sessionid]);
+
+    return rows;
+}
+export const fetchSessionImages = async ({
+    threadid,
+    sessionid,
+   
+}: {
+    threadid: number,
+    sessionid:string,
+   
+}):Promise<ImageData[]> => {
+    let sql, rows;
+   // const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    sql = `SELECT * from session_images si, images i where si.sessionid=? and si.imageid=i.xid order by  si.ordinal desc`;
+    rows=await query(sql, [sessionid]);
+    return rows;
+}
+export const deleteSessionImages = async ({
+    threadid,
+    sessionid,
+   
+}: {
+    threadid: number,
+    sessionid:string,
+   
+}):Promise<void> => {
+    let sql, rows;
+   // const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    sql = `DELETE from session_images  where sessionid=?`;
+    await query(sql, [sessionid]);
+}
 
