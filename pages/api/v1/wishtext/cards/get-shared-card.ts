@@ -2,9 +2,9 @@
 // ./pages/api/v1/channel/fetch.ts
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
-import { l, chalk, js } from "../../../../../lib/common";
+import { l, chalk, js,ds } from "../../../../../lib/common";
 import {  dbEnd } from "../../../../../lib/db"
-import {recordSessionCard} from "../../../../../lib/db/wishtext"
+import {getSharedCard} from "../../../../../lib/db/wishtext"
 import CardData from "../../../../../lib/types/card-data";
 export default async function handler(
     req: NextApiRequest,
@@ -17,33 +17,27 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    let { sessionid=''} = req.query;
-    const body=req.body;
-    const {card}:{card:CardData,sessionid:string,metaimage:string}=body;
-    
-    let threadid = Math.floor(Math.random() * 100000000)
+    let { sessionid='',id} = req.query;
+    id=ds(id as string);
+    console.log("API: getSharedCard", sessionid, id);
+    let threadid = Math.floor(Math.random() * 100000000);
     try{
-    //    l(chalk.yellowBright("recordSessionCard API>",card));
-    const {cardNum,linkid}= await recordSessionCard({threadid, sessionid: sessionid as string,card});  
-    
-    l(chalk.yellowBright("after recordSessionCard API>",linkid));  
-        
-    const ret = linkid?{
-            success: true,
-            cardNum,
-            linkid
+    const record:CardData= await getSharedCard({threadid, sessionid: sessionid as string,id}); 
+    l(chalk.greenBright("getSharedCard API>",record)) 
+        const ret = record?{
+           success: true,
+           card:record
         }:{
             success: false,
-            msg: "Unable to  recordSessionCard for sessionid:", sessionid
+            msg: "Unable to get getSessionCards for sessionid:", sessionid
         }
-        res.status(200).json(ret)
+        res.status(200).json(ret);
     }
     catch (x) {
         l(chalk.red.bold(x));
         res.status(501).json(x);
     }
     finally {
-     
         dbEnd(threadid);
         return res.status(500);
     }

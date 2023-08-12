@@ -3,6 +3,7 @@ import { dbGetQuery, dbLog } from "../db";
 import ImageData from "../types/image-data";
 import CardData from "../types/card-data";
 import { Cardo } from "@next/font/google";
+import { StringMappingType } from "typescript";
 export const getUser = async ({
     threadid,
     slug
@@ -387,14 +388,16 @@ export const checkSessionHistory = async ({
 export const recordSessionCard = async ({
     threadid,
     sessionid,
-    card
+    card,
+   
 }: {
     threadid: number,
     sessionid:string,
-    card:CardData
+    card:CardData,
+   
 
 }):Promise<{cardNum:number,linkid:string}> => {
-    const { image,num,signature,greeting} = card;
+    const { image,num,signature,greeting,metaimage} = card;
     const linkid=randomstring();
     l(chalk.yellowBright("recordSessionCard",sessionid,linkid,js(card),js(image)));
     //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
@@ -424,8 +427,13 @@ export const recordSessionCard = async ({
     sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis) VALUES(?,?,?,now(),?,?,?,?)`;
     await query(sql, [sessionid,num,signature,cardNum,xid,linkid,millis]);
     
-    sql= `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis) VALUES(?,?,now(),?,?,?)`;
-    await query(sql, [signature,greeting,xid,linkid,millis]);
+    sql= `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid) VALUES(?,?,now(),?,?,?,?)`;
+    await query(sql, [signature,greeting,xid,linkid,millis,sessionid]);
+    
+    sql= `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
+    await query(sql, [metaimage,linkid,millis,]);
+    
+
     return {cardNum,linkid};
 }
 
@@ -544,3 +552,42 @@ export const deleteSessionImages = async ({
     await query(sql, [sessionid]);
 }
 
+
+export const getSharedCard = async ({
+    threadid,
+    id,
+    sessionid,
+}: {
+    threadid: number,
+    id: string,
+    sessionid: string,
+}):Promise<CardData> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql = `SELECT c.greeting,c.signature,c.stamp,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from cards c, images i where c.linkid=? and c.imageid=i.xid`;
+    let rows = await query(sql, [id]);
+    const filledSql = fillInParams(sql, [id]);
+    l(chalk.greenBright("getSharedCard", sessionid, id, filledSql, js(rows[0])));
+
+    const image={url:rows[0]['url'],publicId:rows[0]['publicId'],height:rows[0]['height'],width:rows[0]['width'],thumbnailUrl:rows[0]['thumbnailUrl'],original_filename:rows[0]['original_filename']};
+    const card={greeting:rows[0]['greeting'],signature:rows[0]['signature'],image,linkid:rows[0]['linkid']};
+    card.image=image;
+    return card;
+}
+
+export const getMetaimage = async ({
+    threadid,
+    linkid,
+}: {
+    threadid: number,
+    linkid: string,
+    
+}):Promise<string> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql = `SELECT image from card_images where linkid=?`;
+    let rows = await query(sql, [linkid]);
+    const filledSql = fillInParams(sql, [linkid]);
+    l(chalk.blueBright("getMetaimage",linkid, filledSql, js(rows[0])));
+    return rows[0]['image'];
+}
