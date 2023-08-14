@@ -6,6 +6,22 @@ import { l, chalk, js } from "../../../../../lib/common";
 import {  dbEnd } from "../../../../../lib/db"
 import {recordSessionCard} from "../../../../../lib/db/wishtext"
 import CardData from "../../../../../lib/types/card-data";
+import sharp from "sharp";
+const resizeBase64 = async ({ base64Image, height = 640, width = 640 }:{base64Image:string,height:number,width:number}) => {
+    const destructImage = base64Image.split(";");
+    const mimType = destructImage[0].split(":")[1];
+    const imageData = destructImage[1].split(",")[1];
+  
+    try {
+      let resizedImage = Buffer.from(imageData, "base64")
+      resizedImage = await sharp(resizedImage).resize({ width,height,fit:'contain',background:{r: 164, g: 164, b: 164, alpha: 0.5} }).toBuffer()
+      
+      return `data:${mimType};base64,${resizedImage.toString("base64")}`
+    } catch (error) {
+      throw({ error })
+    }
+  };
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<any>
@@ -19,11 +35,12 @@ export default async function handler(
 
     let { sessionid=''} = req.query;
     const body=req.body;
-    const {card}:{card:CardData,sessionid:string,metaimage:string}=body;
-    
+    const {card}:{card:CardData,sessionid:string}=body;
+    const rb =await  resizeBase64({base64Image:card.metaimage||'',height:428,width:1200});
+    card.metaimage=rb;
     let threadid = Math.floor(Math.random() * 100000000)
     try{
-    //    l(chalk.yellowBright("recordSessionCard API>",card));
+        l(chalk.yellowBright("recordSessionCard API>",card));
     const {cardNum,linkid}= await recordSessionCard({threadid, sessionid: sessionid as string,card});  
     
     l(chalk.yellowBright("after recordSessionCard API>",linkid));  
@@ -47,4 +64,12 @@ export default async function handler(
         dbEnd(threadid);
         return res.status(500);
     }
+}
+export const config = {
+    api: {
+        responseLimit: false,
+      },
+      bodyParser: {
+        sizeLimit: '8mb',
+      },  
 }
