@@ -263,8 +263,8 @@ export const recordEvent = async ({
         let sql, result;
         const millis = microtime();
         let query = await dbGetQuery("wt", threadid);
-        sql = `INSERT INTO events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sessionid}','${params}','${millis}',now())`;
-        let rows = await query(`INSERT INTO events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid,sessionid, params, millis, fbclid, utm_content]);
+        sql = `INSERT INTO events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
+        let rows = await query(`INSERT INTO events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid,sid, params, millis, fbclid, utm_content]);
         // l(chalk.greenBright("recordEvent", sql, rows));
         const old = millis - 10 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
