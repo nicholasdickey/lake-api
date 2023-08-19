@@ -591,3 +591,106 @@ export const getMetaimage = async ({
     l(chalk.blueBright("getMetaimage",linkid, filledSql, js(rows[0])));
     return rows[0]['image'];
 }
+
+interface ReportItem{
+    name:string,
+    params:string,
+    fbclid:string,
+    ad:string,
+    stamp:string
+}
+
+export const reportEvents = async ({
+    threadid,
+}: {
+    threadid: number,
+    
+}):Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    const millis=microtime();
+   /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+    let rows = await query(sql);
+    l(chalk.red(sql))
+    for(let i=0;i<rows.length;i++){
+        const sessionid=rows[i]['sessionid'];
+        const xid=rows[i]['xid'];
+        const sid=sessionid?.split(':')[1];
+        sql='update wt.events set sid=? where xid=?';
+        await query(sql,[sid,xid]);
+    }*/
+
+    sql = `select distinct sid from wt.events where sessionid like '%PROD%' and millis>? order by millis desc`;
+    let rows = await query(sql, [millis-24*3600*1000]);
+    l(chalk.yellow(sql))
+    const filledSql = fillInParams(sql, [millis-24*3600*1000]);
+    l(chalk.blueBright("reportEvents", filledSql, js(rows)));
+    let retval:any={};
+    for(let i=0;i<rows.length;i++){
+        const sessionid=rows[i]['sid'];
+        let itemRetval:any={};
+        itemRetval.sessionid=sessionid;
+        retval[sessionid]=itemRetval;
+        itemRetval.items=[];
+        const filledSql = fillInParams(sql, [sessionid]);
+        sql = `select distinct name,params,fbclid,ad,stamp  from wt.events where sid =? order by millis desc`;
+        let rows2 = await query(sql, [sessionid]);
+       // l(js(rows2));
+        for(let j=0;j<rows2.length;j++){
+        let record:any={}
+        const name=rows2[j]['name'];
+        let constRecord=false;
+        record['fbclid']=rows2[j]['fbclid'];
+        record['ad']=rows2[j]['ad'];
+        record['stamp']=rows2[j]['stamp'];
+        switch(name){
+            case 'stripClickHandler':
+                record['name']='stripClick';
+                record['image']=rows2[j]['params'];
+                constRecord=true;
+                break;
+            case 'generate':{
+                record['name']='generate-text';
+                const params=JSON.parse(rows2[j]['params']);
+                record['occasion']=params['occasion'];
+                record['naive']=params['naive'];
+                constRecord=true;
+                break;
+            }
+            case 'create-card':{
+                const id=rows2[j]['params'];
+                sql=`select * from cards where linkid=?`;
+                break;
+            }
+            case 'createChatCompletion' : {
+                record['name']='text-completion';
+                const params=rows2[j]['params'];
+                l(chalk.red.bold("params",params)   );
+                const completion=params?.split('===>Completion:')[1]; 
+                l(chalk.green.bold("completion",completion)   );
+                record['text']=completion;
+                constRecord=true;
+                break;
+            }
+            case 'ssr-bot-landing-init':
+            case 'ssr-bot-card-init':
+            case 'ssr-card-init':
+            case 'ssr-index-init':
+            case 'ssr-landing-init':
+                record['name']=rows2[j]['name'];
+                l(chalk.grey("params",rows2[j]['params'])   );
+               // const params=JSON.parse(rows2[j]['params']);
+                record['params']=rows2[j]['params'];
+                constRecord=true;
+                break;
+            }
+            if(constRecord){
+                itemRetval.items.push(record);
+                l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+            } 
+            
+        }
+    }
+    l(chalk.greenBright("retval",js(retval)));
+    return retval;
+}
