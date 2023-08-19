@@ -1,4 +1,4 @@
-import { l, chalk, microtime, js, ds, fillInParams,randomstring } from "../common";
+import { l, chalk, microtime, js, ds, fillInParams, randomstring } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 import ImageData from "../types/image-data";
 import CardData from "../types/card-data";
@@ -103,25 +103,25 @@ export const fetchSession = async ({
     if (rows && rows.length > 0) {
         await query(`UPDATE session_configs set lastUsed=now() where sessionid=?`, [sessionid]);
         //blend in shared_images:
-        let configString= rows[0]['config'];
-      
+        let configString = rows[0]['config'];
+
         return configString;
     }
     // console.log
     return null;
 }
-export const fetchSharedImages=async({
+export const fetchSharedImages = async ({
     threadid
-}:{
-    threadid:number
-})=>{
-    try{
+}: {
+    threadid: number
+}) => {
+    try {
         let query = await dbGetQuery("wt", threadid);
-        const sql=`SELECT config from shared_images where tags like '%all%' order by ordinal`;
-        const sharedRows =await query(sql);
-        return sharedRows.map((r:{config:string})=>r['config']);
+        const sql = `SELECT config from shared_images where tags like '%all%' order by ordinal`;
+        const sharedRows = await query(sql);
+        return sharedRows.map((r: { config: string }) => r['config']);
     }
-    catch(x){
+    catch (x) {
         l(chalk.redBright(x));
     }
 }
@@ -252,7 +252,7 @@ export const recordEvent = async ({
     threadid: number,
     name: string,
     sessionid: string,
-    sid:string,
+    sid: string,
     params: string
 }) => {
     try {
@@ -264,7 +264,7 @@ export const recordEvent = async ({
         const millis = microtime();
         let query = await dbGetQuery("wt", threadid);
         sql = `INSERT INTO events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
-        let rows = await query(`INSERT INTO events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid,sid, params, millis, fbclid, utm_content]);
+        let rows = await query(`INSERT INTO events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
         // l(chalk.greenBright("recordEvent", sql, rows));
         const old = millis - 10 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
@@ -391,33 +391,33 @@ export const recordSessionCard = async ({
     threadid,
     sessionid,
     card,
-   
+
 }: {
     threadid: number,
-    sessionid:string,
-    card:CardData,
-   
+    sessionid: string,
+    card: CardData,
 
-}):Promise<{cardNum:number,linkid:string}> => {
-    const { image,num,signature,greeting,metaimage} = card;
-    const linkid=randomstring();
-    l(chalk.yellowBright("recordSessionCard",sessionid,linkid,js(card),js(image)));
+
+}): Promise<{ cardNum: number, linkid: string }> => {
+    const { image, num, signature, greeting, metaimage } = card;
+    const linkid = randomstring();
+    l(chalk.yellowBright("recordSessionCard", sessionid, linkid, js(card), js(image)));
     //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
-    const {url,publicId,height,width,thumbnailUrl,original_filename} = image;
-    l(chalk.yellowBright("recordSessionCard2",{url,publicId,height,width,thumbnailUrl,original_filename}));
+    const { url, publicId, height, width, thumbnailUrl, original_filename } = image;
+    l(chalk.yellowBright("recordSessionCard2", { url, publicId, height, width, thumbnailUrl, original_filename }));
     let sql, rows;
     const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
-    let xid=0;
-    sql=`SELECT xid from images where publicId=?`;
+    let xid = 0;
+    sql = `SELECT xid from images where publicId=?`;
     rows = await query(sql, [publicId]);
-    if(rows&&rows.length>0){
-        xid=rows[0]['xid'];
+    if (rows && rows.length > 0) {
+        xid = rows[0]['xid'];
     }
     else {
-        sql=`INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
-        const result=await query(sql, [url,publicId,height,width,thumbnailUrl,original_filename]);
-        xid=result.insertId;
+        sql = `INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
+        const result = await query(sql, [url, publicId, height, width, thumbnailUrl, original_filename]);
+        xid = result.insertId;
     }
     sql = `SELECT max(cardNum) as cardNum from session_cards where sessionid=?`;
     rows = await query(sql, [sessionid]);
@@ -427,16 +427,16 @@ export const recordSessionCard = async ({
     }
     cardNum++;
     sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis) VALUES(?,?,?,now(),?,?,?,?)`;
-    await query(sql, [sessionid,num,signature,cardNum,xid,linkid,millis]);
-    
-    sql= `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid) VALUES(?,?,now(),?,?,?,?)`;
-    await query(sql, [signature,greeting,xid,linkid,millis,sessionid]);
-    
-    sql= `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
-    await query(sql, [metaimage,linkid,millis,]);
-    
+    await query(sql, [sessionid, num, signature, cardNum, xid, linkid, millis]);
 
-    return {cardNum,linkid};
+    sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid) VALUES(?,?,now(),?,?,?,?)`;
+    await query(sql, [signature, greeting, xid, linkid, millis, sessionid]);
+
+    sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
+    await query(sql, [metaimage, linkid, millis,]);
+
+
+    return { cardNum, linkid };
 }
 
 export const getSessionCards = async ({
@@ -447,7 +447,7 @@ export const getSessionCards = async ({
     threadid: number,
     cardNum: number,
     sessionid: string,
-}):Promise<CardData> => {
+}): Promise<CardData> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT c.num,c.signature,c.stamp, max(c.cardNum) as cardMax,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from session_cards c, images i where sessionid=? and c.imageid=i.xid and c.cardNum=?`;
@@ -455,9 +455,9 @@ export const getSessionCards = async ({
     const filledSql = fillInParams(sql, [sessionid, cardNum]);
     l(chalk.greenBright("getSessionCards", sessionid, cardNum, filledSql, js(rows[0])));
 
-    const image={url:rows[0]['url'],publicId:rows[0]['publicId'],height:rows[0]['height'],width:rows[0]['width'],thumbnailUrl:rows[0]['thumbnailUrl'],original_filename:rows[0]['original_filename']};
-    const card={num:rows[0]['num'],signature:rows[0]['signature'],image,cardNum,cardMax:rows[0]['cardMax'],linkid:rows[0]['linkid']};
-    card.image=image;
+    const image = { url: rows[0]['url'], publicId: rows[0]['publicId'], height: rows[0]['height'], width: rows[0]['width'], thumbnailUrl: rows[0]['thumbnailUrl'], original_filename: rows[0]['original_filename'] };
+    const card = { num: rows[0]['num'], signature: rows[0]['signature'], image, cardNum, cardMax: rows[0]['cardMax'], linkid: rows[0]['linkid'] };
+    card.image = image;
     return card;
 }
 export const deleteSessionCards = async ({
@@ -483,29 +483,29 @@ export const addSessionImage = async ({
     image
 }: {
     threadid: number,
-    sessionid:string,
-    image:ImageData
+    sessionid: string,
+    image: ImageData
 
-}):Promise<ImageData[]> => {
-    const { url,publicId,height,width,thumbnailUrl,original_filename} = image;
-;
-    l(chalk.yellowBright("addSessionImage",sessionid,publicId,js(image)));
+}): Promise<ImageData[]> => {
+    const { url, publicId, height, width, thumbnailUrl, original_filename } = image;
+    ;
+    l(chalk.yellowBright("addSessionImage", sessionid, publicId, js(image)));
     //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
-  
-   // l(chalk.yellowBright("recordSessionCard2",{url,publicId,height,width,thumbnailUrl,original_filename}));
+
+    // l(chalk.yellowBright("recordSessionCard2",{url,publicId,height,width,thumbnailUrl,original_filename}));
     let sql, rows;
-   // const millis = microtime();
+    // const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
-    let xid=0;
-    sql=`SELECT xid from images where publicId=?`;
+    let xid = 0;
+    sql = `SELECT xid from images where publicId=?`;
     rows = await query(sql, [publicId]);
-    if(rows&&rows.length>0){
-        xid=rows[0]['xid'];
+    if (rows && rows.length > 0) {
+        xid = rows[0]['xid'];
     }
     else {
-        sql=`INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
-        const result=await query(sql, [url,publicId,height,width,thumbnailUrl,original_filename]);
-        xid=result.insertId;
+        sql = `INSERT INTO images (url,publicId,height,width,thumbnailUrl,original_filename) VALUES(?,?,?,?,?,?)`;
+        const result = await query(sql, [url, publicId, height, width, thumbnailUrl, original_filename]);
+        xid = result.insertId;
     }
     sql = `SELECT max(ordinal) as maxOrdinal from session_images where sessionid=?`;
     rows = await query(sql, [sessionid]);
@@ -515,40 +515,40 @@ export const addSessionImage = async ({
     }
     maxOrdinal++;
     sql = `INSERT INTO session_images(sessionid,ordinal,imageid,stamp) VALUES(?,?,?,now())`;
-    await query(sql, [sessionid,maxOrdinal,xid]);
+    await query(sql, [sessionid, maxOrdinal, xid]);
 
     sql = `SELECT * from session_images si, images i where si.sessionid=? and si.imageid=i.xid order by  si.ordinal desc`;
-    rows=await query(sql, [sessionid]);
+    rows = await query(sql, [sessionid]);
 
     return rows;
 }
 export const fetchSessionImages = async ({
     threadid,
     sessionid,
-   
+
 }: {
     threadid: number,
-    sessionid:string,
-   
-}):Promise<ImageData[]> => {
+    sessionid: string,
+
+}): Promise<ImageData[]> => {
     let sql, rows;
-   // const millis = microtime();
+    // const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT * from session_images si, images i where si.sessionid=? and si.imageid=i.xid order by  si.ordinal desc`;
-    rows=await query(sql, [sessionid]);
+    rows = await query(sql, [sessionid]);
     return rows;
 }
 export const deleteSessionImages = async ({
     threadid,
     sessionid,
-   
+
 }: {
     threadid: number,
-    sessionid:string,
-   
-}):Promise<void> => {
+    sessionid: string,
+
+}): Promise<void> => {
     let sql, rows;
-   // const millis = microtime();
+    // const millis = microtime();
     let query = await dbGetQuery("wt", threadid);
     sql = `DELETE from session_images  where sessionid=?`;
     await query(sql, [sessionid]);
@@ -563,7 +563,7 @@ export const getSharedCard = async ({
     threadid: number,
     id: string,
     sessionid: string,
-}):Promise<CardData> => {
+}): Promise<CardData> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT c.greeting,c.signature,c.stamp,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from cards c, images i where c.linkid=? and c.imageid=i.xid`;
@@ -571,9 +571,9 @@ export const getSharedCard = async ({
     const filledSql = fillInParams(sql, [id]);
     l(chalk.greenBright("getSharedCard", sessionid, id, filledSql, js(rows[0])));
 
-    const image={url:rows[0]['url'],publicId:rows[0]['publicId'],height:rows[0]['height'],width:rows[0]['width'],thumbnailUrl:rows[0]['thumbnailUrl'],original_filename:rows[0]['original_filename']};
-    const card={greeting:rows[0]['greeting'],signature:rows[0]['signature'],image,linkid:rows[0]['linkid']};
-    card.image=image;
+    const image = { url: rows[0]['url'], publicId: rows[0]['publicId'], height: rows[0]['height'], width: rows[0]['width'], thumbnailUrl: rows[0]['thumbnailUrl'], original_filename: rows[0]['original_filename'] };
+    const card = { greeting: rows[0]['greeting'], signature: rows[0]['signature'], image, linkid: rows[0]['linkid'] };
+    card.image = image;
     return card;
 }
 
@@ -583,181 +583,371 @@ export const getMetaimage = async ({
 }: {
     threadid: number,
     linkid: string,
-    
-}):Promise<string> => {
+
+}): Promise<string> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT image from card_images where linkid=?`;
     let rows = await query(sql, [linkid]);
     const filledSql = fillInParams(sql, [linkid]);
-    l(chalk.blueBright("getMetaimage",linkid, filledSql, js(rows[0])));
+    l(chalk.blueBright("getMetaimage", linkid, filledSql, js(rows[0])));
     return rows[0]['image'];
 }
 
-interface ReportItem{
-    name:string,
-    params:string,
-    fbclid:string,
-    ad:string,
-    stamp:string
+interface ReportItem {
+    name: string,
+    params: string,
+    fbclid: string,
+    ad: string,
+    stamp: string
 }
 
 export const reportEvents = async ({
     threadid,
 }: {
     threadid: number,
-    
-}):Promise<any> => {
+
+}): Promise<any> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
-    const millis=microtime();
-   /* sql='select distinct sessionid, xid from wt.events order by millis desc';
-    let rows = await query(sql);
-    l(chalk.red(sql))
-    for(let i=0;i<rows.length;i++){
-        const sessionid=rows[i]['sessionid'];
-        const xid=rows[i]['xid'];
-        const sid=sessionid?.split(':')[1];
-        sql='update wt.events set sid=? where xid=?';
-        await query(sql,[sid,xid]);
-    }*/
+    const millis = microtime();
+    /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+     let rows = await query(sql);
+     l(chalk.red(sql))
+     for(let i=0;i<rows.length;i++){
+         const sessionid=rows[i]['sessionid'];
+         const xid=rows[i]['xid'];
+         const sid=sessionid?.split(':')[1];
+         sql='update wt.events set sid=? where xid=?';
+         await query(sql,[sid,xid]);
+     }*/
 
     sql = `select sid,stamp from wt.events where millis>? group by millis,sid   order by millis desc `;
-    if(process.env.event_env!='DEV'){
+    if (process.env.event_env != 'DEV') {
         sql = `select sid,stamp from wt.events where not name like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
     }
-    let rows = await query(sql, [millis-24*3600*1000]);
-   // l(chalk.yellow(sql))
-    const filledSql = fillInParams(sql, [millis-24*3600*1000]);
+    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
+    // l(chalk.yellow(sql))
+    const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
     l(chalk.blueBright("reportEvents", filledSql, js(rows)));
-    let retval:any={};
-    for(let i=0;i<rows.length;i++){
-        const sessionid=rows[i]['sid'];
-        let itemRetval:any={};
-        itemRetval.sessionid=sessionid;
-        retval[sessionid]=itemRetval;
-        itemRetval.items=[];
+    let retval: any = {};
+    for (let i = 0; i < rows.length; i++) {
+        const sessionid = rows[i]['sid'];
+        let itemRetval: any = {};
+        itemRetval.sessionid = sessionid;
+        retval[sessionid] = itemRetval;
+        itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,stamp  from wt.events where sid =? order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
-       // l(js(rows2));
-        for(let j=0;j<rows2.length;j++){
-        let record:any={}
-        const name=rows2[j]['name'];
-        let constRecord=false;
-        record['fbclid']=rows2[j]['fbclid'];
-        record['ad']=rows2[j]['ad'];
-        record['stamp']=rows2[j]['stamp'];
-        l(chalk.magentaBright("name",name));
-        switch(name){
+        // l(js(rows2));
+        for (let j = 0; j < rows2.length; j++) {
+            let record: any = {}
+            const name = rows2[j]['name'];
+            let constRecord = false;
+            record['fbclid'] = rows2[j]['fbclid'];
+            record['ad'] = rows2[j]['ad'];
+            record['stamp'] = rows2[j]['stamp'];
+            l(chalk.magentaBright("name", name));
+            switch (name) {
+                case 'stripClickHandler':
+                    record['name'] = 'stripClick';
+                    record['image'] = rows2[j]['params'];
+                    constRecord = true;
+                    break;
+                case 'generate': {
+                    record['name'] = 'generate-text';
+                    const params = JSON.parse(rows2[j]['params']);
+                    record['occasion'] = params['occasion'];
+                    record['naive'] = params['naive'];
+                    constRecord = true;
+                    break;
+                }
+                case 'create-card': {
+                    record['name'] = 'create-card';
+                    const linkid = rows2[j]['params'];
+                    sql = `select * from cards where linkid=?`
+                    let rows3 = await query(sql, [linkid]);
+                    if (rows3 && rows3.length > 0) {
+                        record['signature'] = rows3[0]['signature'];
+                        record['greeting'] = rows3[0]['greeting'];
+                        sql = `select * from card_images where linkid=?`
+                        let rows4 = await query(sql, [linkid]);
+                        if (rows4 && rows4.length > 0) {
+                            record['metaimage'] = rows4[0]['image'];
+                        }
+                    }
+                    constRecord = true;
+                    break;
+                }
+                case 'ssr-card-init': {
+                    record['name'] = 'ssr-card-init';
+                    let srcParams = rows2[j]['params'];
+                    //  console.log("==================================================>>>srcParams",srcParams);
+
+                    if (srcParams.indexOf('"id"') < 0)
+                        srcParams = srcParams.replace("id", "\"id\"")
+                    //   l("after replace",srcParams)
+                    const params = JSON.parse(srcParams);
+                    const linkid = params['id'];
+                    sql = `select * from cards where linkid=?`
+                    let rows3 = await query(sql, [linkid]);
+                    if (rows3 && rows3.length > 0) {
+                        record['signature'] = rows3[0]['signature'];
+                        record['greeting'] = rows3[0]['greeting'];
+                        sql = `select * from card_images where linkid=?`
+                        let rows4 = await query(sql, [linkid]);
+                        if (rows4 && rows4.length > 0) {
+                            record['metaimage'] = rows4[0]['image'];
+                        }
+                    }
+                    constRecord = true;
+                    //  l(chalk.yellowBright("reportEventsInner",  js(record)));
+                    break;
+                }
+                case 'ssr-bot-card-init': {
+                    record['name'] = 'ssr-bot-card-init';
+                    let srcParams = rows2[j]['params'];
+                    console.log("srcParams", srcParams);
+                    if (srcParams.indexOf('{{') == 0)
+                        srcParams = srcParams.replace("{{", "{");
+                    if (srcParams.indexOf('"id"') < 0)
+                        srcParams = srcParams.replace("id", "\"id\"")
+                    l("after replace", srcParams)
+                    const params = JSON.parse(srcParams);
+                    const linkid = params['id'];
+                    sql = `select * from cards where linkid=?`
+                    let rows3 = await query(sql, [linkid]);
+                    if (rows3 && rows3.length > 0) {
+                        record['signature'] = rows3[0]['signature'];
+                        record['greeting'] = rows3[0]['greeting'];
+                        sql = `select * from card_images where linkid=?`
+                        let rows4 = await query(sql, [linkid]);
+                        if (rows4 && rows4.length > 0) {
+                            record['metaimage'] = rows4[0]['image'];
+                        }
+                    }
+                    constRecord = true;
+                    break;
+                }
+                case 'createChatCompletion': {
+                    record['name'] = 'text-completion';
+                    const params = rows2[j]['params'];
+                    // l(chalk.red.bold("params",params)   );
+                    const completion = params?.split('===>Completion:')[1];
+                    // l(chalk.green.bold("completion",completion)   );
+                    record['text'] = completion;
+                    constRecord = true;
+                    break;
+                }
+                case 'landing-cta-click':{
+                    record['name'] = rows2[j]['name'];
+                    const params = JSON.parse( rows2[j]['params']);
+                    record['fbclid'] = rows2[j]['fbclid'];
+                    record['ad'] = rows2[j]['ad'];
+                    record['cta_tag']=params.cta_tag;
+                    constRecord = true;
+                    break;
+                }
+                case 'landing-card-reveal':{
+                    record['name'] = rows2[j]['name'];
+                    record['fbclid'] = rows2[j]['fbclid'];
+                    record['ad'] = rows2[j]['ad'];  
+                    constRecord = true;
+                    break;
+                }
+                case 'ssr-bot-landing-init':
+                case 'ssr-index-init':
+                case 'ssr-bot-index-init':
+                case 'ssr-landing-init':
+                    record['name'] = rows2[j]['name'];
+                    // l(chalk.grey("params",rows2[j]['params'])   );
+                    // const params=JSON.parse(rows2[j]['params']);
+                    record['params'] = rows2[j]['params'];
+                    constRecord = true;
+                    break;
+            }
+            if (constRecord) {
+                itemRetval.items.push(record);
+                // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+            }
+
+        }
+    }
+    //l(chalk.greenBright("retval",js(retval)));
+    return retval;
+}
+
+export const reportSessionEvents = async ({
+    threadid,
+    sessionid,
+}: {
+    threadid: number,
+    sessionid: string,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    const millis = microtime();
+
+
+
+    let itemRetval: any = {};
+    itemRetval.sessionid = sessionid;
+
+    itemRetval.items = [];
+    //const filledSql = fillInParams(sql, [sessionid]);
+    sql = `select distinct name,params,fbclid,ad,stamp  from wt.events where sid =? order by millis desc`;
+    let rows2 = await query(sql, [sessionid]);
+    // l(js(rows2));
+    for (let j = 0; j < rows2.length; j++) {
+        let record: any = {}
+        const name = rows2[j]['name'];
+        let constRecord = false;
+        record['fbclid'] = rows2[j]['fbclid'];
+        record['ad'] = rows2[j]['ad'];
+        record['stamp'] = rows2[j]['stamp'];
+        l(chalk.magentaBright("name", name));
+        switch (name) {
             case 'stripClickHandler':
-                record['name']='stripClick';
-                record['image']=rows2[j]['params'];
-                constRecord=true;
+                record['name'] = 'stripClick';
+                record['image'] = rows2[j]['params'];
+                constRecord = true;
                 break;
-            case 'generate':{
-                record['name']='generate-text';
-                const params=JSON.parse(rows2[j]['params']);
-                record['occasion']=params['occasion'];
-                record['naive']=params['naive'];
-                constRecord=true;
+            case 'generate': {
+                record['name'] = 'generate-text';
+                const params = JSON.parse(rows2[j]['params']);
+                record['occasion'] = params['occasion'];
+                record['naive'] = params['naive'];
+                constRecord = true;
                 break;
             }
-            case 'create-card':{
-                record['name']='create-card';
-                const linkid=rows2[j]['params'];
-                sql=`select * from cards where linkid=?`
+            case 'create-card': {
+                record['name'] = 'create-card';
+                const linkid = rows2[j]['params'];
+                sql = `select * from cards where linkid=?`
                 let rows3 = await query(sql, [linkid]);
-                if(rows3&&rows3.length>0){
-                    record['signature']=rows3[0]['signature'];
-                    record['greeting']=rows3[0]['greeting'];
-                    sql=`select * from card_images where linkid=?`
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
                     let rows4 = await query(sql, [linkid]);
-                    if(rows4&&rows4.length>0){
-                        record['metaimage']=rows4[0]['image'];
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
                     }
                 }
-                constRecord=true;      
+                constRecord = true;
                 break;
             }
-            case 'ssr-card-init':{
-                record['name']='ssr-card-init';
-                let srcParams=rows2[j]['params'];
-              //  console.log("==================================================>>>srcParams",srcParams);
-                  
-                if(srcParams.indexOf('"id"')<0)
-                    srcParams= srcParams.replace("id","\"id\"")
-             //   l("after replace",srcParams)
-                const params=JSON.parse(srcParams);
-                const linkid=params['id'];
-                sql=`select * from cards where linkid=?`
+            case 'ssr-card-init': {
+                record['name'] = 'ssr-card-init';
+                let srcParams = rows2[j]['params'];
+                //  console.log("==================================================>>>srcParams",srcParams);
+
+                if (srcParams.indexOf('"id"') < 0)
+                    srcParams = srcParams.replace("id", "\"id\"")
+                //   l("after replace",srcParams)
+                const params = JSON.parse(srcParams);
+                const linkid = params['id'];
+                sql = `select * from cards where linkid=?`
                 let rows3 = await query(sql, [linkid]);
-                if(rows3&&rows3.length>0){
-                    record['signature']=rows3[0]['signature'];
-                    record['greeting']=rows3[0]['greeting'];
-                    sql=`select * from card_images where linkid=?`
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
                     let rows4 = await query(sql, [linkid]);
-                    if(rows4&&rows4.length>0){
-                        record['metaimage']=rows4[0]['image'];
-                    }       
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
+                    }
                 }
-                constRecord=true;
-              //  l(chalk.yellowBright("reportEventsInner",  js(record)));
+                constRecord = true;
+                //  l(chalk.yellowBright("reportEventsInner",  js(record)));
                 break;
             }
-            case 'ssr-bot-card-init':{
-                record['name']='ssr-bot-card-init';
-                let srcParams=rows2[j]['params'];
-                console.log("srcParams",srcParams);
-                if(srcParams.indexOf('{{')==0)
-                   srcParams= srcParams.replace("{{","{");
-                if(srcParams.indexOf('"id"')<0)
-                    srcParams= srcParams.replace("id","\"id\"")
-                l("after replace",srcParams)
-                const params=JSON.parse(srcParams);
-                const linkid=params['id'];
-                sql=`select * from cards where linkid=?`
+            case 'ssr-bot-card-init': {
+                record['name'] = 'ssr-bot-card-init';
+                let srcParams = rows2[j]['params'];
+                console.log("srcParams", srcParams);
+                if (srcParams.indexOf('{{') == 0)
+                    srcParams = srcParams.replace("{{", "{");
+                if (srcParams.indexOf('"id"') < 0)
+                    srcParams = srcParams.replace("id", "\"id\"")
+                l("after replace", srcParams)
+                const params = JSON.parse(srcParams);
+                const linkid = params['id'];
+                sql = `select * from cards where linkid=?`
                 let rows3 = await query(sql, [linkid]);
-                if(rows3&&rows3.length>0){
-                    record['signature']=rows3[0]['signature'];
-                    record['greeting']=rows3[0]['greeting'];
-                    sql=`select * from card_images where linkid=?`
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
                     let rows4 = await query(sql, [linkid]);
-                    if(rows4&&rows4.length>0){
-                        record['metaimage']=rows4[0]['image'];
-                    }       
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
+                    }
                 }
-                constRecord=true;
+                constRecord = true;
                 break;
             }
-            case 'createChatCompletion' : {
-                record['name']='text-completion';
-                const params=rows2[j]['params'];
-               // l(chalk.red.bold("params",params)   );
-                const completion=params?.split('===>Completion:')[1]; 
-               // l(chalk.green.bold("completion",completion)   );
-                record['text']=completion;
-                constRecord=true;
+            case 'createChatCompletion': {
+                record['name'] = 'text-completion';
+                const params = rows2[j]['params'];
+                // l(chalk.red.bold("params",params)   );
+                const completion = params?.split('===>Completion:')[1];
+                // l(chalk.green.bold("completion",completion)   );
+                record['text'] = completion;
+                constRecord = true;
                 break;
             }
             case 'ssr-bot-landing-init':
             case 'ssr-index-init':
             case 'ssr-bot-index-init':
             case 'ssr-landing-init':
-                record['name']=rows2[j]['name'];
-               // l(chalk.grey("params",rows2[j]['params'])   );
-               // const params=JSON.parse(rows2[j]['params']);
-                record['params']=rows2[j]['params'];
-                constRecord=true;
+                record['name'] = rows2[j]['name'];
+                // l(chalk.grey("params",rows2[j]['params'])   );
+                // const params=JSON.parse(rows2[j]['params']);
+                record['params'] = rows2[j]['params'];
+                constRecord = true;
                 break;
-            }
-            if(constRecord){
-                itemRetval.items.push(record);
-               // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
-            } 
-            
         }
+        if (constRecord) {
+            itemRetval.items.push(record);
+            // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+        }
+
     }
+
     //l(chalk.greenBright("retval",js(retval)));
-    return retval;
+    return itemRetval;
+}
+
+export const reportsSessionids = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    const millis = microtime();
+    /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+     let rows = await query(sql);
+     l(chalk.red(sql))
+     for(let i=0;i<rows.length;i++){
+         const sessionid=rows[i]['sessionid'];
+         const xid=rows[i]['xid'];
+         const sid=sessionid?.split(':')[1];
+         sql='update wt.events set sid=? where xid=?';
+         await query(sql,[sid,xid]);
+     }*/
+
+    sql = `select sid,stamp from wt.events where millis>? group by millis,sid   order by millis desc `;
+    if (process.env.event_env != 'DEV') {
+        sql = `select sid,stamp from wt.events where not name like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
+    }
+    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
+    // l(chalk.yellow(sql))
+   
+    //l(chalk.greenBright("retval",js(retval)));
+    return rows;
 }
