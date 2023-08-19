@@ -55,7 +55,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
 
         if (cachedResult) {
           console.log("cachedResult:", cachedResult);
-          await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGreetingCompletion" });
+          await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""),sid:sessionid as string||'', params: ""+k+";conent:"+cachedResult, name: "cachedGreetingCompletion" });
           const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
           const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:cachedResult,occasion:occasion as string});
 
@@ -114,13 +114,13 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         }
       }
       if (!completion) {
-        await recordEvent({ threadid, sessionid:"API=>"+ process.env.event_env+":"+(sessionid as string || ""), params: ""+messages.map(m=>m.content).join('***') + '===!@!!No Completion Possible', name: "createChatCompletion" });
+        await recordEvent({ threadid, sessionid:"API=>"+ process.env.event_env+":"+(sessionid as string || ""), sid:sessionid as string||'',params: ""+messages.map(m=>m.content).join('***') + '===!@!!No Completion Possible', name: "createChatCompletion" });
 
         return res.status(200).json({ result: "no completion possible" });
       }   
       const content = `${completion.data.choices[0]?.message?.content}`;
       console.log("result:", js(content));
-      await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env+":"+(sessionid as string || ""), params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });
+      await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env+":"+(sessionid as string || ""),sid:sessionid as string||'', params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });
       const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
       const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:content,occasion:occasion as string});
   
