@@ -622,9 +622,9 @@ export const reportEvents = async ({
         await query(sql,[sid,xid]);
     }*/
 
-    sql = `select distinct sid from wt.events where sessionid like '%PROD%' and millis>? order by millis desc`;
+    sql = `select sid,stamp from wt.events where millis>? group by millis,sid   order by millis desc `;
     let rows = await query(sql, [millis-24*3600*1000]);
-    l(chalk.yellow(sql))
+   // l(chalk.yellow(sql))
     const filledSql = fillInParams(sql, [millis-24*3600*1000]);
     l(chalk.blueBright("reportEvents", filledSql, js(rows)));
     let retval:any={};
@@ -680,11 +680,11 @@ export const reportEvents = async ({
             case 'ssr-card-init':{
                 record['name']='ssr-card-init';
                 let srcParams=rows2[j]['params'];
-                console.log("srcParams",srcParams);
-               
+              //  console.log("==================================================>>>srcParams",srcParams);
+                  
                 if(srcParams.indexOf('"id"')<0)
                     srcParams= srcParams.replace("id","\"id\"")
-                l("after replace",srcParams)
+             //   l("after replace",srcParams)
                 const params=JSON.parse(srcParams);
                 const linkid=params['id'];
                 sql=`select * from cards where linkid=?`
@@ -699,6 +699,7 @@ export const reportEvents = async ({
                     }       
                 }
                 constRecord=true;
+              //  l(chalk.yellowBright("reportEventsInner",  js(record)));
                 break;
             }
             case 'ssr-bot-card-init':{
@@ -729,9 +730,9 @@ export const reportEvents = async ({
             case 'createChatCompletion' : {
                 record['name']='text-completion';
                 const params=rows2[j]['params'];
-                l(chalk.red.bold("params",params)   );
+               // l(chalk.red.bold("params",params)   );
                 const completion=params?.split('===>Completion:')[1]; 
-                l(chalk.green.bold("completion",completion)   );
+               // l(chalk.green.bold("completion",completion)   );
                 record['text']=completion;
                 constRecord=true;
                 break;
@@ -741,7 +742,7 @@ export const reportEvents = async ({
             case 'ssr-bot-index-init':
             case 'ssr-landing-init':
                 record['name']=rows2[j]['name'];
-                l(chalk.grey("params",rows2[j]['params'])   );
+               // l(chalk.grey("params",rows2[j]['params'])   );
                // const params=JSON.parse(rows2[j]['params']);
                 record['params']=rows2[j]['params'];
                 constRecord=true;
@@ -749,11 +750,11 @@ export const reportEvents = async ({
             }
             if(constRecord){
                 itemRetval.items.push(record);
-                l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+               // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
             } 
             
         }
     }
-    l(chalk.greenBright("retval",js(retval)));
+    //l(chalk.greenBright("retval",js(retval)));
     return retval;
 }
