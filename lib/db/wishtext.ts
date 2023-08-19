@@ -756,6 +756,20 @@ export const reportEvents = async ({
                     constRecord = true;
                     break;
                 }
+                case 'open-card-editor':{
+                    record['name'] = rows2[j]['name'];
+                    record['fbclid'] = rows2[j]['fbclid'];
+                    record['utm_content'] = rows2[j]['utm_content'];  
+                    constRecord = true;
+                    break;
+                }
+                case 'close-card-editor':{
+                    record['name'] = rows2[j]['name'];
+                    record['fbclid'] = rows2[j]['fbclid'];
+                    record['utm_content'] = rows2[j]['utm_content'];  
+                    constRecord = true;
+                    break;
+                }
                 case 'ssr-bot-landing-init':
                 case 'ssr-index-init':
                 case 'ssr-bot-index-init':
