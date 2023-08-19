@@ -632,7 +632,7 @@ export const reportEvents = async ({
         itemRetval.sessionid=sessionid;
         retval[sessionid]=itemRetval;
         itemRetval.items=[];
-        const filledSql = fillInParams(sql, [sessionid]);
+        //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,stamp  from wt.events where sid =? order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
        // l(js(rows2));
@@ -643,6 +643,7 @@ export const reportEvents = async ({
         record['fbclid']=rows2[j]['fbclid'];
         record['ad']=rows2[j]['ad'];
         record['stamp']=rows2[j]['stamp'];
+        l(chalk.magentaBright("name",name));
         switch(name){
             case 'stripClickHandler':
                 record['name']='stripClick';
@@ -658,8 +659,69 @@ export const reportEvents = async ({
                 break;
             }
             case 'create-card':{
-                const id=rows2[j]['params'];
-                sql=`select * from cards where linkid=?`;
+                record['name']='create-card';
+                const linkid=rows2[j]['params'];
+                sql=`select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if(rows3&&rows3.length>0){
+                    record['signature']=rows3[0]['signature'];
+                    record['greeting']=rows3[0]['greeting'];
+                    sql=`select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if(rows4&&rows4.length>0){
+                        record['metaimage']=rows4[0]['image'];
+                    }
+                }
+                constRecord=true;      
+                break;
+            }
+            case 'ssr-card-init':{
+                record['name']='ssr-card-init';
+                let srcParams=rows2[j]['params'];
+                console.log("srcParams",srcParams);
+               
+                if(srcParams.indexOf('"id"')<0)
+                    srcParams= srcParams.replace("id","\"id\"")
+                l("after replace",srcParams)
+                const params=JSON.parse(srcParams);
+                const linkid=params['id'];
+                sql=`select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if(rows3&&rows3.length>0){
+                    record['signature']=rows3[0]['signature'];
+                    record['greeting']=rows3[0]['greeting'];
+                    sql=`select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if(rows4&&rows4.length>0){
+                        record['metaimage']=rows4[0]['image'];
+                    }       
+                }
+                constRecord=true;
+                break;
+            }
+            case 'ssr-bot-card-init':{
+                record['name']='ssr-bot-card-init';
+                let srcParams=rows2[j]['params'];
+                console.log("srcParams",srcParams);
+                if(srcParams.indexOf('{{')==0)
+                   srcParams= srcParams.replace("{{","{");
+                if(srcParams.indexOf('"id"')<0)
+                    srcParams= srcParams.replace("id","\"id\"")
+                l("after replace",srcParams)
+                const params=JSON.parse(srcParams);
+                const linkid=params['id'];
+                sql=`select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if(rows3&&rows3.length>0){
+                    record['signature']=rows3[0]['signature'];
+                    record['greeting']=rows3[0]['greeting'];
+                    sql=`select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if(rows4&&rows4.length>0){
+                        record['metaimage']=rows4[0]['image'];
+                    }       
+                }
+                constRecord=true;
                 break;
             }
             case 'createChatCompletion' : {
@@ -673,9 +735,8 @@ export const reportEvents = async ({
                 break;
             }
             case 'ssr-bot-landing-init':
-            case 'ssr-bot-card-init':
-            case 'ssr-card-init':
             case 'ssr-index-init':
+            case 'ssr-bot-index-init':
             case 'ssr-landing-init':
                 record['name']=rows2[j]['name'];
                 l(chalk.grey("params",rows2[j]['params'])   );
