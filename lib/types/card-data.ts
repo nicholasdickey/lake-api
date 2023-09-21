@@ -8,5 +8,6 @@ export default interface CardData {
     cardMax?:number;
     greeting?:string;
     metaimage?:string;
+    animatedSignature?:number;
   }
   

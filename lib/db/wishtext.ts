@@ -256,7 +256,7 @@ export const recordEvent = async ({
     params: string
 }) => {
     try {
-        console.log("PARSING PARAMS", params);
+       // console.log("PARSING PARAMS", params);
         let { fbclid, utm_content } = params.trim().indexOf('{"fbclid"') == 0 ? JSON.parse(params) : params;
         fbclid = ds(fbclid);
         utm_content = ds(utm_content);
@@ -399,7 +399,7 @@ export const recordSessionCard = async ({
 
 
 }): Promise<{ cardNum: number, linkid: string }> => {
-    const { image, num, signature, greeting, metaimage } = card;
+    const { image, num, signature, greeting, metaimage,animatedSignature } = card;
     const linkid = randomstring();
     l(chalk.yellowBright("recordSessionCard", sessionid, linkid, js(card), js(image)));
     //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
@@ -426,11 +426,11 @@ export const recordSessionCard = async ({
         cardNum = rows[0]['cardNum'];
     }
     cardNum++;
-    sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis) VALUES(?,?,?,now(),?,?,?,?)`;
-    await query(sql, [sessionid, num, signature, cardNum, xid, linkid, millis]);
+    sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis,animatedSignature) VALUES(?,?,?,now(),?,?,?,?,?)`;
+    await query(sql, [sessionid, num, signature, cardNum, xid, linkid, millis,animatedSignature]);
 
-    sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid) VALUES(?,?,now(),?,?,?,?)`;
-    await query(sql, [signature, greeting, xid, linkid, millis, sessionid]);
+    sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid,animatedSignature) VALUES(?,?,now(),?,?,?,?,?)`;
+    await query(sql, [signature, greeting, xid, linkid, millis, sessionid,animatedSignature]);
 
     sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
     await query(sql, [metaimage, linkid, millis,]);
@@ -450,7 +450,7 @@ export const getSessionCards = async ({
 }): Promise<CardData> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
-    sql = `SELECT c.num,c.signature,c.stamp, max(c.cardNum) as cardMax,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from session_cards c, images i where sessionid=? and c.imageid=i.xid and c.cardNum=?`;
+    sql = `SELECT c.num,c.signature,c.stamp, max(c.cardNum) as cardMax,c.linkid, c.animated_signature as animatedSignature, i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from session_cards c, images i where sessionid=? and c.imageid=i.xid and c.cardNum=?`;
     let rows = await query(sql, [sessionid, cardNum]);
     const filledSql = fillInParams(sql, [sessionid, cardNum]);
     l(chalk.greenBright("getSessionCards", sessionid, cardNum, filledSql, js(rows[0])));
@@ -566,7 +566,7 @@ export const getSharedCard = async ({
 }): Promise<CardData> => {
     let sql, result;
     let query = await dbGetQuery("wt", threadid);
-    sql = `SELECT c.greeting,c.signature,c.stamp,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from cards c, images i where c.linkid=? and c.imageid=i.xid`;
+    sql = `SELECT c.greeting,c.signature,c.animated_signature as animatedSignature, c.stamp,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from cards c, images i where c.linkid=? and c.imageid=i.xid`;
     let rows = await query(sql, [id]);
     const filledSql = fillInParams(sql, [id]);
     l(chalk.greenBright("getSharedCard", sessionid, id, filledSql, js(rows[0])));
@@ -592,6 +592,29 @@ export const getMetaimage = async ({
     const filledSql = fillInParams(sql, [linkid]);
     l(chalk.blueBright("getMetaimage", linkid, filledSql, js(rows[0])));
     return rows[0]['image'];
+}
+export const recordMetaimage = async ({
+    threadid,
+    linkid,
+    image,
+}: {
+    threadid: number,
+    linkid: string,
+    image:string
+
+}): Promise<void> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    sql = `SELECT xid from card_images where linkid=?`;
+    let rows = await query(sql, [linkid]);
+    if(rows&&rows.length>0){
+        sql=`UPDATE card_images set image=? where linkid=?`;
+        await query(sql,[image,linkid]);
+    }
+    else {
+        sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
+        await query(sql, [image, linkid, microtime()]);
+    }
 }
 
 interface ReportItem {
@@ -964,4 +987,43 @@ export const reportsSessionids = async ({
    
     //l(chalk.greenBright("retval",js(retval)));
     return rows;
+}
+
+
+export const recordGif = async ({
+    threadid,
+    sessionid,
+    gif,
+    id
+
+}: {
+    threadid: number,
+    sessionid: string,
+    gif: string,
+    id: string
+
+
+}): Promise<{ success: boolean}> => {
+    
+    const linkid = id;
+    l(chalk.yellowBright("recordSessionCard", sessionid, linkid, ));
+   
+    let sql, rows;
+    const millis = microtime();
+    let query = await dbGetQuery("wt", threadid);
+    let xid = 0;
+    sql = `SELECT xid from card_images where linkid=?`;
+    rows = await query(sql, [linkid]);
+    if (rows && rows.length > 0) {
+        xid = rows[0]['xid'];
+        sql = `UPDATE  card_images set gif=?, millis? where linkid=?`;
+        await query(sql, [gif, millis,linkid]);
+    }
+    else {
+        sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
+        await query(sql, [gif, linkid, millis]);
+
+    }
+   
+    return { success:true };
 }
