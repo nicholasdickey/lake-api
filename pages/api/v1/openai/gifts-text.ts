@@ -43,7 +43,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         const cachedResult = await redis?.get(k);
         if (cachedResult) {
           //console.log("cachedResult:", cachedResult);
-          await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGiftsCompletion" });
+          await recordEvent({ threadid, sid:sessionid as string||'',sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: ""+k+";conent:"+cachedResult, name: "cachedGiftsCompletion" });
 
           return res.status(200).json({ result: cachedResult });
         }
@@ -86,14 +86,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
       if (!completion) {
-        await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===!@!!No Completion Possible', name: "giftsCompletion" });
+        await recordEvent({sid:sessionid as string||'', threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===!@!!No Completion Possible', name: "giftsCompletion" });
 
         return res.status(200).json({ result: "no completion possible" });
       }
 
       const content = `${completion.data.choices[0]?.message?.content}`;
     //  console.log("result:", js(content));
-      await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===>Completion:' + content, name: "giftsCompletion" });
+      await recordEvent({ threadid, sid:sessionid as string||'',sessionid: "API=>"+process.env.event_env + ":" + (sessionid as string || ""), params: messages.map(m => m.content).join('***') + '===>Completion:' + content, name: "giftsCompletion" });
 
       await redis?.setex(`${k}`, 3600 * 24 * 7, content);
       res.status(200).json({ result: content });
