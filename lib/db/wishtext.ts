@@ -432,8 +432,8 @@ export const recordSessionCard = async ({
     sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid,animatedSignature) VALUES(?,?,now(),?,?,?,?,?)`;
     await query(sql, [signature, greeting, xid, linkid, millis, sessionid,animatedSignature]);
 
-    sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
-    await query(sql, [metaimage, linkid, millis,]);
+  /*  sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
+    await query(sql, [metaimage, linkid, millis,]);*/
 
 
     return { cardNum, linkid };
@@ -590,7 +590,7 @@ export const getMetaimage = async ({
     sql = `SELECT image from card_images where linkid=?`;
     let rows = await query(sql, [linkid]);
     const filledSql = fillInParams(sql, [linkid]);
-    l(chalk.blueBright("getMetaimage", linkid, filledSql, js(rows[0])));
+   // l(chalk.blueBright("getMetaimage", linkid, filledSql, js(rows[0])));
     return rows[0]['image'];
 }
 export const recordMetaimage = async ({
