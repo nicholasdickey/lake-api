@@ -49,12 +49,38 @@ export default async function handler(
       fs.writeFileSync(tempVideoPath, videoBuffer);
 
       // Convert the video to GIF format
-      const outputPath = path.join(process.cwd(), `tmp/${linkid}.gif`);
+      const outputPath = path.join(process.cwd(), `/tmp/${linkid}.gif`);
+      const palettePath = path.join(process.cwd(), `/tmp/palette-${linkid}.png`);
+      
+    //  -i image_%02d.png -vf palettegen palette.png
+     await new Promise<void>((resolve, reject) => {
+        ffmpeg()
+          .input(tempVideoPath)
+          .output(palettePath)
+          .outputOptions('-vf palettegen')
+          .on('end', () => {
+            // Clean up the temporary video file
+            //fs.unlinkSync(tempVideoPath);
+            resolve();
+          })
+          .on('error', (err) => {
+            reject(err);
+          })
+          .run();
+      });
+    // console.log("AFTER PALETTE")
+    const options = [
+      '-i', palettePath,
+      '-lavfi', 'paletteuse',
+   //   '-loop', '-1',
+      // ...etc
+  ];
       await new Promise<void>((resolve, reject) => {
         ffmpeg()
           .input(tempVideoPath)
+         // .inputOptions('-i palette.png -lavfi paletteuse')
           .output(outputPath)
-          .outputOptions('-loop -1')
+          .outputOptions(options)
           .on('end', () => {
             // Clean up the temporary video file
             fs.unlinkSync(tempVideoPath);
@@ -75,6 +101,7 @@ export default async function handler(
       const gifDataUrl = `data:image/gif;base64,${gifBinaryData.toString('base64')}`;
 
      await recordMetaimage({threadid, linkid:linkid as string, image:gifDataUrl});
+     console.log("API: record-gif DONE", linkid);
       // Respond with the Base64-encoded GIF string
       res.status(200).json({ success:true});
     } catch (error) {

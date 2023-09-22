@@ -6,8 +6,9 @@ import { l, chalk, js } from "../../../../../lib/common";
 import {  dbEnd } from "../../../../../lib/db"
 import {recordSessionCard} from "../../../../../lib/db/wishtext"
 import CardData from "../../../../../lib/types/card-data";
-import sharp from "sharp";
-const resizeBase64 = async ({ base64Image, height = 640, width = 640 }:{base64Image:string,height:number,width:number}) => {
+//import sharp from "sharp";
+const puppeteer = require('puppeteer');
+/*const resizeBase64 = async ({ base64Image, height = 640, width = 640 }:{base64Image:string,height:number,width:number}) => {
     const destructImage = base64Image.split(";");
     const mimType = destructImage[0].split(":")[1];
     const imageData = destructImage[1].split(",")[1];
@@ -21,7 +22,7 @@ const resizeBase64 = async ({ base64Image, height = 640, width = 640 }:{base64Im
       throw({ error })
     }
   };
-
+*/
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<any>
@@ -36,15 +37,20 @@ export default async function handler(
     let { sessionid=''} = req.query;
     const body=req.body;
     const {card}:{card:CardData,sessionid:string}=body;
-    const rb =await  resizeBase64({base64Image:card.metaimage||'',height:428,width:1200});
-    card.metaimage=rb;
+   // const rb =await  resizeBase64({base64Image:card.metaimage||'',height:428,width:1200});
+    card.metaimage="";
     let threadid = Math.floor(Math.random() * 100000000)
     try{
         l(chalk.yellowBright("recordSessionCard API>",card));
     const {cardNum,linkid}= await recordSessionCard({threadid, sessionid: sessionid as string,card});  
     
     l(chalk.yellowBright("after recordSessionCard API>",linkid));  
-        
+    const browser = await puppeteer.launch();
+	const page = await browser.newPage();
+	await page.goto(`https://dev.qwiket.com/view/${linkid}.gif&create=true`, {waitUntil: 'networkidle2'});
+	
+	await browser.close();
+    l(chalk.green("After puppeteer"));    
     const ret = linkid?{
             success: true,
             cardNum,
