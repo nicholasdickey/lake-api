@@ -111,13 +111,20 @@ export const fetchSession = async ({
     return null;
 }
 export const fetchSharedImages = async ({
-    threadid
+    threadid,
+    tags,
 }: {
-    threadid: number
+    threadid: number,
+    tags:string
 }) => {
     try {
+        const tagsArray=tags?tags.split(","):[];
+       // tagsArray.push("all");
+        tags="tags like '%"+tagsArray.join("%' OR tags like '%")+ "%'";
+        
         let query = await dbGetQuery("wt", threadid);
-        const sql = `SELECT config from shared_images where tags like '%all%' order by ordinal`;
+        const sql = `SELECT config from shared_images where ${tags} order by ordinal`;
+        l(chalk.red.redBright(sql));
         const sharedRows = await query(sql);
         return sharedRows.map((r: { config: string }) => r['config']);
     }
@@ -426,10 +433,10 @@ export const recordSessionCard = async ({
         cardNum = rows[0]['cardNum'];
     }
     cardNum++;
-    sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis,animatedSignature) VALUES(?,?,?,now(),?,?,?,?,?)`;
+    sql = `INSERT INTO session_cards (sessionid,num,signature,stamp,cardNum,imageid,linkid,millis,animated_signature) VALUES(?,?,?,now(),?,?,?,?,?)`;
     await query(sql, [sessionid, num, signature, cardNum, xid, linkid, millis,animatedSignature]);
 
-    sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid,animatedSignature) VALUES(?,?,now(),?,?,?,?,?)`;
+    sql = `INSERT INTO cards (signature,greeting,stamp,imageid,linkid,millis,author_sessionid,animated_signature) VALUES(?,?,now(),?,?,?,?,?)`;
     await query(sql, [signature, greeting, xid, linkid, millis, sessionid,animatedSignature]);
 
   /*  sql = `INSERT INTO card_images (stamp,image,linkid,millis) VALUES(now(),?,?,?)`;
