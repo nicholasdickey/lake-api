@@ -17,15 +17,17 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
 
-    //let { sessionid } = req.query;
+    const tags:string = req.query.tags as string||"";
+    l(chalk.yellowBright("fetchSharedImages API>",tags));
+
     let threadid = Math.floor(Math.random() * 100000000)
    
     //if (!sessionid)
     //    return res.status(200).json({ user: {} })
 
     try {   
-        const images =  await fetchSharedImages({ threadid });
-       // console.log("fetchSession", session)    
+        const images =  await fetchSharedImages({ threadid,tags });
+        console.log("fetchSharedImages", tags)    
         if(!images){
             return res.status(200).json({ success: true, images:null })  
         }

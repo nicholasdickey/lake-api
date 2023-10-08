@@ -45,12 +45,14 @@ export default async function handler(
     const {cardNum,linkid}= await recordSessionCard({threadid, sessionid: sessionid as string,card});  
     
     l(chalk.yellowBright("after recordSessionCard API>",linkid));  
+    /*
     const browser = await puppeteer.launch();
 	const page = await browser.newPage();
 	await page.goto(`https://dev.qwiket.com/view/${linkid}.gif&create=true`, {waitUntil: 'networkidle2'});
 	
 	await browser.close();
     l(chalk.green("After puppeteer"));    
+    */
     const ret = linkid?{
             success: true,
             cardNum,
@@ -59,8 +61,10 @@ export default async function handler(
             success: false,
             msg: "Unable to  recordSessionCard for sessionid:", sessionid
         }
+        
         res.status(200).json(ret)
     }
+    
     catch (x) {
         l(chalk.red.bold(x));
         res.status(501).json(x);
