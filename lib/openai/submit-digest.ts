@@ -146,7 +146,7 @@ export default async ({ newsline, minutes }: { newsline: string, minutes: number
         description: json.summary,
         body,
         title: `The Digest, ${label.date} @${label.timeIndex}${label.ampm}, CDT`,
-        site_name: `America First News`,
+        site_name: `America One News`,
         author: `ai.Q`,
         published_time: now,
         date: now,
