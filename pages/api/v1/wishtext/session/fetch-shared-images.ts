@@ -27,11 +27,11 @@ export default async function handler(
 
     try {   
         const images =  await fetchSharedImages({ threadid,tags });
-        console.log("fetchSharedImages", tags)    
+        console.log("fetchSharedImages", tags,images)    
         if(!images){
             return res.status(200).json({ success: true, images:null })  
         }
-        return res.status(200).json({ success: true, images:images.map((i:string)=>JSON.parse(i)) })
+        return res.status(200).json({ success: true, images:images.map((i:string)=>{l(chalk.cyanBright(i));l(chalk.magentaBright(JSON.parse(i)));return JSON.parse(i)}) })
     }
     catch (x) {
         l(chalk.red.bold(x));
