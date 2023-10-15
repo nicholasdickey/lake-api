@@ -183,7 +183,7 @@ export default async function handler(
             tokens = text.split(" ").length;
             if (tokens > 3000)
                 text = text.substring(0, 14000);
-            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#illegals,#politics, #society, #warinukraine,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
+            let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#illegals,#politics, #society, #ukraine,#israel, #economy, #foreignaffairs,#military,#culture,#history,#health,#education,#crime,#sports,#science,#outdoors,#religion,#technology,#other): ${text}` }];
             let text2 = '';
             for (let i = 0; i < 4; i++) {
                 try {
@@ -259,13 +259,25 @@ export default async function handler(
                 society.push(article)
                 combinedText += `\n${text2}`;
             }
-            else if (text2.toLowerCase().includes('#warinukraine')) {
+            else if (text2.toLowerCase().includes('#ukraine')) {
                 if (!hasSummary) {
-                    text2 = text2.replaceAll('#warinukraine', '');
+                    text2 = text2.replaceAll('#ukraine', '');
                     article.text = text2;
                 }
                 else {
-                    text = text.replaceAll('#warinukraine', '');
+                    text = text.replaceAll('#ukraine', '');
+                    article.text = text;
+                }
+                war.push(article);
+                combinedText += `\n${text2}`;
+            }
+            else if (text2.toLowerCase().includes('#israel')) {
+                if (!hasSummary) {
+                    text2 = text2.replaceAll('#israel', '');
+                    article.text = text2;
+                }
+                else {
+                    text = text.replaceAll('#israel', '');
                     article.text = text;
                 }
                 war.push(article);
@@ -352,7 +364,7 @@ export default async function handler(
                     article.text = text2;
                 }
                 else {
-                    text2 = text2.replaceAll('#warinukraine', '');
+                    text2 = text2.replaceAll('#education', '');
                     article.text = text2;
                 }
                 education.push(article)
