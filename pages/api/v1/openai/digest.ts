@@ -153,7 +153,7 @@ export default async function handler(
                 tokens = text.split(" ").length;
                 if (tokens > 3000)
                     text = text.substring(0, 14000);
-                let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #war,#economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal):${text}` }];
+                let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukraine, #israel, #economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal):${text}` }];
                 const completion = await openai.createChatCompletion({
                     model: "gpt-3.5-turbo",
                     messages: qwiketMessages,
@@ -171,7 +171,9 @@ export default async function handler(
                     politics.push(article)
                 else if (text2.includes('#social'))
                     social.push(article)
-                else if (text2.includes('#war'))
+                else if (text2.includes('#ukraine'))
+                    war.push(article)
+                else if (text2.includes('#israel'))
                     war.push(article)
                 else if (text2.includes('#economy'))
                     economy.push(article)
