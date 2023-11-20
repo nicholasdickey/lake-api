@@ -60,7 +60,7 @@ export default async function handler(
              //   l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
             }
         }
-       // if (!json) {
+        if (!json) {
             // get from db
           //  l("calling getQwiket",slug,withBody,tag);
             json = await getQwiket({ threadid, slug, withBody, tag })
@@ -86,7 +86,7 @@ export default async function handler(
                     l(chalk.red.bold(x))
                 }
             }
-      //  }
+        }
         const item = json;
         if (!item) {
             return res.status(200).json({ success: false, msg: "Topic doesn't exist" });
