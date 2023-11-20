@@ -60,7 +60,7 @@ export default async function handler(
              //   l("JSON:",chalk.cyan(js(json)),chalk.magenta(jsonRaw))
             }
         }
-        if (!json) {
+       // if (!json) {
             // get from db
           //  l("calling getQwiket",slug,withBody,tag);
             json = await getQwiket({ threadid, slug, withBody, tag })
@@ -68,14 +68,14 @@ export default async function handler(
             if (json && withBody) {
               //  l("json1:", js(json.body))
                 const b= processBody(json);
-              //  l("json11:", js(json.body),b)
+               // l("json11:", js(json.body),b)
                if(b&&b.length>0)
                 json.body=b;
                 else {
                     json.body=json.body.blocks;
                     json.url=`https://am1.news/usconservative/topic/fq/${slug}`
                 }
-               // l("json2:", js(json.body))
+                //l("json2:", js(json.body))
                 //const key = `ntjson-${withBody + '-'}${txid}`;
                 const jsonRaw = JSON.stringify(json);
                 try {
@@ -86,7 +86,7 @@ export default async function handler(
                     l(chalk.red.bold(x))
                 }
             }
-        }
+      //  }
         const item = json;
         if (!item) {
             return res.status(200).json({ success: false, msg: "Topic doesn't exist" });
@@ -109,6 +109,7 @@ export default async function handler(
             body: item.body,
             headless: item.headless
         }
+       // l(chalk.magenta(js(common.body)))
         /**
          * Check the user acceptances
          */

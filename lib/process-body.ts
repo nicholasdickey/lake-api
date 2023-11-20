@@ -86,7 +86,7 @@ export function processBody({ body }: { body: any }) {
                     switch (tagName) {
                         case "table":
                         case "tbody":
-
+                       
                         case "p":
                         case "section":
                             block.type = "text";
@@ -122,7 +122,9 @@ export function processBody({ body }: { body: any }) {
                             block.type = "text";
                             break;
                         case "iframe":
-                            block.type = "iframe"
+                            block.type = "iframe";
+                        case "ol":    
+                            block.type="ol";
                     }
                    // l(chalk.green(js(block)))
                     if (block.type)

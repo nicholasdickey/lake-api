@@ -411,7 +411,7 @@ export const recordSessionCard = async ({
     l(chalk.yellowBright("recordSessionCard", sessionid, linkid, js(card), js(image)));
     //const {url:image_url,publicId:image_publicId,height:image_height,width:image_width,thumbnailUrl:image_thumbnailUrl,original_filename:image_original_filename} = image;
     const { url, publicId, height, width, thumbnailUrl, original_filename } = image;
-    l(chalk.yellowBright("recordSessionCard2", { url, publicId, height, width, thumbnailUrl, original_filename }));
+    l(chalk.yellowBright("recordSessionCard2", js({ url, publicId, height, width, thumbnailUrl, original_filename })));
     let sql, rows;
     const millis = microtime();
     let query = await dbGetQuery("wt", threadid);

@@ -27,7 +27,7 @@ export default async function handler(
 
     try {   
         const images =  await fetchSharedImages({ threadid,tags });
-        console.log("fetchSharedImages", tags,images)    
+      //  console.log("fetchSharedImages", tags,images)    
         if(!images){
             return res.status(200).json({ success: true, images:null })  
         }

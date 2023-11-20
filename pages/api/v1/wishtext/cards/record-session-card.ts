@@ -7,7 +7,7 @@ import {  dbEnd } from "../../../../../lib/db"
 import {recordSessionCard} from "../../../../../lib/db/wishtext"
 import CardData from "../../../../../lib/types/card-data";
 //import sharp from "sharp";
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
 /*const resizeBase64 = async ({ base64Image, height = 640, width = 640 }:{base64Image:string,height:number,width:number}) => {
     const destructImage = base64Image.split(";");
     const mimType = destructImage[0].split(":")[1];
