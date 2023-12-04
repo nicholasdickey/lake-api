@@ -16,6 +16,10 @@
     "incremental": true,
 
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/google/submitCurrentSitemap.js"],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+},
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "lib/google/submitCurrentSitemap.js", "lib/functions/add-article.js", "lib/scripts/add-article.js", "lib/functions/rules/index.js", "lib/functions/rules/main.js", "lib/functions/get-and-parse.js", "lib/functions/dbservice.ts"],
   "exclude": ["node_modules"]
 }
