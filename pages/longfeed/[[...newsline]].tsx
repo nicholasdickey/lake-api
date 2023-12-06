@@ -41,7 +41,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
     <rss version="2.0"> 
       <channel> 
-        <title>${newsline}</title> 
+        <title>Long Feed ${newsline}</title> 
         <link>https://findexar.com</link> 
         <description>Findexar RSS Feed for ${newsline}</description>
       `;
@@ -72,13 +72,16 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     const isoDate = new Date(p.processedTime).toISOString();
                     const flink = `${url}`;
                     let {longdigest:digest,title} = p;
+                    if(!digest)
+                        return null;
                     //   const descrParts = description.split("{ai:summary}");
                     //  description - descrParts[0];
                     // let summary = descrParts.length > 1 ? descrParts[1] : '';
-                    digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()', '');
+                   // digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()', '');
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
+                   
                     console.log("################# DIGEST summary", digest)
                     return `
         <item>
