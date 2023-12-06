@@ -19,6 +19,19 @@ export default async function Home() {
 }
 
 
+function escapeXml(unsafe:string):string {
+    return unsafe.replace(/[<>&'"]/g,   (c:string):string=>{
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+            case "'": return '&quot;';
+        }
+        return "";
+    });
+}
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
     console.log("rss context", context);
@@ -70,15 +83,18 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     const d=new Date(p.processedTime);
                     l(chalk.yellow("time:",d))
                     const isoDate = new Date(p.processedTime).toISOString();
-                    const flink = `${url}`;
+                    let flink = `${url}`;
                     let {digest,title} = p;
                     //   const descrParts = description.split("{ai:summary}");
                     //  description - descrParts[0];
                     // let summary = descrParts.length > 1 ? descrParts[1] : '';
-                    digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()', '');
+                    //digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()', '');
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
+                    digest=escapeXml(digest);
+                    title=escapeXml(title);
+                    flink=flink.split('?')[0];
                     console.log("################# DIGEST summary", digest)
                     return `
         <item>

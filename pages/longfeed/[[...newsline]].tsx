@@ -26,6 +26,7 @@ function escapeXml(unsafe:string):string {
             case '&': return '&amp;';
             case '\'': return '&apos;';
             case '"': return '&quot;';
+            case "'": return '&quot;';
         }
         return "";
     });
@@ -81,7 +82,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     const d=new Date(p.processedTime);
                     l(chalk.yellow("time:",d))
                     const isoDate = new Date(p.processedTime).toISOString();
-                    const flink = `${url}`;
+                    let flink = `${url}`;
                     function extractDomain(url: string): string | null {
                         try {
                             const parsedUrl = new URL(url);
@@ -108,6 +109,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     digest=escapeXml(digest);
                     l(chalk.yellow("escaped digest",digest))
                     title=escapeXml(title);
+                    flink=flink.split('?')[0];
                     
                     console.log("################# DIGEST summary",title, digest)
                     return `
