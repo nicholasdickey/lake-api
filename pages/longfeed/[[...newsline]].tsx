@@ -103,7 +103,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
-                    digest=`${digest} source: ${domain}`
+                    digest=`${digest} ${domain}`
                     l(chalk.yellow("digest",digest))
                     digest=escapeXml(digest);
                     l(chalk.yellow("escaped digest",digest))
