@@ -41,9 +41,9 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
     <rss version="2.0"> 
       <channel> 
-        <title>Findexar Media Digest</title> 
-        <link>https://fidexar.com</link> 
-        <description>Findexar RSS Feed</description>
+        <title>${newsline}</title> 
+        <link>https://findexar.com</link> 
+        <description>Findexar RSS Feed for ${newsline}</description>
       `;
 
 
