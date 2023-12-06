@@ -173,7 +173,7 @@ export const getChannelItems = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     
-    sql = `SELECT digest,title,url,processedTime from x40_channel_items where channel=? order by processedTime desc limit 100`;
+    sql = `SELECT digest,longdigest,title,url,processedTime from x40_channel_items where channel=? order by processedTime desc limit 100`;
     l(chalk.green(sql))
     rows = await query(sql, [channel]);
     l("RESULT:",rows);
