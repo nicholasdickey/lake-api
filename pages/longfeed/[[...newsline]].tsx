@@ -18,7 +18,18 @@ export default async function Home() {
     return <div><div></div></div>;
 }
 
-
+function escapeXml(unsafe:string):string {
+    return unsafe.replace(/[<>&'"]/g,   (c:string):string=>{
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+        return "";
+    });
+}
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
     console.log("rss context", context);
@@ -81,8 +92,12 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
-                   
-                    console.log("################# DIGEST summary", digest)
+                    l(chalk.yellow("digest",digest))
+                    digest=escapeXml(digest);
+                    l(chalk.yellow("escaped digest",digest))
+                    title=escapeXml(title);
+                    
+                    console.log("################# DIGEST summary",title, digest)
                     return `
         <item>
             <link>${flink}</link>
