@@ -82,6 +82,17 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     l(chalk.yellow("time:",d))
                     const isoDate = new Date(p.processedTime).toISOString();
                     const flink = `${url}`;
+                    function extractDomain(url: string): string | null {
+                        try {
+                            const parsedUrl = new URL(url);
+                            return parsedUrl.hostname;
+                        } catch (error) {
+                            console.error("Invalid URL:", error);
+                            return null;
+                        }
+                    }
+                    const domain = extractDomain(url);
+                    
                     let {longdigest:digest,title} = p;
                     if(!digest)
                         return null;
@@ -92,6 +103,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
+                    digest=`${digest} source: ${domain}`
                     l(chalk.yellow("digest",digest))
                     digest=escapeXml(digest);
                     l(chalk.yellow("escaped digest",digest))
