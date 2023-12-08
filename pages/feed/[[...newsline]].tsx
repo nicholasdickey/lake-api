@@ -19,8 +19,8 @@ export default async function Home() {
 }
 
 
-function escapeXml(unsafe:string):string {
-    return unsafe.replace(/[<>&'"]/g,   (c:string):string=>{
+function escapeXml(unsafe: string): string {
+    return unsafe.replace(/[<>&'"]/g, (c: string): string => {
         switch (c) {
             case '<': return '&lt;';
             case '>': return '&gt;';
@@ -48,7 +48,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
         //  const key: FetchQueueKey["key"] = ['queue', type, newsline, 0, forum, '', 0, '0', '', '', 0, '', '', 12];
         // console.log("rss key==", key)
-        let items  = await getChannelItems({ channel: newsline, threadid });
+        let items = await getChannelItems({ channel: newsline, threadid });
         l("after items", items)
         if (context.res) {
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
@@ -66,25 +66,25 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     // const isDigest = p.title.indexOf('Digest') >= 0;
                     //   if (isDigestFeed && !isDigest)
                     //       return;
-                  
+
                     //  const date = p.processedTime;// .shared_time;
                     const url = p.url;
                     // const image=p.image;
                     // if (!date || date == "null") return;
                     // console.log("RSS date ",date);
 
-                   
+
 
                     /* if (date > cdate - 600)
                          // delay by 10 minutes
                          return;*/
                     if (itemCount++ > 100) return;
-                 l("rss item",p);
-                    const d=new Date(p.createdTime);
-                    l(chalk.yellow("time:",d))
+                    l("rss item", p);
+                    const d = new Date(p.createdTime);
+                    l(chalk.yellow("time:", d))
                     const isoDate = new Date(p.createdTime).toISOString();
                     let flink = `${url}`;
-                    let {digest,title} = p;
+                    let { digest, title } = p;
                     //   const descrParts = description.split("{ai:summary}");
                     //  description - descrParts[0];
                     // let summary = descrParts.length > 1 ? descrParts[1] : '';
@@ -92,10 +92,11 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //description=description.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
-                    digest=escapeXml(digest);
-                    digest=`#${newsline} ${digest}`;
-                    title=escapeXml(title);
-                    flink=flink.split('?')[0];
+                    digest = escapeXml(digest);
+                    if (p.hashtag && p.hashtag.length > 0)
+                        digest = `#${p.hashtag} ${digest}`;
+                    title = escapeXml(title);
+                    flink = flink.split('?')[0];
                     console.log("################# DIGEST summary", digest)
                     return `
         <item>
@@ -124,7 +125,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             context.res.write(all);
             context.res.end();
         }
-        return {props:{}};
+        return { props: {} };
     }
     catch (x) {
         console.log("Exception in rss", x)
