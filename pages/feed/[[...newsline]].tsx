@@ -93,6 +93,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
                     digest=escapeXml(digest);
+                    digest=`${digest} #${newsline}}`;
                     title=escapeXml(title);
                     flink=flink.split('?')[0];
                     console.log("################# DIGEST summary", digest)

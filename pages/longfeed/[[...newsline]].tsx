@@ -107,6 +107,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     digest=`${digest} ${domain}`
                     l(chalk.yellow("digest",digest))
                     digest=escapeXml(digest);
+                  
                     l(chalk.yellow("escaped digest",digest))
                     title=escapeXml(title);
                     flink=flink.split('?')[0];
