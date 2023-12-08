@@ -80,9 +80,9 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                          return;*/
                     if (itemCount++ > 100) return;
                  l("rss item",p);
-                    const d=new Date(p.processedTime);
+                    const d=new Date(p.createdTime);
                     l(chalk.yellow("time:",d))
-                    const isoDate = new Date(p.processedTime).toISOString();
+                    const isoDate = new Date(p.createdTime).toISOString();
                     let flink = `${url}`;
                     let {digest,title} = p;
                     //   const descrParts = description.split("{ai:summary}");
