@@ -109,8 +109,11 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     digest = escapeXml(digest);
 
                     l(chalk.yellow("escaped digest", digest))
-                    if (p.hashtag && p.hashtag.length > 0)
-                        digest = `#${p.hashtag} ${digest}`;
+                    if (p.hashtag && p.hashtag.length > 0){
+                        const hashtags=p.hashtag.split(' ').map((word:string) => `#${word}`).join(' ');
+                        digest = `${hashtags} ${digest}`;
+                    }
+                       
                     title = escapeXml(title);
                     flink = flink.split('?')[0];
 

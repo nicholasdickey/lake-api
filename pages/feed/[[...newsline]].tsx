@@ -93,8 +93,10 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
                     digest = escapeXml(digest);
-                    if (p.hashtag && p.hashtag.length > 0)
-                        digest = `#${p.hashtag} ${digest}`;
+                    if (p.hashtag && p.hashtag.length > 0){
+                        const hashtags=p.hashtag.split(' ').map((word:string) => `#${word}`).join(' ');
+                        digest = `${hashtags} ${digest}`;
+                    }
                     title = escapeXml(title);
                     flink = flink.split('?')[0];
                     console.log("################# DIGEST summary", digest)
