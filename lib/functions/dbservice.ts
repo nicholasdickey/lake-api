@@ -172,10 +172,58 @@ export const getChannelItems = async ({
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    
+
     sql = `SELECT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel=? and i.channel=c.channel order by i.createdTime desc limit 100`;
     l(chalk.green(sql))
     rows = await query(sql, [channel]);
-    l("RESULT:",rows);
+    l("RESULT:", rows);
     return rows;
+}
+export const getOutfeeds = async ({
+    threadid,
+}: {
+    threadid: number,
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT DISTINCT outfeed from x40_outfeeds limit 1000`;
+    rows = await query(sql, []);
+    interface Outfeed {
+        outfeed: string,
+        channels: string[]
+    }
+    let outfeeds: Outfeed[] = []
+    if (rows && rows.length) {
+        for (let i = 0; i < rows.length; i++) {
+            const outfeed = rows[i].group;
+            sql = `SELECT DISTINCT channel from x40_outfeeds where outfeed=?`;
+            const channels = await query(sql, [outfeed]);
+            let g: Outfeed = { outfeed, channels };
+            outfeeds.push(g);
+        }
+    }
+    return outfeeds;
+}
+export const getOutfeedItems = async ({
+    threadid,
+    outfeed
+}: {
+    threadid: number,
+    outfeed: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT channel from x40_outfeeds where outfeed=?`;
+    const channels = await query(sql, [outfeed]);
+    let chans: string[] = [];
+    l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
+    for (let j = 0; j < channels.length; j++) {
+        chans.push(`'${channels[j].channel}'`);
+    }
+    let channelString = chans.join(",");
+    l("channelString=", channelString);
+    sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
+    const items = await query(sql, []);
+    return items;
 }

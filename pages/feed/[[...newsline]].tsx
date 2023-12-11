@@ -6,7 +6,7 @@ import {
 
 } from "next";
 
-import { getChannelItems } from '../../lib/functions/dbservice';
+import { getChannelItems,getOutfeedItems } from '../../lib/functions/dbservice';
 import encodeEntities from '../../lib/encode-entities';
 import removeHashtags from '../../lib/remove-hashtags';
 
@@ -48,7 +48,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
         //  const key: FetchQueueKey["key"] = ['queue', type, newsline, 0, forum, '', 0, '0', '', '', 0, '', '', 12];
         // console.log("rss key==", key)
-        let items = await getChannelItems({ channel: newsline, threadid });
+        let items = await getOutfeedItems({ outfeed: newsline, threadid });
         l("after items", items)
         if (context.res) {
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
