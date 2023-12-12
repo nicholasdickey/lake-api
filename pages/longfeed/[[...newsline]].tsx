@@ -107,7 +107,8 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     digest = `${digest} ${domain}`
                     l(chalk.yellow("digest", digest))
                     digest = escapeXml(digest);
-
+                    digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()','').replaceAll('(,)','');
+                  
                     l(chalk.yellow("escaped digest", digest))
                     if (p.hashtag && p.hashtag.length > 0){
                         const hashtags=p.hashtag.split(' ').map((word:string) => `#${word}`).join(' ');
