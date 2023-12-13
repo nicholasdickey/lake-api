@@ -105,16 +105,24 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     //summary=summary.replaceAll('"', '&#34;').replaceAll("'", '&#39;').replaceAll("&", '&#38;');
                     digest = removeHashtags(digest);
                     digest = `${digest} ${domain}`
-                    l(chalk.yellow("digest", digest))
-                    digest = escapeXml(digest);
-                    digest = digest.replaceAll('<p>', '<p>').replaceAll('</p>', '</p>\n\n').replaceAll('()','').replaceAll('(,)','');
-                  
-                    l(chalk.yellow("escaped digest", digest))
+                    l(chalk.magenta("digest", digest))
+                    digest = digest.replace(/<\/p><p>|<p>|<\/p>|\(\)|\(\,\)/g, (match:string) => {
+                        switch (match) {
+                            case '</p><p>': return '<br/>';
+                            case '<p>':
+                            case '</p>':
+                            case '()':
+                            case '(,)': return '';
+                            default: return match;
+                        }
+                    });
+                    l(chalk.green("escaped digest", digest))
                     if (p.hashtag && p.hashtag.length > 0){
                         const hashtags=p.hashtag.split(' ').map((word:string) => `#${word}`).join(' ');
-                        digest = `${hashtags} ${digest}`;
+                        digest = `${digest} ${hashtags}`;
                     }
-                       
+                    digest = escapeXml(digest);
+                    
                     title = escapeXml(title);
                     flink = flink.split('?')[0];
 
@@ -146,6 +154,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             context.res.write(all);
             context.res.end();
         }
+        l(chalk.cyanBright("rss end"));
         return { props: {} };
     }
     catch (x) {
