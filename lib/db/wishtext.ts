@@ -389,8 +389,8 @@ export const checkSessionHistory = async ({
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT greeting from session_history where sessionid=? and occasion=?`;
     let rows = await query(sql, [sessionid, occasion]);
-    const filledSql = fillInParams(sql, [sessionid, occasion]);
-    l(chalk.greenBright("checkSessionHistory", sessionid, occasion, filledSql, js(rows)));
+   // const filledSql = fillInParams(sql, [sessionid, occasion]);
+    //l(chalk.greenBright("checkSessionHistory", sessionid, occasion, filledSql, js(rows)));
     return rows;
 }
 
@@ -575,8 +575,8 @@ export const getSharedCard = async ({
     let query = await dbGetQuery("wt", threadid);
     sql = `SELECT c.greeting,c.signature,c.animated_signature as animatedSignature, c.stamp,c.linkid,i.url ,i.publicId,i.height, i.width,i.thumbnailUrl, i.original_filename from cards c, images i where c.linkid=? and c.imageid=i.xid`;
     let rows = await query(sql, [id]);
-    const filledSql = fillInParams(sql, [id]);
-    l(chalk.greenBright("getSharedCard", sessionid, id, filledSql, js(rows[0])));
+   // const filledSql = fillInParams(sql, [id]);
+   // l(chalk.greenBright("getSharedCard", sessionid, id, filledSql, js(rows[0])));
 
     const image = { url: rows[0]['url'], publicId: rows[0]['publicId'], height: rows[0]['height'], width: rows[0]['width'], thumbnailUrl: rows[0]['thumbnailUrl'], original_filename: rows[0]['original_filename'] };
     const card = { greeting: rows[0]['greeting'], signature: rows[0]['signature'], image, linkid: rows[0]['linkid'] };
