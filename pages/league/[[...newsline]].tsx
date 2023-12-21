@@ -6,13 +6,13 @@ import {
 
 } from "next";
 
-import { getChannelItems,getLeagueItems } from '../../lib/functions/dbservice';
+import { findexCalc,getChannelItems,getLeagueItems } from '../../lib/functions/dbservice';
 import encodeEntities from '../../lib/encode-entities';
 import removeHashtags from '../../lib/remove-hashtags';
 
 import { dbEnd } from '../../lib/db';
-import { l, chalk, allowLog } from '../../lib/common';
-
+import { l, chalk, allowLog,microtime } from '../../lib/common';
+import { getRedisClient } from "../../lib/redis"
 export default async function Home() {
 
     return <div><div></div></div>;
@@ -38,6 +38,16 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     allowLog();
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const redis = await getRedisClient({});
+        if(redis){
+        let findexTimestamp=+(await redis.get('findex-timestamp')||0);
+        let m=microtime();
+        let interval=m-findexTimestamp;
+            if(interval>1000*60*60){
+                await findexCalc({ threadid});
+                await redis.set('findex-timestamp',m);
+            }
+        }
         let ns=context.params?.newsline;
         if(ns && typeof ns === 'object'){
             ns=ns[0];

@@ -1,5 +1,5 @@
 //./functions/dbservice.ts
-import { l, chalk, microtime, js, ds, uxToMySql } from "../common";
+import { l, chalk, microtime, js, ds, uxToMySql, } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 export const getChannelItem = async ({
     threadid,
@@ -217,12 +217,12 @@ export const getOutfeedItems = async ({
     sql = `SELECT DISTINCT channel from x40_outfeeds where outfeed=?`;
     const channels = await query(sql, [outfeed]);
     let chans: string[] = [];
-   l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
+    l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
     for (let j = 0; j < channels.length; j++) {
         chans.push(`'${channels[j].channel}'`);
     }
     let channelString = chans.join(",");
-   // l("channelString=", channelString);
+    // l("channelString=", channelString);
     sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
     return items;
@@ -235,7 +235,7 @@ export const getLeagueItems = async ({
     league: string
 }) => {
     let sql, rows;
-    league=league.toUpperCase();
+    league = league.toUpperCase();
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT DISTINCT id from x41_teams where league=?`;
@@ -246,9 +246,115 @@ export const getLeagueItems = async ({
         chans.push(`'${channels[j].id}'`);
     }
     let channelString = chans.join(",");
-   // l("channelString=", channelString);
+    // l("channelString=", channelString);
     sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
-   // l("return items:",js(items))
+    // l("return items:",js(items))
     return items;
 }
+//to be called once an hour using redis as a timer
+export const findexCalc = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+    where team in (select id from x41_teams )
+    group by name`;
+    rows = await query(sql, []);
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const { name, team_menions, mentions, avg_findex, team, league } = row;
+        sql = `SELECT millis from x41_findex where name=? and teamid=?`;
+        const findexRows = await query(sql, [name, team]);
+        let millis = 0;
+        if (findexRows && findexRows.length) {
+            millis = findexRows[0].millis || 0;
+        }
+
+        let millisNow = microtime();
+        
+        if (millisNow - millis < 1000 * 60 * 60 * 24)
+            continue;
+        //need to set millisNow to milliseconds of noon today
+        const now = new Date();
+        const noon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+        const recorded=noon.toISOString().slice(0, 19).replace('T', ' ');
+        millisNow = noon.getTime();
+
+        //needs a fresh update to be inserted
+        sql = `INSERT into x41_findex (name,teams,mentions,findex,teamid,league,millis,recorded) values (?,?,?,?,?,?,?,?)`;
+        await query(sql, [name, team_menions, mentions, avg_findex, team, league, millisNow,recorded]);
+    }
+    sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+    where name in (select name from x41_teams )
+    group by name`;
+    rows = await query(sql, []);
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const { name, team_menions, mentions, avg_findex, team, league } = row;
+        sql = `SELECT millis from x41_findex where name=? and teamid=?`;
+        const findexRows = await query(sql, [name, team]);
+        let millis = 0;
+        if (findexRows && findexRows.length) {
+            millis = findexRows[0].millis || 0;
+        }
+        let millisNow = microtime();
+        if (millisNow - millis < 1000 * 60 * 60 * 24)
+            continue;
+        //need to set millisNow to milliseconds of noon today
+        const now = new Date();
+        const noon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+        const recorded=noon.toISOString().slice(0, 19).replace('T', ' ');
+        millisNow = noon.getTime();
+
+        //needs a fresh update to be inserted
+        sql = `INSERT into x41_findex (name,teams,mentions,findex,teamid,league,millis,recorded) values (?,?,?,?,?,?,?,?)`;
+        await query(sql, [name, team_menions, mentions, avg_findex, team, league, millisNow,recorded]);
+
+
+
+    }
+}
+
+/*******************************************************************/
+export const getLeagues = async ({
+    threadid,
+
+}: {
+    threadid: number,
+
+}) => {
+    let sql, rows;
+
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT name from x41_leagues limit 100`;
+    rows = await query(sql, []);
+    let leagues: string[] = [];
+    l(chalk.yellow("leagues=", js(leagues)))
+    for (let j = 0; j < rows.length; j++) {
+        leagues.push(`'${rows[j].name}'`);
+    }
+    return leagues;
+}
+export const getLeagueTeams = async ({
+    threadid,
+    league
+}: {
+    threadid: number,
+    league: string
+}) => {
+    let sql, rows;
+    league = league.toUpperCase();
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT id,name from x41_teams where league=?`;
+    rows = await query(sql, [league]);
+    return rows;
+}
+
