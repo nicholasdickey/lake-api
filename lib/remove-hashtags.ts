@@ -5,6 +5,6 @@ export default  function removeHashtags(input: string): string {
 
     let ret=input.replace(hashtagRegex, '');
     ret=input.replace(/\(\)/g, '');
-    console.log("removeHashtags:",input,ret);
+   // console.log("removeHashtags:",input,ret);
     return input.replace(hashtagRegex, '');
 }

@@ -6,7 +6,7 @@ import {
 
 } from "next";
 
-import { getChannelItems,getOutfeedItems } from '../../lib/functions/dbservice';
+import { getChannelItems,getLeagueItems } from '../../lib/functions/dbservice';
 import encodeEntities from '../../lib/encode-entities';
 import removeHashtags from '../../lib/remove-hashtags';
 
@@ -34,29 +34,35 @@ function escapeXml(unsafe: string): string {
 }
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  //  console.log("rss context", context);
+   // console.log("rss context", context);
     allowLog();
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let newsline: string = context.params?.newsline as string || process.env.DEFAULT_NEWSLINE || "";
+        let ns=context.params?.newsline;
+        if(ns && typeof ns === 'object'){
+            ns=ns[0];
+        }
+
+        let newsline: string = ns as string || process.env.DEFAULT_NEWSLINE || "";
         if (!newsline)
             process.env.DEFAULT_NEWSLINE
         console.log("FEED:", { newsline, context: context.params })
+      
         //  const rssNewsline = `rss-${newsline || process.env.DEFAULT_NEWSLINE}`;
 
 
 
         //  const key: FetchQueueKey["key"] = ['queue', type, newsline, 0, forum, '', 0, '0', '', '', 0, '', '', 12];
         // console.log("rss key==", key)
-        let items = await getOutfeedItems({ outfeed: newsline, threadid });
-      //  l("after items", items)
+        let items = await getLeagueItems({ league: newsline, threadid });
+        l("after items", items)
         if (context.res) {
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
     <rss version="2.0"> 
       <channel> 
         <title>${newsline}</title> 
         <link>https://findexar.com</link> 
-        <description>Findexar RSS Feed for ${newsline}</description>
+        <description>Findexar RSS League Feed for ${newsline} </description>
       `;
 
 
@@ -81,7 +87,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     if (itemCount++ > 100) return;
                    // l("rss item", p);
                     const d = new Date(p.createdTime);
-                   // l(chalk.yellow("time:", d))
+                  //  l(chalk.yellow("time:", d))
                     const isoDate = new Date(p.createdTime).toISOString();
                     let flink = `${url}`;
                     let { digest, title } = p;
@@ -101,7 +107,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                     }
                     title = escapeXml(title);
                     flink = flink.split('?')[0];
-                   // console.log("################# DIGEST summary", digest)
+                  //  console.log("################# DIGEST summary", digest)
                     return `
         <item>
             <link>${flink}</link>

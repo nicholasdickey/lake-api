@@ -217,13 +217,38 @@ export const getOutfeedItems = async ({
     sql = `SELECT DISTINCT channel from x40_outfeeds where outfeed=?`;
     const channels = await query(sql, [outfeed]);
     let chans: string[] = [];
-    l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
+   l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
     for (let j = 0; j < channels.length; j++) {
         chans.push(`'${channels[j].channel}'`);
     }
     let channelString = chans.join(",");
-    l("channelString=", channelString);
+   // l("channelString=", channelString);
     sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
+    return items;
+}
+export const getLeagueItems = async ({
+    threadid,
+    league
+}: {
+    threadid: number,
+    league: string
+}) => {
+    let sql, rows;
+    league=league.toUpperCase();
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT id from x41_teams where league=?`;
+    const channels = await query(sql, [league]);
+    let chans: string[] = [];
+    l(chalk.yellow("league=", league, "teams=", js(channels)))
+    for (let j = 0; j < channels.length; j++) {
+        chans.push(`'${channels[j].id}'`);
+    }
+    let channelString = chans.join(",");
+   // l("channelString=", channelString);
+    sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
+    const items = await query(sql, []);
+   // l("return items:",js(items))
     return items;
 }
