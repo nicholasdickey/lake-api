@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { getLeagues } from "../../../../lib/functions/dbservice";
+import { getDetails } from "../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../lib/db"
 
 
@@ -15,10 +15,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     let threadid = Math.floor(Math.random() * 100000000);
     try {
        // console.log("events/record called");
-        let { sessionid, name, params } = req.query;
-        const leagues=await getLeagues({ threadid});
+        let { sessionid, teamid, name,params } = req.query;
+        const details=await getDetails({ threadid,teamid:teamid as string,name:name as string});
 
-        return res.status(200).json({ success: true,leagues });
+        return res.status(200).json({ success: true,details });
     }
     catch(x){
         console.log("Error in events/record:", x);

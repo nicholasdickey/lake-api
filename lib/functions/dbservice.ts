@@ -336,10 +336,11 @@ export const getLeagues = async ({
     sql = `SELECT DISTINCT name from x41_leagues limit 100`;
     rows = await query(sql, []);
     let leagues: string[] = [];
-    l(chalk.yellow("leagues=", js(leagues)))
+    
     for (let j = 0; j < rows.length; j++) {
-        leagues.push(`'${rows[j].name}'`);
+        leagues.push(`${rows[j].name}`);
     }
+    l(chalk.yellow("leagues=", js(leagues)))
     return leagues;
 }
 export const getLeagueTeams = async ({
@@ -357,4 +358,109 @@ export const getLeagueTeams = async ({
     rows = await query(sql, [league]);
     return rows;
 }
+export const getTeamPlayers = async ({
+    threadid,
+    teamid
+}: {
+    threadid: number,
+    teamid: string
+}) => {
+    let sql, rows;
+    teamid = teamid.toLowerCase();
+    let query = await dbGetQuery("povdb", threadid);
 
+    sql = `SELECT DISTINCT member as name from x41_team_players where teamid=?`;
+    rows = await query(sql, [teamid]);
+    return rows;
+}
+
+export const recordEvent = async ({
+    threadid,
+    name,
+    sessionid,
+    sid,
+    params
+}: {
+    threadid: number,
+    name: string,
+    sessionid: string,
+    sid: string,
+    params: string
+}) => {
+    try {
+       // console.log("PARSING PARAMS", params);
+        let { fbclid, utm_content } = params.trim().indexOf('{"fbclid"') == 0 ? JSON.parse(params) : params;
+        fbclid = ds(fbclid);
+        utm_content = ds(utm_content);
+        let sql, result;
+        const millis = microtime();
+        let query = await dbGetQuery("povdb", threadid);
+        sql = `INSERT INTO x41_events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
+        let rows = await query(`INSERT INTO x41_events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
+        // l(chalk.greenBright("recordEvent", sql, rows));
+        const old = millis - 10 * 24 * 3600 * 1000;
+        sql = `DELETE FROM events where millis<${old}`;
+        await query(`DELETE FROM x41_events where millis<?`, [old]);
+    } catch (e) {
+        console.log(chalk.redBright("ERROR", e));
+    }
+
+}
+
+export const getPlayerDetails = async ({
+    threadid,
+    teamid,
+    name
+}: {
+    threadid: number,
+    teamid: string,
+    name:string,
+}) => {
+    let sql, rows;
+    teamid = teamid.toLowerCase();
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+    where  team=? and name =?
+    group by name`
+    const currentFindexRows = await query(sql, [teamid,name]);
+    const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
+    sql = `SELECT DISTINCT * from x41_findex where teamid=? and name=? order by millis desc limit 100`;
+    const findexHistory = await query(sql, [teamid]);
+    sql = `SELECT DISTINCT * from x41_findex where team=? and name=? order by millis desc limit 100`;
+    const mentions = await query(sql, [teamid]);
+    return {
+        currentFindex,
+        findexHistory,
+        mentions
+    }
+}
+
+export const getDetails = async ({
+    threadid,
+    teamid,
+    name
+}: {
+    threadid: number,
+    teamid: string,
+    name:string,
+}) => {
+    let sql, rows;
+    teamid = teamid.toLowerCase();
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT DISTINCT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+    where  team=? and name =?
+    group by name`
+    const currentFindexRows = await query(sql, [teamid,name]);
+    const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
+    sql = `SELECT DISTINCT teamid,millis,recorded,findex,mentions,teams from x41_findex where teamid=? and name=? order by millis desc limit 100`;
+    const findexHistory = await query(sql, [teamid,name]);
+    sql = `SELECT DISTINCT * from x41_raw_findex where team=? and name=? order by date desc limit 100`;
+    const mentions = await query(sql, [teamid,name]);
+    return {
+        currentFindex,
+        findexHistory,
+        mentions
+    }
+}

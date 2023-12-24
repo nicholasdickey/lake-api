@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { getLeagues } from "../../../../lib/functions/dbservice";
+import { recordEvent } from "../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../lib/db"
 
 
@@ -16,9 +16,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
        // console.log("events/record called");
         let { sessionid, name, params } = req.query;
-        const leagues=await getLeagues({ threadid});
+        await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""),sid:sessionid as string||'', params: params as string, name: name as string});
 
-        return res.status(200).json({ success: true,leagues });
+        return res.status(200).json({ success: true });
     }
     catch(x){
         console.log("Error in events/record:", x);
