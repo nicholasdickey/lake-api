@@ -475,7 +475,7 @@ export const getAllMentions = async ({
    
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 25
+    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25
     `
      const mentions = await query(sql, []);
     return  mentions;
@@ -493,7 +493,7 @@ export const getLeagueMentions = async ({
    
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by date desc limit 25
+    sql=`SELECT date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25
     `
      const mentions = await query(sql, [league]);
     return mentions;
