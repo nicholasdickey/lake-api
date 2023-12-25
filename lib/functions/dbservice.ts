@@ -464,3 +464,40 @@ export const getDetails = async ({
         mentions
     }
 }
+export const getAllMentions = async ({
+    threadid,
+    
+}: {
+    threadid: number,
+    
+}) => {
+    let sql, rows;
+   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 25
+    `
+     const mentions = await query(sql, []);
+    return {
+        mentions
+    }
+}
+export const getLeagueMentions = async ({
+    threadid,
+    league,
+}: {
+    threadid: number,
+    league:string,
+    
+}) => {
+    let sql, rows;
+   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 25
+    `
+     const mentions = await query(sql, []);
+    return {
+        mentions
+    }
+}
