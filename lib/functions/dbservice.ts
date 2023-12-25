@@ -371,6 +371,19 @@ export const getTeamPlayers = async ({
 
     sql = `SELECT DISTINCT member as name from x41_team_players where teamid=?`;
     rows = await query(sql, [teamid]);
+    for(let i=0;i<rows.length;i++){
+        const row=rows[i];
+        const {name}=row;
+        sql=`SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+        where  team=? and name =?
+        group by name`
+        const currentFindexRows = await query(sql, [teamid,name]);
+        const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
+        row.mentions=currentFindex.mentions;
+        row.findex=currentFindex.avg_findex;
+    }
+        
+   
     return rows;
 }
 
