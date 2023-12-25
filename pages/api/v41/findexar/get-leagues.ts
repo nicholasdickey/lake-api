@@ -4,7 +4,6 @@ import { l, chalk, js, sleep } from "../../../../lib/common";
 import { getLeagues } from "../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../lib/db"
 
-
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     await NextCors(req, res, {
         // Options
@@ -14,18 +13,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-       // console.log("events/record called");
-        let { sessionid, name, params } = req.query;
         const leagues=await getLeagues({ threadid});
-
         return res.status(200).json({ success: true,leagues });
     }
     catch(x){
         console.log("Error in events/record:", x);
         return res.status(500).json({ success: false });
     }    
-    finally {
-        
+    finally { 
         dbEnd(threadid)
     }
 };

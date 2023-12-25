@@ -9,7 +9,6 @@ export const getChannelItem = async ({
     threadid: number,
     url: string,
     channel: string
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
@@ -17,13 +16,13 @@ export const getChannelItem = async ({
     rows = await query(sql, [url, channel]);
     return rows && rows.length ? rows[0] : false
 }
+
 export const saveChannelItem = async ({
     threadid,
     url,
     title,
     digest,
     body,
-
     channel,
 }: {
     threadid: number,
@@ -31,13 +30,11 @@ export const saveChannelItem = async ({
     title: string,
     digest: string,
     body: string,
-
     channel: string,
 
 }) => {
     digest = digest || "";
     body = body || "";
-    // const pt=uxToMySql(publishedTime);
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from x40_channel_items where url=? and channel=?`;
@@ -54,6 +51,7 @@ export const saveChannelItem = async ({
     }
     return rows && rows.length ? rows[0] : false
 }
+
 export const getChannel = async ({
     threadid,
     channel
@@ -61,7 +59,6 @@ export const getChannel = async ({
     threadid: number,
     url: string,
     channel: string
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
@@ -70,7 +67,6 @@ export const getChannel = async ({
         sql = `SELECT DISTINCT channel from x40_channels order by lastProcessed limit 1`;
         rows = await query(sql, []);
         chan = rows[0];
-
     }
     sql = `SELECT DISTINCT * from x40_channels where channel=?`;
     rows = await query(sql, [channel]);
@@ -84,7 +80,6 @@ export const checkFeedItem = async ({
     threadid: number,
     url: string,
     feed: string
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
@@ -102,15 +97,11 @@ interface Channel {
 }
 export const getChannels = async ({
     threadid,
-
 }: {
     threadid: number,
-
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    let chan;
 
     sql = `SELECT DISTINCT channel from x40_channels where UNIX_TIMESTAMP(lastProcessed)+5*60<UNIX_TIMESTAMP(now()) order by lastProcessed limit 10`;
     rows = await query(sql, []);
@@ -120,22 +111,18 @@ export const getChannels = async ({
         const channel = rows[i].channel;
         sql = `SELECT DISTINCT filter as value, sign from x40_channel_filters where channel=?`;
         const filters = await query(sql, [channel]);
-
-        //const filters=await getFilters({threadid,channel});
         let chan: Channel = { channel, filters };
         channels.push(chan);
     }
     return channels;
-
 }
+
 export const getFeeds = async ({
     threadid,
     force
-
 }: {
     threadid: number,
     force: number;
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
@@ -146,33 +133,28 @@ export const getFeeds = async ({
     rows = await query(sql, []);
     return rows;
 }
+
 export const setProcessedFeed = async ({
     threadid,
     feed
-
 }: {
     threadid: number,
     feed: string
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     sql = `UPDATE x40_feeds  set lastprocessed=now() where feed=? limit 1`;
     await query(sql, [feed]);
-
 }
 export const getChannelItems = async ({
     threadid,
     channel
-
 }: {
     threadid: number,
     channel: string;
-
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-
     sql = `SELECT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel=? and i.channel=c.channel order by i.createdTime desc limit 100`;
     l(chalk.green(sql))
     rows = await query(sql, [channel]);
@@ -192,6 +174,7 @@ export const getOutfeeds = async ({
         outfeed: string,
         channels: string[]
     }
+
     let outfeeds: Outfeed[] = []
     if (rows && rows.length) {
         for (let i = 0; i < rows.length; i++) {
@@ -204,6 +187,7 @@ export const getOutfeeds = async ({
     }
     return outfeeds;
 }
+
 export const getOutfeedItems = async ({
     threadid,
     outfeed
@@ -213,20 +197,19 @@ export const getOutfeedItems = async ({
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-
     sql = `SELECT DISTINCT channel from x40_outfeeds where outfeed=?`;
     const channels = await query(sql, [outfeed]);
     let chans: string[] = [];
-    l(chalk.yellow("outfeed=", outfeed, "channels=", channels,))
+
     for (let j = 0; j < channels.length; j++) {
         chans.push(`'${channels[j].channel}'`);
     }
     let channelString = chans.join(",");
-    // l("channelString=", channelString);
     sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
     return items;
 }
+
 export const getLeagueItems = async ({
     threadid,
     league
@@ -241,17 +224,17 @@ export const getLeagueItems = async ({
     sql = `SELECT DISTINCT id from x41_teams where league=?`;
     const channels = await query(sql, [league]);
     let chans: string[] = [];
-    l(chalk.yellow("league=", league, "teams=", js(channels)))
     for (let j = 0; j < channels.length; j++) {
         chans.push(`'${channels[j].id}'`);
     }
     let channelString = chans.join(",");
-    // l("channelString=", channelString);
+
     sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
-    // l("return items:",js(items))
+
     return items;
 }
+
 //to be called once an hour using redis as a timer
 export const findexCalc = async ({
     threadid,
@@ -275,9 +258,7 @@ export const findexCalc = async ({
         if (findexRows && findexRows.length) {
             millis = findexRows[0].millis || 0;
         }
-
-        let millisNow = microtime();
-        
+        let millisNow = microtime();       
         if (millisNow - millis < 1000 * 60 * 60 * 24)
             continue;
         //need to set millisNow to milliseconds of noon today
@@ -290,10 +271,12 @@ export const findexCalc = async ({
         sql = `INSERT into x41_findex (name,teams,mentions,findex,teamid,league,millis,recorded) values (?,?,?,?,?,?,?,?)`;
         await query(sql, [name, team_menions, mentions, avg_findex, team, league, millisNow,recorded]);
     }
+
     sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
     where name in (select name from x41_teams )
     group by name`;
     rows = await query(sql, []);
+
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const { name, team_menions, mentions, avg_findex, team, league } = row;
@@ -306,6 +289,7 @@ export const findexCalc = async ({
         let millisNow = microtime();
         if (millisNow - millis < 1000 * 60 * 60 * 24)
             continue;
+
         //need to set millisNow to milliseconds of noon today
         const now = new Date();
         const noon = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
@@ -315,22 +299,16 @@ export const findexCalc = async ({
         //needs a fresh update to be inserted
         sql = `INSERT into x41_findex (name,teams,mentions,findex,teamid,league,millis,recorded) values (?,?,?,?,?,?,?,?)`;
         await query(sql, [name, team_menions, mentions, avg_findex, team, league, millisNow,recorded]);
-
-
-
     }
 }
 
 /*******************************************************************/
 export const getLeagues = async ({
     threadid,
-
 }: {
     threadid: number,
-
 }) => {
     let sql, rows;
-
     let query = await dbGetQuery("povdb", threadid);
 
     sql = `SELECT DISTINCT name from x41_leagues limit 100`;
@@ -340,9 +318,9 @@ export const getLeagues = async ({
     for (let j = 0; j < rows.length; j++) {
         leagues.push(`${rows[j].name}`);
     }
-    l(chalk.yellow("leagues=", js(leagues)))
     return leagues;
 }
+
 export const getLeagueTeams = async ({
     threadid,
     league
@@ -358,6 +336,7 @@ export const getLeagueTeams = async ({
     rows = await query(sql, [league]);
     return rows;
 }
+
 export const getTeamPlayers = async ({
     threadid,
     teamid
@@ -382,8 +361,6 @@ export const getTeamPlayers = async ({
         row.mentions=currentFindex.mentions;
         row.findex=currentFindex.avg_findex;
     }
-        
-   
     return rows;
 }
 
@@ -401,7 +378,6 @@ export const recordEvent = async ({
     params: string
 }) => {
     try {
-       // console.log("PARSING PARAMS", params);
         let { fbclid, utm_content } = params.trim().indexOf('{"fbclid"') == 0 ? JSON.parse(params) : params;
         fbclid = ds(fbclid);
         utm_content = ds(utm_content);
@@ -410,14 +386,12 @@ export const recordEvent = async ({
         let query = await dbGetQuery("povdb", threadid);
         sql = `INSERT INTO x41_events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
         let rows = await query(`INSERT INTO x41_events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
-        // l(chalk.greenBright("recordEvent", sql, rows));
         const old = millis - 10 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
         await query(`DELETE FROM x41_events where millis<?`, [old]);
     } catch (e) {
         console.log(chalk.redBright("ERROR", e));
     }
-
 }
 
 export const getPlayerDetails = async ({
@@ -477,38 +451,31 @@ export const getDetails = async ({
         mentions
     }
 }
+
 export const getAllMentions = async ({
-    threadid,
-    
+    threadid,   
 }: {
     threadid: number,
-    
 }) => {
     let sql, rows;
-   
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25
-    `
-     const mentions = await query(sql, []);
-    return  mentions;
-    
+    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25 `
+    const mentions = await query(sql, []);
+    return  mentions;   
 }
+
 export const getLeagueMentions = async ({
     threadid,
     league,
 }: {
     threadid: number,
     league:string,
-    
 }) => {
-    let sql, rows;
-   
+    let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25
-    `
-     const mentions = await query(sql, [league]);
-    return mentions;
-    
+    sql=`SELECT date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
+    const mentions = await query(sql, [league]);
+    return mentions; 
 }

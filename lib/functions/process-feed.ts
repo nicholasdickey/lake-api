@@ -128,7 +128,6 @@ const processFeed = async (channel: string, feed: string, rss: string, filters: 
                 await addArticle(url, channel, threadid);
             }
         }
-
     }
 
 }
