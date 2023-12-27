@@ -443,7 +443,7 @@ export const getDetails = async ({
     const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
     sql = `SELECT DISTINCT teamid,millis,recorded,findex,mentions,teams from x41_findex where teamid=? and name=? order by millis desc limit 100`;
     const findexHistory = await query(sql, [teamid,name]);
-    sql = `SELECT DISTINCT * from x41_raw_findex where team=? and name=? order by date desc limit 100`;
+    sql = `SELECT DISTINCT xid,date, league, team, type, name, url, findex,summary from x41_raw_findex where team=? and name=? order by date desc limit 100`;
     const mentions = await query(sql, [teamid,name]);
     return {
         currentFindex,
@@ -460,7 +460,7 @@ export const getAllMentions = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25 `
+    sql=`SELECT xid,date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25 `
     const mentions = await query(sql, []);
     return  mentions;   
 }
@@ -475,7 +475,23 @@ export const getLeagueMentions = async ({
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
+    sql=`SELECT xid,date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
     const mentions = await query(sql, [league]);
     return mentions; 
+}
+
+export const getMetaLink = async ({
+    threadid,
+    xid,
+}: {
+    threadid: number,
+    xid:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
+    l(sql,xid)
+    rows = await query(sql, [xid]);
+    return rows&&rows.length?rows[0]:false; 
 }
