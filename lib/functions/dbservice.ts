@@ -439,15 +439,15 @@ export const getDetails = async ({
     sql=`SELECT DISTINCT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
     where  team=? and name =?
     group by name`
-    const currentFindexRows = await query(sql, [teamid,name]);
-    const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
+    //const currentFindexRows = await query(sql, [teamid,name]);
+    //const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
     sql = `SELECT DISTINCT teamid,millis,recorded,findex,mentions,teams from x41_findex where teamid=? and name=? order by millis desc limit 100`;
-    const findexHistory = await query(sql, [teamid,name]);
+    //const findexHistory = await query(sql, [teamid,name]);
     sql = `SELECT DISTINCT xid,date, league, team, type, name, url, findex,summary from x41_raw_findex where team=? and name=? order by date desc limit 100`;
     const mentions = await query(sql, [teamid,name]);
     return {
-        currentFindex,
-        findexHistory,
+        currentFindex:[],
+        findexHistory:[],
         mentions
     }
 }
