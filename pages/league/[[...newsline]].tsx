@@ -39,24 +39,24 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
     let threadid = Math.floor(Math.random() * 100000000);
     try {
         const redis = await getRedisClient({});
+       
         if(redis){
         let findexTimestamp=+(await redis.get('findex-timestamp')||0);
         let m=microtime();
-        let interval=m-findexTimestamp;
+       /* let interval=m-findexTimestamp;
             if(interval>1000*60*60){
                 await findexCalc({ threadid});
                 await redis.set('findex-timestamp',m);
-            }
+            }*/
         }
         let ns=context.params?.newsline;
         if(ns && typeof ns === 'object'){
             ns=ns[0];
         }
-
         let newsline: string = ns as string || process.env.DEFAULT_NEWSLINE || "";
         if (!newsline)
             process.env.DEFAULT_NEWSLINE
-        console.log("FEED:", { newsline, context: context.params })
+      //  console.log("FEED:", { newsline, context: context.params })
       
         //  const rssNewsline = `rss-${newsline || process.env.DEFAULT_NEWSLINE}`;
 
@@ -64,6 +64,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
         //  const key: FetchQueueKey["key"] = ['queue', type, newsline, 0, forum, '', 0, '0', '', '', 0, '', '', 12];
         // console.log("rss key==", key)
+       
         let items = await getLeagueItems({ league: newsline, threadid });
         l("after items", items)
         if (context.res) {
