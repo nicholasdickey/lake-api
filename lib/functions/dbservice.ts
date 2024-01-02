@@ -495,3 +495,20 @@ export const getMetaLink = async ({
     rows = await query(sql, [xid]);
     return rows&&rows.length?rows[0]:false; 
 }
+export const getAthletePhoto = async ({
+    threadid,
+    name,
+    teamid,
+}: {
+    threadid: number,
+    name:string,
+    teamid:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT photo from x41_team_players where member=? and teamid=? limit 1`;
+    //l(sql,xid)
+    rows = await query(sql, [name,teamid]);
+    return rows&&rows.length?rows[0]['photo']:''; 
+}
