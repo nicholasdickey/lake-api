@@ -460,7 +460,7 @@ export const getAllMentions = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT xid,date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by xid desc limit 25 `
+    sql=`SELECT xid,date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 100 `
     const mentions = await query(sql, []);
     return  mentions;   
 }
@@ -511,4 +511,56 @@ export const getAthletePhoto = async ({
     //l(sql,xid)
     rows = await query(sql, [name,teamid]);
     return rows&&rows.length?rows[0]['photo']:''; 
+}
+export const getOrCreateSubscriberId = async ({
+    threadid,
+    userId,
+    email,
+}: {
+    threadid: number,
+    userId:string,
+    email:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT * from x41_users where userId=? limit 1`;
+    //l(sql,xid)
+    rows = await query(sql, [userId]);
+    if(!rows||!rows.length){
+        sql=`INSERT into x41_users (userId,SubscriberId,email) values (?,?,?)`;
+        await query(sql, [userId,userId,email]);
+    }
+    return rows&&rows.length?rows[0]['subscriberId']:userId; 
+}
+export const getLastUserPing = async ({
+    threadid,
+    userId,
+}: {
+    threadid: number,
+    userId:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT * from x41_user_pings where userId=? limit 1`;
+    //l(sql,xid)
+    rows = await query(sql, [userId]);
+    
+    return rows&&rows.length?rows[0]['ping']:-1; 
+}
+export const updateLastUserPing = async ({
+    threadid,
+    userId,
+}: {
+    threadid: number,
+    userId:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`UPDATE x41_user_pings set ping=UNIX_TIMESTAMP(now()) where userId=? limit 1`;
+    //l(sql,xid)
+    rows = await query(sql, [userId]);
+    
 }
