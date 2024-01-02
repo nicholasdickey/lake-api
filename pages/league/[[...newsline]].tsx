@@ -66,7 +66,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
         // console.log("rss key==", key)
        
         let items = await getLeagueItems({ league: newsline, threadid });
-        l("after items", items)
+    //    l("after items", items)
         if (context.res) {
             const header = `<?xml version="1.0" encoding="UTF-8" ?>  
     <rss version="2.0"> 
@@ -141,7 +141,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
             const rss = rssItems.filter((p: any) => p ? true : false)
             const all = `${header}${rss.join('\n')} </channel>
     </rss>`
-            console.log("NEAR END")
+          //  console.log("NEAR END")
             context.res.setHeader('Content-Type', 'text/xml');
             context.res.write(all);
             context.res.end();
