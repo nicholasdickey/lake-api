@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { getOrCreateSubscriberId } from "../../../../../lib/functions/dbservice";
+import { checkFreeUser } from "../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../lib/db"
 
 
@@ -18,9 +18,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        console.log("get-subscriberid.ts: userId:",userId,"email:",email);
-        const subscriberId=await getOrCreateSubscriberId({ threadid,userId:userId as string||"",email:email as string||""});
-        return res.status(200).json({ success: true,subscriberId });
+        const exists=await checkFreeUser({ threadid,userId:userId as string||"",email:email as string||""});
+        l("exists:",{exists,email,userId})
+        return res.status(200).json({ success: true,exists });
     }
     catch(x){
         console.log("Error in getDetails:", x);

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { getOrCreateSubscriberId } from "../../../../../lib/functions/dbservice";
+import { updateUserList } from "../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../lib/db"
 
 
@@ -14,13 +14,12 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userId,api_key,email} = req.query;
+        let { userId,api_key,listxid,name,description} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        console.log("get-subscriberid.ts: userId:",userId,"email:",email);
-        const subscriberId=await getOrCreateSubscriberId({ threadid,userId:userId as string||"",email:email as string||""});
-        return res.status(200).json({ success: true,subscriberId });
+        await updateUserList({ threadid,userId:userId as string||"",listxid:listxid as string||"",name:name as string||"",description:description as string||""});
+        return res.status(200).json({ success: true});
     }
     catch(x){
         console.log("Error in getDetails:", x);

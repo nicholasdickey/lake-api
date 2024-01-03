@@ -491,7 +491,7 @@ export const getMetaLink = async ({
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
     sql=`SELECT i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
-    l(sql,xid)
+    //l(sql,xid)
     rows = await query(sql, [xid]);
     return rows&&rows.length?rows[0]:false; 
 }
@@ -523,12 +523,12 @@ export const getOrCreateSubscriberId = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    // Get current findex, findex history, and mentions
-    sql=`SELECT * from x41_users where userId=? limit 1`;
-    //l(sql,xid)
+    sql=`SELECT * from x41_users where userId=? limit 1`,userId,email;
+    l("getOr",sql);
     rows = await query(sql, [userId]);
     if(!rows||!rows.length){
-        sql=`INSERT into x41_users (userId,SubscriberId,email) values (?,?,?)`;
+        l("inserting")
+        sql=`INSERT into x41_users (userId,subscriberId,email) values (?,?,?)`;
         await query(sql, [userId,userId,email]);
     }
     return rows&&rows.length?rows[0]['subscriberId']:userId; 
@@ -542,9 +542,7 @@ export const getLastUserPing = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    // Get current findex, findex history, and mentions
     sql=`SELECT * from x41_user_pings where userId=? limit 1`;
-    //l(sql,xid)
     rows = await query(sql, [userId]);
     
     return rows&&rows.length?rows[0]['ping']:-1; 
@@ -558,9 +556,111 @@ export const updateLastUserPing = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    // Get current findex, findex history, and mentions
     sql=`UPDATE x41_user_pings set ping=UNIX_TIMESTAMP(now()) where userId=? limit 1`;
-    //l(sql,xid)
     rows = await query(sql, [userId]);
     
+}
+export const getUserLists = async ({
+    threadid,
+    userId,
+}: {
+    threadid: number,
+    userId:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT * from x41_lists where userId=? limit 1`;
+    rows = await query(sql, [userId]);
+    
+    return rows;
+}
+export const getUserListMembers = async ({
+    threadid,
+    userId,
+    listxid,
+}: {
+    threadid: number,
+    userId:string,
+    listxid:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT * from x41_list_members where listxid=? order by member limit 10000`;
+    rows = await query(sql, [listxid]);
+    
+    return rows;
+}
+export const updateUserList = async ({
+    threadid,
+    userId,
+    listxid,
+    name,
+    description,
+}: {
+    threadid: number,
+    userId:string,
+    listxid:string,
+    name:string,
+    description:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`UPDATE x41_lists set name=?, description=? where listxid=?`;
+    await query(sql, [name,description,listxid]);
+}
+export const updateUserListMembers = async ({
+    threadid,
+    userId,
+    listxid,
+    members
+}: {
+    threadid: number,
+    userId:string,
+    listxid:string,
+    members:{member:string,teamid:string}[]
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`DELETE from x41_list_members where listxid=?`;
+    await query(sql, [listxid]);
+    for(let i=0;i<members.length;i++){
+        const member=members[i];
+        sql=`INSERT into x41_list_members (listxid,member,teamid) values (?,?,?)`;
+        await query(sql, [listxid,member.member,member.teamid]);
+    }
+    sql=`SELECT * from x41_list_members where listxid=? order by member limit 10000`;
+    rows = await query(sql, [listxid]);
+    return rows;
+}
+export const addUserList = async ({
+    threadid,
+    userId,
+    name,
+    description,
+}: {
+    threadid: number,
+    userId:string,
+    name:string,
+    description:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`INSERT INTO x41_lists (name,description,usedrid) VALUES (?,?,?)`;
+    await query(sql, [name,description,userId]);
+}
+
+export const checkFreeUser = async ({
+    threadid,
+    userId,
+    email,
+}: {
+    threadid: number,
+    userId:string,
+    email:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT xid from x41_free_users where email=? limit 1`;
+    rows=await query(sql, [email]);
+    return rows&&rows.length?true:false; 
 }

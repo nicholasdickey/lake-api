@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { getOrCreateSubscriberId } from "../../../../../lib/functions/dbservice";
+import { updateUserListMembers } from "../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../lib/db"
 
 
@@ -14,13 +14,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userId,api_key,email} = req.query;
+        const body = req.body;
+        let { members } = body;
+        let { userId,api_key,listxid} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        console.log("get-subscriberid.ts: userId:",userId,"email:",email);
-        const subscriberId=await getOrCreateSubscriberId({ threadid,userId:userId as string||"",email:email as string||""});
-        return res.status(200).json({ success: true,subscriberId });
+        const retMembers=await updateUserListMembers({ threadid,userId:userId as string||"",listxid:listxid as string||"",members:members as {member:string,teamid:string}[]});
+        return res.status(200).json({ success: true,members:retMembers });
     }
     catch(x){
         console.log("Error in getDetails:", x);
