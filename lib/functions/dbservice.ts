@@ -763,7 +763,7 @@ export const getTrackerList = async ({
     league:string,
 }) => {
     let sql, rows;
-    league=league.toUpperCase();   
+    league=league?league.toUpperCase():"";   
     let query = await dbGetQuery("povdb", threadid);
     if(league){
         sql=`SELECT l.member,l.teamid from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
