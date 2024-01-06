@@ -339,12 +339,16 @@ export const getLeagueTeams = async ({
 
 export const getTeamPlayers = async ({
     threadid,
-    teamid
+    teamid,
+    userid,
 }: {
     threadid: number,
-    teamid: string
+    teamid: string,
+    userid?:string
 }) => {
     let sql, rows;
+    userid=userid||"";
+
     teamid = teamid.toLowerCase();
     let query = await dbGetQuery("povdb", threadid);
 
@@ -360,6 +364,12 @@ export const getTeamPlayers = async ({
         const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
         row.mentions=currentFindex.mentions;
         row.findex=currentFindex.avg_findex;
+        row.tracked=false;
+        if(userid){
+            sql=`SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
+            const listRows = await query(sql, [userid,name,teamid]);
+            row.tracked=listRows&&listRows.length?true:false;
+        }
     }
     return rows;
 }
@@ -474,6 +484,8 @@ export const getLeagueMentions = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
+    
+
     // Get current findex, findex history, and mentions
     sql=`SELECT xid,date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
     const mentions = await query(sql, [league]);
@@ -495,6 +507,41 @@ export const getMetaLink = async ({
     rows = await query(sql, [xid]);
     return rows&&rows.length?rows[0]:false; 
 }
+export const getFilteredAllMentions = async ({
+    threadid,  
+    userid, 
+}: {
+    threadid: number;
+    userid:string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary FROM povdb.x41_raw_findex i, povdb.x41_list_members m where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `
+    const mentions = await query(sql, [userid]);
+    return  mentions;   
+}
+
+export const getFilteredLeagueMentions = async ({
+    threadid,
+    league,
+    userid,
+}: {
+    threadid: number,
+    league:string,
+    userid:string
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    
+
+    // Get current findex, findex history, and mentions
+    sql=`SELECT i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary FROM povdb.x41_raw_findex i,povdb.x41_list_members m where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
+    const mentions = await query(sql, [league,userid]);
+    return mentions; 
+}
+
+
 export const getAthletePhoto = async ({
     threadid,
     name,
@@ -569,7 +616,7 @@ export const getUserLists = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    sql=`SELECT * from x41_lists where userId=? limit 1`;
+    sql=`SELECT * from x41_lists where userId=? limit 1000`;
     rows = await query(sql, [userId]);
     
     return rows;
@@ -585,7 +632,7 @@ export const getUserListMembers = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    sql=`SELECT * from x41_list_members where listxid=? order by member limit 10000`;
+    sql=`SELECT m.listxid,m.member,m.teamid,t.league from x41_list_members m, x41_teams t where m.listxid=? and m.teamid=t.id  order by member limit 1000`;
     rows = await query(sql, [listxid]);
     
     return rows;
@@ -628,7 +675,7 @@ export const updateUserListMembers = async ({
         sql=`INSERT into x41_list_members (listxid,member,teamid) values (?,?,?)`;
         await query(sql, [listxid,member.member,member.teamid]);
     }
-    sql=`SELECT * from x41_list_members where listxid=? order by member limit 10000`;
+    sql=`SELECT * from x41_list_members where listxid=? order by member limit 1000`;
     rows = await query(sql, [listxid]);
     return rows;
 }
@@ -645,17 +692,20 @@ export const addUserList = async ({
 }) => {
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
-    sql=`INSERT INTO x41_lists (name,description,usedrid) VALUES (?,?,?)`;
-    await query(sql, [name,description,userId]);
+    var randomstring = () => Math.random().toString(36).substring(2, 24) + Math.random().toString(36).substring(2, 24);
+    const listxid=randomstring();
+    sql=`INSERT INTO x41_lists (name,description,userid,listxid) VALUES (?,?,?,?)`;
+    await query(sql, [name,description,userId,listxid]);
+    const lists= await getUserLists({threadid,userId});
+    console.log("DB get lists",lists)
+    return lists;
 }
 
 export const checkFreeUser = async ({
     threadid,
-    userId,
     email,
 }: {
     threadid: number,
-    userId:string,
     email:string,
 }) => {
     let sql, rows;   
@@ -663,4 +713,102 @@ export const checkFreeUser = async ({
     sql=`SELECT xid from x41_free_users where email=? limit 1`;
     rows=await query(sql, [email]);
     return rows&&rows.length?true:false; 
+}
+
+export const addTrackerListMember = async ({
+    threadid,
+    userid,
+    member,
+    teamid
+}: {
+    threadid: number,
+    userid:string,
+    member:string,
+    teamid:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
+    rows=await query(sql, [userid,member,teamid]);
+    if(rows&&rows.length)
+        return false;
+    sql=`INSERT INTO x41_list_members (userid,member,teamid) VALUES (?,?,?)`;
+    await query(sql, [userid,member,teamid]);
+    return true;
+}
+export const removeTrackerListMember = async ({
+    threadid,
+    userid,
+    member,
+    teamid
+}: {
+    threadid: number,
+    userid:string,
+    member:string,
+    teamid:string,
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`DELETE from x41_list_members where userid=? and member=? and teamid=? limit 1`;
+    await query(sql, [userid,member,teamid]);
+    return true;
+}
+export const getTrackerList = async ({
+    threadid,
+    userid,
+    league,
+}: {
+    threadid: number,
+    userid:string,
+    league:string,
+}) => {
+    let sql, rows;
+    league=league.toUpperCase();   
+    let query = await dbGetQuery("povdb", threadid);
+    if(league){
+        sql=`SELECT l.member,l.teamid from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
+        rows=await query(sql, [userid,league]);
+    }
+    else {
+        sql=`SELECT member,teamid from x41_list_members where userid=? limit 1000`;
+        rows=await query(sql, [userid]);
+    }
+    return rows;
+}
+export const getUserOptions = async ({
+    threadid,
+    userid,
+    email,
+}: {
+    threadid: number,
+    userid:string,
+    email:string
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT tracker_filter from x41_user_options where userid=? limit 1`;
+    rows=await query(sql, [userid]);
+    if(!rows||!rows.length){ // to keep a copy of user email locally just in case
+        sql=`INSERT INTO x41_user_options (userid,email,last_access) VALUES (?,?,now())`;
+        await query(sql, [userid,email]); 
+        sql=`SELECT tracker_filter from x41_user_options where userid=? limit 1`;
+        rows=await query(sql, [userid]); 
+    }
+    sql=`UPDATE x41_user_options set last_access=now() where userid=? limit 1`;
+    await query(sql, [userid]);
+    return rows[0]; 
+}
+export const updateTrackerFilterOption = async ({
+    threadid,
+    userid,
+    tracker_filter,
+}: {
+    threadid: number,
+    userid:string,
+    tracker_filter:string
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`UPDATE x41_user_options set tracker_filter=? where userid=? limit 1`;
+    await query(sql, [tracker_filter,userid]);
 }

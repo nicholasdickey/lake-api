@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { checkFreeUser } from "../../../../../lib/functions/dbservice";
+import { getFilteredLeagueMentions,getFilteredAllMentions } from "../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../lib/db"
-
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     await NextCors(req, res, {
@@ -14,19 +13,27 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userId,api_key,email} = req.query;
+        let {league,userid,api_key} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        const exists=await checkFreeUser({ threadid,userId:userId as string||"",email:email as string||""});
-        l("exists:",{exists,email,userId})
-        return res.status(200).json({ success: true,exists });
+        let mentions;
+      
+        if(league){
+            l(chalk.greenBright("get-mentions: league",league)  )
+            mentions=await getFilteredLeagueMentions({ threadid,league:league as string,userid:userid as string||""});
+            l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
+        }
+        else 
+            mentions=await getFilteredAllMentions({ threadid,userid:userid as string||""});   
+        
+        return res.status(200).json({ success: true,mentions });
     }
     catch(x){
-        console.log("Error in getDetails:", x);
+        console.log("Error in events/record:", x);
         return res.status(500).json({ success: false });
     }    
-    finally {    
+    finally {       
         dbEnd(threadid)
     }
 };

@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
-import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { getUserLists } from "../../../../../lib/functions/dbservice";
-import { dbEnd } from "../../../../../lib/db"
+import { l, chalk, js, sleep } from "../../../../../../lib/common";
+import { updateTrackerFilterOption } from "../../../../../../lib/functions/dbservice";
+import { dbEnd } from "../../../../../../lib/db"
 
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -14,21 +14,18 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userId,api_key} = req.query;
+        let { userid,api_key,tracker_filter} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
-            return res.status(401).json({ success: false });
+            return res.status(401).json({ success: false ,message:"Invalid api_key",exists:false});
         }
-        
-        const lists=await getUserLists({ threadid,userId:userId as string||""});
-        const retLists=lists.map((list:any)=>{
-            return {listxid:list.listxid,name:list.name,description:list.description}
-        });
-        console.log("get-lists",userId,retLists)
-        return res.status(200).json({ success: true,lists:retLists });
+        console.log("set-tracker-filter",userid,tracker_filter)
+        const options=await updateTrackerFilterOption({ threadid,userid:userid as string||"",tracker_filter:tracker_filter as string||""});
+       
+        return res.status(200).json({ success: true});
     }
     catch(x){
         console.log("Error in getDetails:", x);
-        return res.status(500).json({ success: false });
+        return res.status(500).json({ success: false});
     }    
     finally {    
         dbEnd(threadid)

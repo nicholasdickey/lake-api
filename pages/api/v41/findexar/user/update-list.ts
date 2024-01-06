@@ -18,8 +18,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        await updateUserList({ threadid,userId:userId as string||"",listxid:listxid as string||"",name:name as string||"",description:description as string||""});
-        return res.status(200).json({ success: true});
+        console.log("API update list called")
+        const lists=await updateUserList({ threadid,userId:userId as string||"",listxid:listxid as string||"",name:name as string||"",description:description as string||""});
+        return res.status(200).json({ success: true,lists});
     }
     catch(x){
         console.log("Error in getDetails:", x);

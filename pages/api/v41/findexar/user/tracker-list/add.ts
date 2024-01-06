@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
-import { l, chalk, js, sleep } from "../../../../../lib/common";
-import { updateUserListMembers } from "../../../../../lib/functions/dbservice";
-import { dbEnd } from "../../../../../lib/db"
+import { l, chalk, js, sleep } from "../../../../../../lib/common";
+import { addTrackerListMember } from "../../../../../../lib/functions/dbservice";
+import { dbEnd } from "../../../../../../lib/db"
 
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -14,18 +14,16 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        const body = req.body;
-        let { members } = body;
-        let { userId,api_key,listxid} = req.query;
-        console.log("Update List Members:",{userId,listxid,members});
+        let { userid,api_key,member,teamid} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        const retMembers=await updateUserListMembers({ threadid,userId:userId as string||"",listxid:listxid as string||"",members:members as {member:string,teamid:string}[]});
-        return res.status(200).json({ success: true,members:retMembers });
+        l(chalk.yellowBright("API remove tracker list member called",userid,member,teamid));
+        await addTrackerListMember({ threadid,userid:userid as string||"",member:member as string||"",teamid:teamid as string||""});
+        return res.status(200).json({ success: true });
     }
     catch(x){
-        console.log("Error in getDetails:", x);
+        console.log("Error in addTrackerListMember:", x);
         return res.status(500).json({ success: false });
     }    
     finally {    
