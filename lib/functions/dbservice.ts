@@ -770,6 +770,7 @@ export const getTrackerList = async ({
         rows=await query(sql, [userid,league]);
     }
     else {
+        console.log ("get tracking list with no league")
         sql=`SELECT member,teamid from x41_list_members where userid=? limit 1000`;
         rows=await query(sql, [userid]);
     }

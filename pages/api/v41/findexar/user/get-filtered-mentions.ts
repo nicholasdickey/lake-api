@@ -20,9 +20,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         let mentions;
       
         if(league){
-            l(chalk.greenBright("get-mentions: league",league)  )
+            l(chalk.greenBright("get-filtered-mentions: league",league)  )
             mentions=await getFilteredLeagueMentions({ threadid,league:league as string,userid:userid as string||""});
-            l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
+           // l(chalk.greenBright("get-filtered-mentions: mentions",js(mentions))  )
         }
         else 
             mentions=await getFilteredAllMentions({ threadid,userid:userid as string||""});   

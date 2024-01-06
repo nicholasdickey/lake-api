@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(league){
             l(chalk.greenBright("get-mentions: league",league)  )
             mentions=await getLeagueMentions({ threadid,league:league as string});
-            l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
+           // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
         }
         else 
             mentions=await getAllMentions({ threadid});   
