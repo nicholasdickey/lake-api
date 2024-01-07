@@ -60,7 +60,7 @@ const processFeed = async (channel: string, feed: string, rss: string, filters: 
                 username,
             })*/
         for (var j = 0; j < items.length; j++) {
-            const item = items[j]
+            const item = items[j];
             if (feed == 'fnc')
                 item.link = item.guid;
             //  l("rss item", js(item))

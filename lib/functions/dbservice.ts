@@ -453,8 +453,45 @@ export const getDetails = async ({
     //const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
     sql = `SELECT DISTINCT teamid,millis,recorded,findex,mentions,teams from x41_findex where teamid=? and name=? order by millis desc limit 100`;
     //const findexHistory = await query(sql, [teamid,name]);
-    sql = `SELECT DISTINCT xid,date, league, team, type, name, url, findex,summary from x41_raw_findex where team=? and name=? order by date desc limit 100`;
+    sql = `SELECT DISTINCT xid as findexarxid,date, league, team, type, name, url, findex,summary 
+    from x41_raw_findex 
+    where team=? and name=? order by date desc limit 100`;
     const mentions = await query(sql, [teamid,name]);
+    return {
+        currentFindex:[],
+        findexHistory:[],
+        mentions
+    }
+}
+export const getDetailsFavorites = async ({
+    threadid,
+    teamid,
+    name,
+    userid
+}: {
+    threadid: number,
+    teamid: string,
+    name:string,
+    userid:string,
+}) => {
+    if(!userid)
+        return getDetails({threadid,teamid,name});
+    let sql, rows;
+    teamid = teamid.toLowerCase();
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    /*sql=`SELECT DISTINCT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+    where  team=? and name =?
+    group by name`
+    //const currentFindexRows = await query(sql, [teamid,name]);
+    //const currentFindex=currentFindexRows&&currentFindexRows.length?currentFindexRows[0]:[];
+    sql = `SELECT DISTINCT teamid,millis,recorded,findex,mentions,teams from x41_findex where teamid=? and name=? order by millis desc limit 100`;*/
+    //const findexHistory = await query(sql, [teamid,name]);
+    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,summary ,not f.xid is null as fav 
+    from x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+    where team=? and name=? order by date desc limit 100`;
+    const mentions = await query(sql, [userid,teamid,name]);
     return {
         currentFindex:[],
         findexHistory:[],
@@ -470,7 +507,7 @@ export const getAllMentions = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT xid,date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 100 `
+    sql=`SELECT xid as findexarxid,date, league, team, type, name, url, findex,summary FROM povdb.x41_raw_findex order by date desc limit 100 `
     const mentions = await query(sql, []);
     return  mentions;   
 }
@@ -487,11 +524,54 @@ export const getLeagueMentions = async ({
     
 
     // Get current findex, findex history, and mentions
-    sql=`SELECT xid,date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
+    sql=`SELECT xid as findexarxid,date, league, team, type, name, url, findex,summary  FROM povdb.x41_raw_findex where league=? order by xid desc limit 25`;
     const mentions = await query(sql, [league]);
     return mentions; 
 }
+export const getAllMentionsFavorites = async ({
+    threadid,
+    userid,   
+}: {
+    threadid: number,
+    userid:string
+}) => {
+    if(!userid)
+        return getAllMentions({threadid});
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav 
+    FROM povdb.x41_raw_findex i 
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+    order by date desc limit 100 `
+    const mentions = await query(sql, [userid]);
+    return  mentions;   
+}
 
+export const getLeagueMentionsFavorites = async ({
+    threadid,
+    league,
+    userid,
+}: {
+    threadid: number,
+    league:string,
+    userid:string
+}) => {
+    if(!userid){
+        return getLeagueMentions({threadid,league});
+    }
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    
+
+    // Get current findex, findex history, and mentions
+    sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav  
+    FROM povdb.x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+    where league=? order by xid desc limit 25`;
+    const mentions = await query(sql, [userid,league]);
+    return mentions; 
+}
 export const getMetaLink = async ({
     threadid,
     xid,
@@ -514,11 +594,17 @@ export const getFilteredAllMentions = async ({
     threadid: number;
     userid:string
 }) => {
+    if(!userid)
+        return getAllMentions({threadid});
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql=`SELECT i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary FROM povdb.x41_raw_findex i, povdb.x41_list_members m where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `
-    const mentions = await query(sql, [userid]);
+    sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav
+    FROM povdb.x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+    povdb.x41_list_members m
+    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `
+    const mentions = await query(sql, [userid,userid]);
     return  mentions;   
 }
 
@@ -531,13 +617,20 @@ export const getFilteredLeagueMentions = async ({
     league:string,
     userid:string
 }) => {
+    if(!userid){
+        return getLeagueMentions({threadid,league});
+    }
     let sql, rows;   
     let query = await dbGetQuery("povdb", threadid);
     
 
     // Get current findex, findex history, and mentions
-    sql=`SELECT i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary FROM povdb.x41_raw_findex i,povdb.x41_list_members m where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
-    const mentions = await query(sql, [league,userid]);
+    sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary ,not f.xid is null as fav
+    FROM povdb.x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+    povdb.x41_list_members m 
+    where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
+    const mentions = await query(sql, [userid,league,userid]);
     return mentions; 
 }
 
@@ -766,12 +859,12 @@ export const getTrackerList = async ({
     league=league?league.toUpperCase():"";   
     let query = await dbGetQuery("povdb", threadid);
     if(league&&league.length>1){
-        sql=`SELECT l.member,l.teamid from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
+        sql=`SELECT l.member,l.teamid, t.league from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
         rows=await query(sql, [userid,league]);
     }
     else {
         console.log ("get tracking list with no league")
-        sql=`SELECT member,teamid from x41_list_members where userid=? limit 1000`;
+        sql=`SELECT m.member,m.teamid,t.league from x41_list_members m, x41_teams t where t.id=m.teamid and userid=? limit 1000`;
         rows=await query(sql, [userid]);
     }
     return rows;
@@ -812,4 +905,56 @@ export const updateTrackerFilterOption = async ({
     let query = await dbGetQuery("povdb", threadid);
     sql=`UPDATE x41_user_options set tracker_filter=? where userid=? limit 1`;
     await query(sql, [tracker_filter,userid]);
+}
+export const addUserFavorite = async ({
+    threadid,
+    userid,
+    findexarxid,
+}: {
+    threadid: number,
+    userid:string,
+    findexarxid:string
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+    rows=await query(sql, [userid,findexarxid]);
+    if(rows&&rows.length)
+        return false;
+    sql=`INSERT INTO x41_user_favorites (userid,findexarxid) VALUES (?,?)`;
+    await query(sql, [userid,findexarxid]);
+    return true;
+}
+export const removeUserFavorite = async ({
+    threadid,
+    userid,
+    findexarxid,
+}: {
+    threadid: number,
+    userid:string,
+    findexarxid:string
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`DELETE from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+    await query(sql, [userid,findexarxid]);
+    return true;
+}
+export const getUserFavorites = async ({
+    threadid,
+    userid,
+    
+}: {
+    threadid: number,
+    userid:string,
+  
+}) => {
+    let sql, rows;   
+    let query = await dbGetQuery("povdb", threadid);
+    sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
+        from x41_user_favorites f, 
+        x41_raw_findex i 
+    where f.findexarxid=i.xid and f.userid='user_2aMwz0s7fp5y5QhzKxWbqv8frqW' limit 1000`;
+    rows=await query(sql, [userid]);
+    return rows;
 }
