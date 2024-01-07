@@ -545,6 +545,7 @@ export const getAllMentionsFavorites = async ({
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
     order by date desc limit 100 `
     const mentions = await query(sql, [userid]);
+    l("mentions=-",mentions)
     return  mentions;   
 }
 
@@ -568,7 +569,7 @@ export const getLeagueMentionsFavorites = async ({
     sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav  
     FROM povdb.x41_raw_findex i
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
-    where league=? order by xid desc limit 25`;
+    where league=? order by i.xid desc limit 25`;
     const mentions = await query(sql, [userid,league]);
     return mentions; 
 }
@@ -954,7 +955,7 @@ export const getUserFavorites = async ({
     sql=`SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
         from x41_user_favorites f, 
         x41_raw_findex i 
-    where f.findexarxid=i.xid and f.userid='user_2aMwz0s7fp5y5QhzKxWbqv8frqW' limit 1000`;
+    where f.findexarxid=i.xid and f.userid='user_2aMwz0s7fp5y5QhzKxWbqv8frqW' order by f.xid desc limit 1000`;
     rows=await query(sql, [userid]);
     return rows;
 }
