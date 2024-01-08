@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        l(chalk.yellowBright("API get tracker list members called",userid));
+        l(chalk.yellowBright("API get favorites members called",userid));
         const favorites=await getUserFavorites({ threadid,userid:userid as string||""});
         return res.status(200).json({ success: true,favorites });
     }
