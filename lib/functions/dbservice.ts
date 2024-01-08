@@ -1009,7 +1009,7 @@ export const fetchMentions = async ({
             sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, t.name as teamName, i.type, i.name, i.url, i.findex,i.summary , 0 as fav
                     FROM povdb.x41_raw_findex i,
                     x41_teams t
-                    where t.id=i.name
+                    where t.id=i.team
                     order by i.date desc limit ${pageNum * 25},25 `
             console.log("db1", sql)
             return await query(sql, []);
@@ -1018,7 +1018,7 @@ export const fetchMentions = async ({
             sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, t.name as teamName, i.type, i.name, i.url, i.findex,i.summary, 0 as fav  
                     FROM povdb.x41_raw_findex i,
                     x41_teams t
-                    where t.id=i.name and i.league=? 
+                    where t.id=i.team and i.league=? 
                     order by i.xid desc limit ${pageNum * 25},25`;
             console.log("db2", sql)
             return await query(sql, [league]);
