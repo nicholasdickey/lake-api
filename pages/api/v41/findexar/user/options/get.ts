@@ -14,14 +14,17 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const t1=Date.now();
         let { userid,api_key,email} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false ,message:"Invalid api_key",exists:false});
         }
         const exists=await checkFreeUser({ threadid,email:email as string||""});
-        l("exists:",{exists,email,userid})
+        //l("exists:",{exists,email,userid})
         const options=await getUserOptions({ threadid,userid:userid as string||"",email:email as string||""});
-        l("options:",{options})
+        //l("options:",{options})
+        const t2=Date.now();
+        l(chalk.green("getUseOptions"),js({elapsed:t2-t1}));
         return res.status(200).json({ success: true,exists,options});
     }
     catch(x){

@@ -13,7 +13,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const t1=Date.now();
         const leagues=await getLeagues({ threadid});
+        l("get-leagues",js({time:Date.now()-t1}));
         return res.status(200).json({ success: true,leagues });
     }
     catch(x){

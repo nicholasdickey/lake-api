@@ -13,9 +13,11 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const t1=Date.now();
         let { sessionid, name, params } = req.query;
-        console.log("events/record:", { sessionid, name, params });
+       // console.log("events/record:", { sessionid, name, params });
         await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""),sid:sessionid as string||'', params: params as string, name: name as string});
+        console.log("record-event:", { time: Date.now() - t1 });
         return res.status(200).json({ success: true });
     }
     catch(x){

@@ -13,10 +13,12 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const t1=Date.now();
         let {teamid,userid} = req.query;
         const players=await getTeamPlayers({ threadid,teamid:teamid as string,userid:userid as string||""});
        // l(chalk.magentaBright("API get team players called",teamid,userid,players.length,players));
-        return res.status(200).json({ success: true,players });
+       l("get-team-players",js({time:Date.now()-t1}));
+       return res.status(200).json({ success: true,players });
     }
     catch(x){
         console.log("Error in events/record:", x);

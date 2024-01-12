@@ -12,13 +12,15 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         origin: "*",
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
+    const t1=Date.now();
     let threadid = Math.floor(Math.random() * 100000000);
     try {
         let { userid,api_key} = req.query;
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        l(chalk.yellowBright("API get favorites members called",userid));
+       // l(chalk.yellowBright("API get favorites members called",userid));
+        l("get-user-favorites",js({time:Date.now()-t1}));
         const favorites=await getUserFavorites({ threadid,userid:userid as string||""});
         return res.status(200).json({ success: true,favorites });
     }

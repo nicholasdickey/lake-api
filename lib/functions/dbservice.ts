@@ -1,4 +1,5 @@
 //./functions/dbservice.ts
+import { endOfISOWeek } from "date-fns";
 import { l, chalk, microtime, js, ds, uxToMySql, } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 export const getChannelItem = async ({
@@ -1001,7 +1002,7 @@ export const fetchMentions = async ({
     if (teamid) {
         teamid = teamid.toLowerCase();
     }
-  //  console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
+    console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
     let query = await dbGetQuery("povdb", threadid);
     if (!userid) {
         if (!league) {
@@ -1024,62 +1025,117 @@ export const fetchMentions = async ({
     else {
         if (!filterNum) {
             if (teamid && name) { //aka details
-                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary ,f.xid as fav 
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
                     from x41_raw_findex i
-                        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+                       # LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
                     where i.team=? and i.name=? order by i.date desc limit ${pageNum*25},25`;
               //  console.log("db2", sql)
-                return await query(sql, [userid, teamid, name]);
+                rows= await query(sql, [/*userid,*/ teamid, name]);
+                if(rows&&rows.length){
+                    for(let i=0;i<rows.length;i++){
+                        const row=rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                   
+                }
+                return rows; 
             }
             else if(teamid){
-                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary ,f.xid as fav 
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
                     from x41_raw_findex i
-                        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+                        #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
                     where i.team=? and i.name=?  order by date desc limit ${pageNum*25},25`;
-              //  console.log("db2", sql)
-                return await query(sql, [userid, teamid, name]);
+                console.log("db2", sql)
+                rows= await query(sql, [teamid, name]);
+                if(rows&&rows.length){
+                    for(let i=0;i<rows.length;i++){
+                        const row=rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }                  
+                }
+                return rows;
             }
             else { //aka mentions
                 if (league) {
-                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary ,f.xid as fav 
+                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
                         from x41_raw_findex i
-                            LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+                            #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
                            
                         where i.league=?  order by i.date desc limit ${pageNum*25},25`;
-                 //   console.log("db3", sql)
-                    return await query(sql, [userid, league]);
+                    console.log("db3", sql)
+                    rows= await query(sql, [userid, league]);
+                    if(rows&&rows.length){
+                        for(let i=0;i<rows.length;i++){
+                            const row=rows[i];
+                            sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                            const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                            row.fav = favRows && favRows.length ? true : false;
+                        }                  
+                    }
+                    return rows;
                 }
                 else {
-                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary ,f.xid as fav 
+                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
                         from x41_raw_findex i
-                            LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+                            #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
                         
                         order by i.date desc limit ${pageNum*25},25`;
-                  //  console.log("db4", sql)
-                    return await query(sql, [userid]);
+                    console.log("db4", sql)
+                    rows= await query(sql, []);
+                    if(rows&&rows.length){
+                        for(let i=0;i<rows.length;i++){
+                            const row=rows[i];
+                            sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                            const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                            row.fav = favRows && favRows.length ? true : false;
+                        }                  
+                    }
+                    return rows;
                 }
             }
         }
         else { // filter to my team (tracker list) only
             if (!league) {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.teamName,i.url, i.findex,i.summary,f.xid as fav
-                    FROM povdb.x41_raw_findex i
-                        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.teamName,i.url, i.findex,i.summary #,f.xid as fav
+                    FROM povdb.x41_raw_findex i,
+                       # LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     povdb.x41_list_members m
                     
                     where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit ${pageNum*25},25`;
-               // console.log("db5", sql)
-                return await query(sql, [userid, userid]);
+                console.log("db5", sql)
+                rows= await query(sql, [ userid]);
+                if(rows&&rows.length){
+                    for(let i=0;i<rows.length;i++){
+                        const row=rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }                  
+                }
+                return rows;
             }
             else {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.teamName, i.url, i.findex,i.summary ,f.xid as fav
-                    FROM povdb.x41_raw_findex i
-                        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.teamName, i.url, i.findex,i.summary #,f.xid as fav
+                    FROM povdb.x41_raw_findex i,
+                        #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     povdb.x41_list_members m
                   
                     where m.teamid=i.team and m.member=i.name  and i.league=? and m.userid=? order by i.date desc limit ${pageNum*25},25`;
               //  console.log("db6", sql)
-                return await query(sql, [userid, league, userid]);
+                rows= await query(sql, [ league, userid]);
+                if(rows&&rows.length){
+                    for(let i=0;i<rows.length;i++){
+                        const row=rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }                  
+                }
+                return rows;
             }
 
         }

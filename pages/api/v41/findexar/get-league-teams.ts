@@ -13,8 +13,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
+        const t1=Date.now();
         let { league, params} = req.query;
         const teams=await getLeagueTeams({ threadid,league:league as string});
+        l("get-league-teams",js({time:Date.now()-t1}));
         return res.status(200).json({ success: true,teams });
     }
     catch(x){
