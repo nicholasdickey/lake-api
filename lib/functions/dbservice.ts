@@ -1043,11 +1043,12 @@ export const fetchMentions = async ({
             }
             else if(teamid){
                 sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary  
-                    from x41_raw_findex i
+                    from x41_raw_findex i,
+                    x41_teams t
                       
-                    where i.team=? and i.name=?  order by date desc limit ${pageNum*25},25`;
+                    where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum*25},25`;
                 console.log("db2", sql)
-                rows= await query(sql, [teamid, name]);
+                rows= await query(sql, [teamid]);
                 if(rows&&rows.length){
                     for(let i=0;i<rows.length;i++){
                         const row=rows[i];

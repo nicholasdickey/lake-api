@@ -24,7 +24,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         }
         const mentions=await fetchMentions({ threadid,league:league as string,userid:userid as string||"",teamid:teamid as string||"",name:name as string||"",myteam:myteam as string||"",page:page as string||""})
         //l("MENTIONS:",js(mentions))
-        console.log("fetch-mentions: league",league,"userid",userid,"teamid",teamid,"name",name,",myteam",myteam,"page",page,"time:",microtime()-t1);
+        console.log("fetch-mentions: league",league,"userid",userid,"teamid",teamid,"name",name,",myteam",myteam,"page",page,"count",mentions.length,"time:",microtime()-t1);
       
         return res.status(200).json({ success: true,mentions });
     }
