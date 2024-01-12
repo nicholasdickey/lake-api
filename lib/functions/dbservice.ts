@@ -1001,7 +1001,7 @@ export const fetchMentions = async ({
     if (teamid) {
         teamid = teamid.toLowerCase();
     }
-    console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
+  //  console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
     let query = await dbGetQuery("povdb", threadid);
     if (!userid) {
         if (!league) {
@@ -1020,7 +1020,7 @@ export const fetchMentions = async ({
                     x41_teams t
                     where t.id=i.team and i.league=? 
                     order by i.xid desc limit ${pageNum * 25},25`;
-            console.log("db2", sql)
+           // console.log("db2", sql)
             return await query(sql, [league]);
         }
     }
@@ -1032,7 +1032,7 @@ export const fetchMentions = async ({
                         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     x41_teams t    
                     where i.team=? and i.name=? and t.id=i.team order by i.date desc limit ${pageNum*25},25`;
-                console.log("db2", sql)
+              //  console.log("db2", sql)
                 return await query(sql, [userid, teamid, name]);
             }
             else if(teamid){
@@ -1041,7 +1041,7 @@ export const fetchMentions = async ({
                         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     x41_teams t    
                     where i.team=? and i.name=t.name and t.id=i.team order by date desc limit ${pageNum*25},25`;
-                console.log("db2", sql)
+              //  console.log("db2", sql)
                 return await query(sql, [userid, teamid, name]);
             }
             else { //aka mentions
@@ -1051,7 +1051,7 @@ export const fetchMentions = async ({
                             LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                         x41_teams t    
                         where i.league=? and t.id=i.team order by i.date desc limit ${pageNum*25},25`;
-                    console.log("db3", sql)
+                 //   console.log("db3", sql)
                     return await query(sql, [userid, league]);
                 }
                 else {
@@ -1061,30 +1061,30 @@ export const fetchMentions = async ({
                         x41_teams t
                         where t.id=i.team    
                         order by i.date desc limit ${pageNum*25},25`;
-                    console.log("db4", sql)
+                  //  console.log("db4", sql)
                     return await query(sql, [userid]);
                 }
             }
         }
         else { // filter to my team (tracker list) only
             if (!league) {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, t.teamName, i.type, i.name, t.name as teamName,i.url, i.findex,i.summary,f.xid as fav
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, t.name as teamName, i.type, i.name, t.name as teamName,i.url, i.findex,i.summary,f.xid as fav
                     FROM povdb.x41_raw_findex i
                         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     povdb.x41_list_members m,
                     x41_teams t
                     where m.teamid=i.team and m.member=i.name and t.id=i.team and m.userid=? order by i.date desc limit ${pageNum*25},25`;
-                console.log("db5", sql)
+               // console.log("db5", sql)
                 return await query(sql, [userid, userid]);
             }
             else {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, t.name as teamName i.url, i.findex,i.summary ,f.xid as fav
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, t.name as teamName, i.url, i.findex,i.summary ,f.xid as fav
                     FROM povdb.x41_raw_findex i
                         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     povdb.x41_list_members m,
                     x41_teams t 
                     where m.teamid=i.team and m.member=i.name and t.id=i.team and i.league=? and m.userid=? order by i.date desc limit ${pageNum*25},25`;
-                console.log("db6", sql)
+              //  console.log("db6", sql)
                 return await query(sql, [userid, league, userid]);
             }
 

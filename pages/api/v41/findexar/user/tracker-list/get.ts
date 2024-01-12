@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
-import { l, chalk, js, sleep } from "../../../../../../lib/common";
+import { l, chalk, js, sleep,microtime } from "../../../../../../lib/common";
 import { getTrackerList } from "../../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../../lib/db"
 
@@ -19,7 +19,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(401).json({ success: false });
         }
         l(chalk.yellowBright("API get tracker list members called",userid,league));
+        const t1=microtime();
         const members=await getTrackerList({ threadid,userid:userid as string||"",league:league as string||""});
+        const t2=microtime();
+        l(chalk.yellowBright("API get tracker list members completed",userid,league,members,"in",(t2-t1).toFixed(2),"ms"));
         return res.status(200).json({ success: true,members });
     }
     catch(x){
