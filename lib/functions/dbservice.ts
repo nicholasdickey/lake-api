@@ -1025,9 +1025,8 @@ export const fetchMentions = async ({
     else {
         if (!filterNum) {
             if (teamid && name) { //aka details
-                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                     from x41_raw_findex i
-                       # LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
                     where i.team=? and i.name=? order by i.date desc limit ${pageNum*25},25`;
               //  console.log("db2", sql)
                 rows= await query(sql, [/*userid,*/ teamid, name]);
@@ -1043,9 +1042,9 @@ export const fetchMentions = async ({
                 return rows; 
             }
             else if(teamid){
-                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary  
                     from x41_raw_findex i
-                        #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
+                      
                     where i.team=? and i.name=?  order by date desc limit ${pageNum*25},25`;
                 console.log("db2", sql)
                 rows= await query(sql, [teamid, name]);
@@ -1061,10 +1060,9 @@ export const fetchMentions = async ({
             }
             else { //aka mentions
                 if (league) {
-                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
+                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i
-                            #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
-                           
+                            
                         where i.league=?  order by i.date desc limit ${pageNum*25},25`;
                     console.log("db3", sql)
                     rows= await query(sql, [userid, league]);
@@ -1079,10 +1077,8 @@ export const fetchMentions = async ({
                     return rows;
                 }
                 else {
-                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary #,f.xid as fav 
+                    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i
-                            #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?
-                        
                         order by i.date desc limit ${pageNum*25},25`;
                     console.log("db4", sql)
                     rows= await query(sql, []);
@@ -1100,9 +1096,8 @@ export const fetchMentions = async ({
         }
         else { // filter to my team (tracker list) only
             if (!league) {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.teamName,i.url, i.findex,i.summary #,f.xid as fav
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.teamName,i.url, i.findex,i.summary 
                     FROM povdb.x41_raw_findex i,
-                       # LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
                     povdb.x41_list_members m
                     
                     where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit ${pageNum*25},25`;
@@ -1119,9 +1114,9 @@ export const fetchMentions = async ({
                 return rows;
             }
             else {
-                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.teamName, i.url, i.findex,i.summary #,f.xid as fav
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.teamName, i.url, i.findex,i.summary 
                     FROM povdb.x41_raw_findex i,
-                        #LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+                        
                     povdb.x41_list_members m
                   
                     where m.teamid=i.team and m.member=i.name  and i.league=? and m.userid=? order by i.date desc limit ${pageNum*25},25`;
