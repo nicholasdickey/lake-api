@@ -1088,7 +1088,7 @@ export const fetchMentions = async ({
                             
                         where i.league=?  order by i.date desc limit ${pageNum * 25},25`;
                     console.log("db3", sql)
-                    rows = await query(sql, [userid, league]);
+                    rows = await query(sql, [league]);
                     if (rows && rows.length) {
                         for (let i = 0; i < rows.length; i++) {
                             const row = rows[i];
