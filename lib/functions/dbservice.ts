@@ -1159,7 +1159,23 @@ export const fetchMentions = async ({
         }
     }
 }
+export const getMention = async ({
+    threadid,
+    findexarxid,
+}: {
+    threadid: number,
+    findexarxid:string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+ 
 
+    // Get findex
+    sql = `SELECT xid as findexarxid,date, league, team,teamName, type, name, url, findex,summary  FROM povdb.x41_raw_findex where xid=? limit 1`;
+    const mentions = await query(sql, [findexarxid]);
+    l(chalk.greenBright("getMention",sql,mentions));
+    return mentions?mentions[0]:false;
+}
 
 
 
