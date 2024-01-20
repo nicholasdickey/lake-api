@@ -1169,9 +1169,8 @@ export const getMention = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
  
-
     // Get findex
-    sql = `SELECT xid as findexarxid,date, league, team,teamName, type, name, url, findex,summary  FROM povdb.x41_raw_findex where xid=? limit 1`;
+    sql = `SELECT f.xid as findexarxid,f.date, f.league, f.team,f.teamName, f.type, f.name, f.url, f.findex,f.summary,l.image  FROM povdb.x41_raw_findex f, x41_league_items l where f.xid=? and l.url=f.url limit 1`;
     const mentions = await query(sql, [findexarxid]);
     l(chalk.greenBright("getMention",sql,mentions));
     return mentions?mentions[0]:false;
