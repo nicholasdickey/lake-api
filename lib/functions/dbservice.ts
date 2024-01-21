@@ -1177,6 +1177,22 @@ export const getMention = async ({
     l(chalk.greenBright("getMention",sql,mentions));
     return mentions?mentions[0]:false;
 }
+export const removeMention = async ({
+    threadid,
+    findexarxid,
+}: {
+    threadid: number,
+    findexarxid:string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+ 
+    // Get findex
+    sql = `DELETE  FROM povdb.x41_raw_findex f where f.xid= limit 1`;
+    await query(sql, [findexarxid]);
+    l(chalk.greenBright("deleteMention",sql));
+    return true;
+}
 
 
 
