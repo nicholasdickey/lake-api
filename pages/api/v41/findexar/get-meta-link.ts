@@ -13,8 +13,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let {xid} = req.query;
-        const meta=await getMetaLink({ threadid,xid:xid as string});
+        let {xid,long:longString=""} = req.query;
+        const long=longString==="1"?true:false;
+        const meta=await getMetaLink({ threadid,xid:xid as string,long});
         return res.status(200).json({ success: true,meta });
     }
     catch(x){

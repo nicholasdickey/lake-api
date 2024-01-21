@@ -594,14 +594,16 @@ export const getLeagueMentionsFavorites = async ({
 export const getMetaLink = async ({
     threadid,
     xid,
+    long,
 }: {
     threadid: number,
     xid: string,
+    long:boolean,
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql = `SELECT i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
+    sql = `SELECT i.title, i.${long?'longdigest':'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
     //l(sql,xid)
     rows = await query(sql, [xid]);
     return rows && rows.length ? rows[0] : false;
