@@ -1188,7 +1188,7 @@ export const removeMention = async ({
     let query = await dbGetQuery("povdb", threadid);
  
     // Get findex
-    sql = `DELETE  FROM povdb.x41_raw_findex f where f.xid= limit 1`;
+    sql = `DELETE FROM povdb.x41_raw_findex where xid=? limit 1`;
     await query(sql, [findexarxid]);
     l(chalk.greenBright("deleteMention",sql));
     return true;

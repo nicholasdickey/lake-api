@@ -14,6 +14,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     let threadid = Math.floor(Math.random() * 100000000);
     try {
         let {findexarxid} = req.query;
+        console.log("remove-mention: findexarxid",findexarxid)
         let mention=null;
         if(findexarxid){
             l(chalk.greenBright("remove-mention: findexarid",findexarxid)  )
