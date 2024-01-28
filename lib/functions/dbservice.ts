@@ -2,6 +2,7 @@
 import { endOfISOWeek } from "date-fns";
 import { l, chalk, microtime, js, ds, uxToMySql, } from "../common";
 import { dbGetQuery, dbLog } from "../db";
+import { kMaxLength } from "buffer";
 export const getChannelItem = async ({
     threadid,
     url,
@@ -598,12 +599,12 @@ export const getMetaLink = async ({
 }: {
     threadid: number,
     xid: string,
-    long:boolean,
+    long: boolean,
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql = `SELECT i.title, i.${long?'longdigest':'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
+    sql = `SELECT i.title, i.${long ? 'longdigest' : 'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
     //l(sql,xid)
     rows = await query(sql, [xid]);
     return rows && rows.length ? rows[0] : false;
@@ -1166,34 +1167,201 @@ export const getMention = async ({
     findexarxid,
 }: {
     threadid: number,
-    findexarxid:string
+    findexarxid: string
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
- 
+
     // Get findex
     sql = `SELECT f.xid as findexarxid,f.date, f.league, f.team,f.teamName, f.type, f.name, f.url, f.findex,f.summary,l.image  FROM povdb.x41_raw_findex f, x41_league_items l where f.xid=? and l.url=f.url limit 1`;
     const mentions = await query(sql, [findexarxid]);
-    l(chalk.greenBright("getMention",sql,mentions));
-    return mentions?mentions[0]:false;
+    l(chalk.greenBright("getMention", sql, mentions));
+    return mentions ? mentions[0] : false;
 }
 export const removeMention = async ({
     threadid,
     findexarxid,
 }: {
     threadid: number,
-    findexarxid:string
+    findexarxid: string
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
- 
+
     // Get findex
     sql = `DELETE FROM povdb.x41_raw_findex where xid=? limit 1`;
     await query(sql, [findexarxid]);
-    l(chalk.greenBright("deleteMention",sql));
+    l(chalk.greenBright("deleteMention", sql));
     return true;
 }
 
+
+export const fetchStories = async ({
+    threadid,
+    userid,
+    page,
+    league,
+
+}: {
+    threadid: number,
+    userid: string,
+    page: string,
+    league: string,
+
+}) => {
+    let sql, rows;
+    const pageNum = page ? +page : 0;
+    league = league ? league.toUpperCase() : '';
+    console.log("dbservice, fetchStories", { userid, page, league, pageNum })
+    let query = await dbGetQuery("povdb", threadid);
+
+    let stories;
+    if (!league) {
+        sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
+        stories = await query(sql, []);
+    }
+    else {
+        sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
+        stories = await query(sql, [league]);
+    }
+    l(chalk.greenBright("stories", stories));
+    for (let i = 0; i < stories.length; i++) {
+        let mentions;
+        l(chalk.yellow("story", i, stories[i].url))
+        if (!userid) {
+            if (!league) {
+                l(chalk.magenta("no user, no league"))
+                // Get current findex, findex history, and mentions
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,i.summary , 0 as fav
+                    FROM povdb.x41_raw_findex i,
+                    povdb.x41_league_items l
+                    where l.url=i.url
+                    and l.url=?
+                    order by i.name`
+                console.log("stories db1", sql)
+                mentions = await query(sql, [stories[i].url]);
+                console.log("after query")
+            }
+            else {
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,i.summary, 0 as fav  
+                    FROM povdb.x41_raw_findex i,
+                    povdb.x41_league_items l
+                    where l.url=i.url
+                    and l.url=? 
+                    and i.league=? 
+                    order by i.name`;
+                console.log("stories db2", sql)
+                mentions = await query(sql, [stories[i].url, league]);
+            }
+            stories[i].mentions = mentions;
+            l(chalk.cyanBright("story", i, stories[i].url, mentions))
+
+        }
+        else {
+            l(chalk.magenta("story", i, stories[i].url, 'user'));
+            if (league) {
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l
+                            
+                        where i.league=? and l.url=i.url and l.url=?
+                        order by i.name`;
+                console.log("stories b3", sql)
+                rows = await query(sql, [league, stories[i].url]);
+                if (rows && rows.length) {
+                    for (let j = 0; j < rows.length; j++) {
+                        const row = rows[j];
+                        sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                stories[i].mentions = rows;
+            }
+            else {
+                l(chalk.magenta("story", i, stories[i].url, 'no league'));
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l      
+                        where l.url=i.url
+                        and l.url=?
+                        order by i.name`;
+
+                console.log("stories db4", sql)
+                rows = await query(sql, [stories[i].url]);
+                l(chalk.magenta("story===> rows.length:", rows.length))
+                if (rows && rows.length) {
+                    for (let j = 0; j < rows.length; j++) {
+                        l(chalk.cyanBright("getting fav mentions"))
+                        const row = rows[j];
+                        sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        l(chalk.cyanBright("mention " + j))
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                stories[i].mentions = rows;
+            }
+        }
+    }
+    return stories;
+}
+
+export const getStory = async ({
+    threadid,
+    sid,
+}: {
+    threadid: number,
+    sid: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+
+    sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    const stories = await query(sql, [sid]);
+    if (!stories || !stories.length)
+        return false;
+    let story = stories[0];
+    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l      
+                        where l.url=i.url
+                        and l.url=?
+                        order by i.name`;
+
+    console.log("stories db4", sql)
+    rows = await query(sql, [story.url]);
+    l(chalk.magenta("story===> rows.length:", rows.length))
+    
+    story.mentions = rows;
+    return story;
+}
+export const removeStory = async ({
+    threadid,
+    sid,
+}: {
+    threadid: number,
+    sid: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    const stories = await query(sql, [sid]);
+    if (!stories || !stories.length)
+        return false;
+    let story = stories[0];
+
+    sql = `DELETE FROM povdb.x41_league_items where xid=? limit 1`;
+    await query(sql, [sid]);
+    l(chalk.greenBright("deleteStory", sql));
+
+    sql = `DELETE FROM povdb.x41_raw_findex where url=?`;
+    await query(sql, [story.url]);
+   
+    return true;
+}
 
 
 
