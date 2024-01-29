@@ -1017,14 +1017,28 @@ export const fetchMentions = async ({
 
             return rows;
         }
-        else if (teamid) {
-            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+        else if (teamid) { // team mentions TBD mixup with player feeds
+            /*sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
                 from x41_raw_findex i,
                 x41_teams t
                   
                 where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum * 25},25`;
-            console.log("db12", sql)
-            rows = await query(sql, [teamid]);
+            */
+           sql=`SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+           from x41_raw_findex i,
+           x41_teams t
+           where i.team=?  and t.id=i.team and i.name=t.name 
+            UNION DISTINCT
+            SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+           from x41_raw_findex i,
+           x41_teams t,
+           x41_team_players p
+
+           where i.team=?   and t.id=p.teamid and i.name=p.member  and i.team=t.id
+           order by date desc limit ${pageNum * 25},25`;
+            
+                console.log("db12", sql)
+            rows = await query(sql, [teamid,teamid]);
             return rows;
 
         }
@@ -1066,14 +1080,27 @@ export const fetchMentions = async ({
                 }
                 return rows;
             }
-            else if (teamid) {
-                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary  
+            else if (teamid) { // team mentions TBD mixup with player feeds
+                /*sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary  
                     from x41_raw_findex i,
                     x41_teams t
                       
                     where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum * 25},25`;
-                console.log("db2", sql)
-                rows = await query(sql, [teamid]);
+                */
+                    sql=`SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+                    from x41_raw_findex i,
+                    x41_teams t
+                    where i.team=?  and t.id=i.team and i.name=t.name 
+                     UNION DISTINCT
+                     SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+                    from x41_raw_findex i,
+                    x41_teams t,
+                    x41_team_players p
+         
+                    where i.team=?   and t.id=p.teamid and i.name=p.member and i.team=t.id
+                    order by date desc limit ${pageNum * 25},25`;
+                    console.log("db2", sql)
+                rows = await query(sql, [teamid,teamid]);
                 if (rows && rows.length) {
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
