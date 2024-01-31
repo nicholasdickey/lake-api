@@ -602,6 +602,7 @@ export const getMetaLink = async ({
     long: boolean,
 }) => {
     let sql, rows;
+    long=false;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
     sql = `SELECT i.title, i.${long ? 'longdigest' : 'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
@@ -1244,11 +1245,11 @@ export const fetchStories = async ({
 
     let stories;
     if (!league) {
-        sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, []);
     }
     else {
-        sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, [league]);
     }
     l(chalk.greenBright("stories", stories));
@@ -1345,7 +1346,7 @@ export const getStory = async ({
     let query = await dbGetQuery("povdb", threadid);
 
 
-    sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
     const stories = await query(sql, [sid]);
     if (!stories || !stories.length)
         return false;
