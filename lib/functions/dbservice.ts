@@ -157,7 +157,7 @@ export const getChannelItems = async ({
 }) => {
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
-    sql = `SELECT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel=? and i.channel=c.channel order by i.createdTime desc limit 100`;
+    sql = `SELECT i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel=? and i.channel=c.channel order by i.createdTime desc limit 100`;
     l(chalk.green(sql))
     rows = await query(sql, [channel]);
     l("RESULT:", rows);
@@ -207,7 +207,7 @@ export const getOutfeedItems = async ({
         chans.push(`'${channels[j].channel}'`);
     }
     let channelString = chans.join(",");
-    sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
+    sql = `SELECT DISTINCT i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x40_channel_items i, x40_channels c where i.channel in (${channelString}) and i.channel=c.channel order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
     return items;
 }
@@ -231,7 +231,7 @@ export const getLeagueItems = async ({
     }
     let channelString = chans.join(",");
 
-    sql = `SELECT DISTINCT i.digest,i.longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
+    sql = `SELECT DISTINCT i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
 
     return items;
@@ -1375,7 +1375,7 @@ export const removeStory = async ({
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
 
-    sql = `SELECT DISTINCT i.xid,i.title, i.longdigest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    sql = `SELECT DISTINCT i.url  FROM povdb.x41_league_items i where i.xid=? limit 1`;
     const stories = await query(sql, [sid]);
     if (!stories || !stories.length)
         return false;
