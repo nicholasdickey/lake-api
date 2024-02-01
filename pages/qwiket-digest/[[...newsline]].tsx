@@ -86,7 +86,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
                     //  const date = p.processedTime;// .shared_time;
                     //const url = p.url;
-                    const url=`https://www.qwiket.com/pub?sid=${p.xid}&utm_content=qd`
+                    const url=`https://www.qwiket.com/league/${newsline.toLowerCase()}/pub?sid=${p.xid}&utm_content=qd`
                     // const image=p.image;
                     // if (!date || date == "null") return;
                     // console.log("RSS date ",date);
