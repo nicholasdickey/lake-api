@@ -1346,7 +1346,7 @@ export const getStory = async ({
     let query = await dbGetQuery("povdb", threadid);
 
 
-    sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.image_width,i.image_height,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
     const stories = await query(sql, [sid]);
     if (!stories || !stories.length)
         return false;
