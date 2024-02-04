@@ -86,7 +86,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
 
                     //  const date = p.processedTime;// .shared_time;
                     //const url = p.url;
-                    const url=`https://www.qwiket.com/pub/league/${newsline.toLowerCase()}?sid=${p.xid}&utm_content=qd`
+                    const url=`https://www.qwiket.com/pub/league/${newsline.toLowerCase()}?story=${p.slug}&utm_content=qwiket-digest`
                     // const image=p.image;
                     // if (!date || date == "null") return;
                     // console.log("RSS date ",date);
@@ -102,7 +102,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
                   //  l(chalk.yellow("time:", d))
                     const isoDate = new Date(p.createdTime).toISOString();
                     let flink = `${url}`;
-                    let { digest, title } = p;
+                    let { digest, title,slug } = p;
                     //   const descrParts = description.split("{ai:summary}");
                     //  description - descrParts[0];
                     // let summary = descrParts.length > 1 ? descrParts[1] : '';
