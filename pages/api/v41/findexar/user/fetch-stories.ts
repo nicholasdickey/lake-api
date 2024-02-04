@@ -17,16 +17,13 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
 
         let {league,userid,api_key,page} = req.query;
         userid=userid=='null'?'':userid;
-       
+        
         if(!page)
             page='0';
         if (userid&&(api_key != process.env.LAKE_API_KEY)) {
             return res.status(401).json({ success: false });
         }
         const stories=await fetchStories({ threadid,league:league as string,userid:userid as string||"",page:page as string||""})
-
-        console.log("fetch-stories===>: league",league,"userid",userid,"page",page,"count",stories.length,"time:",microtime()-t1);
-      
         return res.status(200).json({ success: true,stories });
     }
     catch(x){

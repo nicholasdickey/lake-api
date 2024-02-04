@@ -1,6 +1,6 @@
 //./functions/dbservice.ts
 import { endOfISOWeek } from "date-fns";
-import { l, chalk, microtime, js, ds, uxToMySql, } from "../common";
+import { l, chalk, microtime, js, ds, uxToMySql,slugify } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 import { kMaxLength } from "buffer";
 export const getChannelItem = async ({
@@ -37,6 +37,7 @@ export const saveChannelItem = async ({
 }) => {
     digest = digest || "";
     body = body || "";
+    const slug=slugify(title);
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from x40_channel_items where url=? and channel=?`;
@@ -44,12 +45,12 @@ export const saveChannelItem = async ({
     if (rows && rows.length) {
         const xid = rows[0].xid;
         l("xid=", xid, rows[0]);
-        sql = `UPDATE x40_channel_items set channel=?,title=?,digest=?,body=?${digest && digest.length > 0 ? ',processedTime=now()' : ''} where xid=?`;
-        rows = await query(sql, [channel, title, digest, body, xid]);
+        sql = `UPDATE x40_channel_items set slug=?,channel=?,title=?,digest=?,body=?${digest && digest.length > 0 ? ',processedTime=now()' : ''} where xid=?`;
+        rows = await query(sql, [slug,channel, title, digest, body, xid]);
     }
     else {
-        sql = `INSERT into x40_channel_items (channel,url,title,digest,body${digest && digest.length > 0 ? ',processedTime' : ''},createdTime) VALUES  (?,?,?,?,?${digest && digest.length > 0 ? ',now()' : ''},now())`;
-        rows = await query(sql, [channel, url, title, digest, body]);
+        sql = `INSERT into x40_channel_items (slug,channel,url,title,digest,body${digest && digest.length > 0 ? ',processedTime' : ''},createdTime) VALUES  (?,?,?,?,?,?${digest && digest.length > 0 ? ',now()' : ''},now())`;
+        rows = await query(sql, [slug,channel, url, title, digest, body]);
     }
     return rows && rows.length ? rows[0] : false
 }
@@ -231,7 +232,7 @@ export const getLeagueItems = async ({
     }
     let channelString = chans.join(",");
 
-    sql = `SELECT DISTINCT i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
+    sql = `SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
     const items = await query(sql, []);
 
     return items;
@@ -605,7 +606,7 @@ export const getMetaLink = async ({
     long=false;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    sql = `SELECT i.title, i.${long ? 'longdigest' : 'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
+    sql = `SELECT i.slug,i.title, i.${long ? 'longdigest' : 'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
     //l(sql,xid)
     rows = await query(sql, [xid]);
     return rows && rows.length ? rows[0] : false;
@@ -1245,11 +1246,11 @@ export const fetchStories = async ({
 
     let stories;
     if (!league) {
-        sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, []);
     }
     else {
-        sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, [league]);
     }
     l(chalk.greenBright("stories", stories));
@@ -1346,7 +1347,7 @@ export const getStory = async ({
     let query = await dbGetQuery("povdb", threadid);
 
 
-    sql = `SELECT DISTINCT i.xid,i.title, i.digest as digest, i.url, i.image,i.image_width,i.image_height,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
+    sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.image_width,i.image_height,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.xid=? limit 1`;
     const stories = await query(sql, [sid]);
     if (!stories || !stories.length)
         return false;
@@ -1383,6 +1384,61 @@ export const removeStory = async ({
 
     sql = `DELETE FROM povdb.x41_league_items where xid=? limit 1`;
     await query(sql, [sid]);
+    l(chalk.greenBright("deleteStory", sql));
+
+    sql = `DELETE FROM povdb.x41_raw_findex where url=?`;
+    await query(sql, [story.url]);
+   
+    return true;
+}
+export const getSlugStory = async ({
+    threadid,
+    slug,
+}: {
+    threadid: number,
+    slug: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+
+    sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.image_width,i.image_height,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i where i.slug=? limit 1`;
+    const stories = await query(sql, [slug]);
+    if (!stories || !stories.length)
+        return false;
+    let story = stories[0];
+    sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l      
+                        where l.url=i.url
+                        and l.url=?
+                        order by i.name`;
+
+    console.log("stories db4", sql)
+    rows = await query(sql, [story.url]);
+    l(chalk.magenta("story===> rows.length:", rows.length))
+    
+    story.mentions = rows;
+    return story;
+}
+export const removeSlugStory = async ({
+    threadid,
+    slug,
+}: {
+    threadid: number,
+    slug: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT i.url  FROM povdb.x41_league_items i where i.slug=? limit 1`;
+    const stories = await query(sql, [slug]);
+    if (!stories || !stories.length)
+        return false;
+    let story = stories[0];
+
+    sql = `DELETE FROM povdb.x41_league_items where slug=? limit 1`;
+    await query(sql, [slug]);
     l(chalk.greenBright("deleteStory", sql));
 
     sql = `DELETE FROM povdb.x41_raw_findex where url=?`;

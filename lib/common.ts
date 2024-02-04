@@ -69,6 +69,24 @@ function uxToMySql(unixTime: number): string {
     const date = new Date(unixTime * 1000); // Convert seconds to milliseconds
     return date.toISOString().slice(0, 19).replace('T', ' ');
 }
+function slugify(s:string) {
+    const a =
+        "àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;"
+    const b =
+        "aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------"
+    const p = new RegExp(a.split("").join("|"), "g")
+
+    return s
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-") // Replace spaces with -
+        .replace(p, (c) => b.charAt(a.indexOf(c))) // Replace special characters
+        .replace(/&/g, "-and-") // Replace & with 'and'
+        .replace(/[^\w\-]+/g, "") // Remove all non-word characters
+        .replace(/\-\-+/g, "-") // Replace multiple - with single -
+        .replace(/^-+/, "") // Trim - from start of text
+        .replace(/-+$/, "") // Trim - from end of text
+}
 export {
     l,
     allowLog,
@@ -83,5 +101,6 @@ export {
     ds,
     fillInParams,
     randomstring,
-    uxToMySql
+    uxToMySql,
+    slugify
 };
