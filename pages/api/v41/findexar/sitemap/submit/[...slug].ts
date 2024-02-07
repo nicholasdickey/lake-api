@@ -2,11 +2,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import NextCors from 'nextjs-cors';
 import { l, chalk, js } from "../../../../../../lib/common";
-import { getRedisClient } from "../../../../../../lib/redis"
+
 import { dbEnd } from "../../../../../../lib/db"
 import { submitCurrentSitemap } from "../../../../../../lib/google/submit-findexar-sitemap"
 import { indexUrl } from "../../../../../../lib/google/index-url"
-import { debugPort } from 'process';
+
 const { getISODay, addDays, startOfDay, formatISO } = require("date-fns");
 import { getSlugLeagues } from "../../../../../../lib/functions/dbservice";
 
@@ -43,9 +43,7 @@ export default async function handler(
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
     let threadid = Math.floor(Math.random() * 100000000);
-    const redis = await getRedisClient({});
-    if (!redis)
-        return res.status(500).json({ msg: "Unable to create redis" })
+  
     try {
         const params = req.query?.slug as string[];
         let [slug] = params || ['',];
@@ -74,7 +72,6 @@ export default async function handler(
         res.status(501).json({ success: false })
     }
     finally {
-        await redis.quit();
         dbEnd(threadid);
     }
 }
