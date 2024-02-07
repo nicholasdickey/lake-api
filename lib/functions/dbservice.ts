@@ -1483,7 +1483,9 @@ export const fetchLeagueStorySlugs = async ({
     let query = await dbGetQuery("povdb", threadid);
     let stories;
 
-    sql = `SELECT DISTINCT i.slug,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? and unix_timestamp(i.createdTime)>? and unix_timestamp(i.createdTime)<=? order by createdTime desc limit 10000`;
+    sql = `SELECT DISTINCT i.slug,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where i.slug is not null and f.url=i.url and f.league=? and unix_timestamp(i.createdTime)>? and unix_timestamp(i.createdTime)<=? order by createdTime desc limit 10000`;
+   
     stories = await query(sql, [league,timeStart,timeEnd]);
+    console.log("fetchLeagueStorySlugs",sql,league,timeStart,timeEnd,stories.length)
     return stories;
 }

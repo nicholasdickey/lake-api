@@ -26,7 +26,7 @@ export default async function handler(
     let threadid = Math.floor(Math.random() * 100000000)
     try {
         const slugs=await fetchLeagueStorySlugs({ threadid, league:league as string, timeStart, timeEnd });
-
+        console.log("slugs",slugs.length,slugs[slugs.length-1])
         if (format == 'xml') {
             const sitemap = slugs.map((m: any) => `<url><loc>https://${domain}.com/pub/${league}?story=${m.slug}&utm_content=sitemap</loc><lastmod>${ff(m.createdTime, 'yyy-MM-dd')}</lastmod></url>`).join('\r\n');
             const fullFile = `<?xml version="1.0" encoding="UTF-8"?>
