@@ -37,5 +37,5 @@ export const indexUrl = async (url: string) => {
   const bingUrl = `https://www.bing.com/indexnow?url=${encodeURIComponent(url)}&key=8d8708d26eaf43bab09eedbae2f3943a`;
   l(chalk.magenta.bold("=======> SUBMIT URL TO BING:", bingUrl))
   const { body } = await request(bingUrl)
-  l("bingdresponse=",js(body))
+  l("bingdresponse=", js(body))
 }

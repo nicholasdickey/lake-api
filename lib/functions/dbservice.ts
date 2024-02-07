@@ -1366,6 +1366,7 @@ export const getStory = async ({
     story.mentions = rows;
     return story;
 }
+
 export const removeStory = async ({
     threadid,
     sid,
@@ -1391,6 +1392,7 @@ export const removeStory = async ({
    
     return true;
 }
+
 export const getSlugStory = async ({
     threadid,
     slug,
@@ -1421,6 +1423,7 @@ export const getSlugStory = async ({
     story.mentions = rows;
     return story;
 }
+
 export const removeSlugStory = async ({
     threadid,
     slug,
@@ -1447,5 +1450,40 @@ export const removeSlugStory = async ({
     return true;
 }
 
+export const getSlugLeagues = async ({
+    threadid,
+    slug,
+}: {
+    threadid: number,
+    slug: string
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT DISTINCT f.league FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and i.slug=? `;
+    const leagues = await query(sql, [slug]);
+    return leagues.map((l: any) => l.league);
+}
+       
+export const fetchLeagueStorySlugs = async ({
+    threadid,
+    league,
+    timeStart,
+    timeEnd
 
+}: {
+    threadid: number,
+    league: string,
+    timeStart:number;
+    timeEnd:number;
 
+}) => {
+    let sql, rows;
+  
+    league = league ? league.toUpperCase() : '';
+    let query = await dbGetQuery("povdb", threadid);
+    let stories;
+
+    sql = `SELECT DISTINCT i.slug,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? and unix_timestamp(i.createdTime)>? and unix_timestamp(i.createdTime)<=? order by createdTime desc limit 10000`;
+    stories = await query(sql, [league,timeStart,timeEnd]);
+    return stories;
+}

@@ -23,7 +23,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if (userid&&(api_key != process.env.LAKE_API_KEY)) {
             return res.status(401).json({ success: false });
         }
+       
         const stories=await fetchStories({ threadid,league:league as string,userid:userid as string||"",page:page as string||""})
+        const t2=microtime();
+        console.log("fetch-stories:",t2-t1);
         return res.status(200).json({ success: true,stories });
     }
     catch(x){
