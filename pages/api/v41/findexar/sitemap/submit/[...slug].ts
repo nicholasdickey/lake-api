@@ -52,9 +52,12 @@ export default async function handler(
         const leagues = await getSlugLeagues({ threadid, slug });
         const date = getDayInPast(7);
         domains.forEach(async (domain) => {
+            console.log("process domain",domain,leagues,slug)
             leagues.forEach(async (league: string) => {
+                console.log("process league",domain,leagues,slug)
                 const url = `https://${domain}/pub/${league}?story=${slug}`;
                 const sitemapName = `${date}`
+                console.log("sitemap url", url, sitemapName,domain,league)
                 await indexUrl(url);
                 await submitCurrentSitemap(sitemapName, domain,league);
 

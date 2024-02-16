@@ -1489,3 +1489,259 @@ export const fetchLeagueStorySlugs = async ({
     console.log("fetchLeagueStorySlugs",sql,league,timeStart,timeEnd,stories.length)
     return stories;
 }
+
+export const reportEvents = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    const millis = microtime();
+    /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+     let rows = await query(sql);
+     l(chalk.red(sql))
+     for(let i=0;i<rows.length;i++){
+         const sessionid=rows[i]['sessionid'];
+         const xid=rows[i]['xid'];
+         const sid=sessionid?.split(':')[1];
+         sql='update wt.events set sid=? where xid=?';
+         await query(sql,[sid,xid]);
+     }*/
+
+    sql = `select distinct sid,stamp from x41_events where name not like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
+    if (process.env.event_env != 'DEV') {
+        sql = `select distinct sid,stamp from x41_events where not name like '%bot%' and sessionid not like '%test%' and sessionid not like '%dev%' and  millis>? group by millis,sid   order by millis desc `;
+    }
+    let rows = await query(sql, [millis - 10 * 60 * 1000]);
+    // l(chalk.yellow(sql))
+    //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
+   // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
+    let retval: any = {};
+    for (let i = 0; i < rows.length; i++) {
+        const sessionid = rows[i]['sid'];
+        let itemRetval: any = {};
+        itemRetval.sessionid = sessionid;
+        retval[sessionid] = itemRetval;
+        itemRetval.items = [];
+        //const filledSql = fillInParams(sql, [sessionid]);
+        sql = `select distinct name,params,fbclid,ad,stamp  from x41_events where sid =? and name not like '%auth%' order by millis desc`;
+        let rows2 = await query(sql, [sessionid]);
+        // l(js(rows2));
+        for (let j = 0; j < rows2.length; j++) {
+            let record: any = {}
+            const name = rows2[j]['name'];
+            let constRecord = false;
+            record['fbclid'] = rows2[j]['fbclid'];
+           // record['params'] = rows2[j]['params'];
+            record['name'] = rows2[j]['name'];
+            record['sessionid']=sessionid;
+            record['stamp'] = rows2[j]['stamp'];
+            l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
+            let params={"empty":""};
+            try{
+                params=JSON.parse(rows2[j]['params']);
+            }
+            catch(e){
+                l(chalk.redBright("error parsing params",e,rows2[j]['params']));
+            }
+
+            l(chalk.magentaBright("oarams",js( {name,...params})));
+           // record.add(...params);
+            for (const key in params) {
+                //@ts-ignore
+                record[key] = params[key];
+              }
+            l(chalk.greenBright("record",js(record)));  
+            itemRetval.items.push(record);
+         
+
+        }
+    }
+    l(chalk.greenBright("retval",js(retval)));
+    return retval;
+}
+
+export const reportSessionEvents = async ({
+    threadid,
+    sessionid,
+}: {
+    threadid: number,
+    sessionid: string,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    const millis = microtime();
+
+
+
+    let itemRetval: any = {};
+    itemRetval.sessionid = sessionid;
+
+    itemRetval.items = [];
+    //const filledSql = fillInParams(sql, [sessionid]);
+    sql = `select distinct name,params,fbclid,ad,stamp  from x41_events where sid =? order by millis desc`;
+    let rows2 = await query(sql, [sessionid]);
+    // l(js(rows2));
+    for (let j = 0; j < rows2.length; j++) {
+        let record: any = {}
+        const name = rows2[j]['name'];
+        let constRecord = false;
+        record['fbclid'] = rows2[j]['fbclid'];
+        record['params'] = rows2[j]['params'];
+        record['name'] = rows2[j]['name'];
+        record['sessionid']=sessionid;
+        record['stamp'] = rows2[j]['stamp'];
+        let params=JSON.parse(rows2[j]['params']);
+        l(chalk.magentaBright("oarams", name,params));
+        for (const key in params) {
+            record[key] = params[key];
+          }
+        itemRetval.items.push(record);
+        /*switch (name) {
+            case 'ssr-pub':
+            case 'ssr-pub-init':    
+                record['ssrTime'] = params.ssrTime;
+                record['image'] = rows2[j]['params'];
+                constRecord = true;
+                break;
+            case 'generate': {
+                record['name'] = 'generate-text';
+                const params = JSON.parse(rows2[j]['params']);
+                record['occasion'] = params['occasion'];
+                record['naive'] = params['naive'];
+                constRecord = true;
+                break;
+            }
+            case 'create-card': {
+                record['name'] = 'create-card';
+                const linkid = rows2[j]['params'];
+                sql = `select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
+                    }
+                }
+                constRecord = true;
+                break;
+            }
+            case 'ssr-card-init': {
+                record['name'] = 'ssr-card-init';
+                let srcParams = rows2[j]['params'];
+                //  console.log("==================================================>>>srcParams",srcParams);
+
+                if (srcParams.indexOf('"id"') < 0)
+                    srcParams = srcParams.replace("id", "\"id\"")
+                //   l("after replace",srcParams)
+                const params = JSON.parse(srcParams);
+                const linkid = params['id'];
+                sql = `select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
+                    }
+                }
+                constRecord = true;
+                //  l(chalk.yellowBright("reportEventsInner",  js(record)));
+                break;
+            }
+            case 'ssr-bot-card-init': {
+                record['name'] = 'ssr-bot-card-init';
+                let srcParams = rows2[j]['params'];
+                console.log("srcParams", srcParams);
+                if (srcParams.indexOf('{{') == 0)
+                    srcParams = srcParams.replace("{{", "{");
+                if (srcParams.indexOf('"id"') < 0)
+                    srcParams = srcParams.replace("id", "\"id\"")
+                l("after replace", srcParams)
+                const params = JSON.parse(srcParams);
+                const linkid = params['id'];
+                sql = `select * from cards where linkid=?`
+                let rows3 = await query(sql, [linkid]);
+                if (rows3 && rows3.length > 0) {
+                    record['signature'] = rows3[0]['signature'];
+                    record['greeting'] = rows3[0]['greeting'];
+                    sql = `select * from card_images where linkid=?`
+                    let rows4 = await query(sql, [linkid]);
+                    if (rows4 && rows4.length > 0) {
+                        record['metaimage'] = rows4[0]['image'];
+                    }
+                }
+                constRecord = true;
+                break;
+            }
+            case 'createChatCompletion': {
+                record['name'] = 'text-completion';
+                const params = rows2[j]['params'];
+                // l(chalk.red.bold("params",params)   );
+                const completion = params?.split('===>Completion:')[1];
+                // l(chalk.green.bold("completion",completion)   );
+                record['text'] = completion;
+                constRecord = true;
+                break;
+            }
+            case 'ssr-bot-landing-init':
+            case 'ssr-index-init':
+            case 'ssr-bot-index-init':
+            case 'ssr-landing-init':
+                record['name'] = rows2[j]['name'];
+                // l(chalk.grey("params",rows2[j]['params'])   );
+                // const params=JSON.parse(rows2[j]['params']);
+                record['params'] = rows2[j]['params'];
+                constRecord = true;
+                break;
+        }*/
+       /* if (constRecord) {
+            itemRetval.items.push(record);
+            // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+        }*/
+
+    }
+
+    //l(chalk.greenBright("retval",js(retval)));
+    return itemRetval;
+}
+
+export const reportsSessionids = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("wt", threadid);
+    const millis = microtime();
+    /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+     let rows = await query(sql);
+     l(chalk.red(sql))
+     for(let i=0;i<rows.length;i++){
+         const sessionid=rows[i]['sessionid'];
+         const xid=rows[i]['xid'];
+         const sid=sessionid?.split(':')[1];
+         sql='update wt.events set sid=? where xid=?';
+         await query(sql,[sid,xid]);
+     }*/
+
+    sql = `select sid,stamp from wt.events where millis>? group by millis,sid   order by millis desc `;
+    if (process.env.event_env != 'DEV') {
+        sql = `select sid,stamp from wt.events where not name like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
+    }
+    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
+    // l(chalk.yellow(sql))
+   
+    //l(chalk.greenBright("retval",js(retval)));
+    return rows;
+}
+
