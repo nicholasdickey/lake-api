@@ -60,13 +60,23 @@ export default async function handler(
                 console.log("sitemap url", url, sitemapName,domain,league)
                 await indexUrl(url);
                 await submitCurrentSitemap(sitemapName, domain,league);
-                const urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
-                await fetch(urlCache);
+                try{
+                    const urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
+                    await fetch(urlCache);
+                }
+                catch(x){
+                    console.log("Error in fetch-stories:", x);
+                }
 
             })
         })
         const urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?force=1`;
-        await fetch(urlCache);
+        try{
+            await fetch(urlCache);
+        }   
+        catch(x){
+            console.log("Error in fetch-stories:", x);
+        }
 
         return res.status(200).json({ success: true, date })
         /**
