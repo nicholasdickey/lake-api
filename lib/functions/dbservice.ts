@@ -1510,11 +1510,11 @@ export const reportEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,stamp from x41_events where name not like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
+    sql = `select distinct sid,stamp from x41_events where name not like '%bot%' and name not like '%ssr%' and  millis>? group by sid   order by millis desc `;
     if (process.env.event_env != 'DEV') {
-        sql = `select distinct sid,stamp from x41_events where not name like '%bot%' and sessionid not like '%test%' and sessionid not like '%dev%' and  millis>? group by millis,sid   order by millis desc `;
+        sql = `select distinct sid,stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and sessionid not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by millis desc `;
     }
-    let rows = await query(sql, [millis - 10 * 60 * 1000]);
+    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
     // l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
