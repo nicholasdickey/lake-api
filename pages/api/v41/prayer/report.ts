@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { recordEvent } from "../../../../lib/functions/dbservice";
-import { dbEnd } from "../../../../lib/db";
+import { reportPrayerEvents } from "../../../../lib/functions/dbservice";
+import { dbEnd } from "../../../../lib/db"
+
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     await NextCors(req, res, {
@@ -13,18 +14,18 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        const t1=Date.now();
+       // console.log("events/record called");
         let { sessionid, name, params } = req.query;
-       console.log("events/record:", { sessionid, name, params });
-        await recordEvent({ threadid, sessionid: process.env.event_env + ":" + (sessionid as string || ""),sid:sessionid as string||'', params: params as string, name: name as string});
-      //  console.log("record-event:", { time: Date.now() - t1 });
-        return res.status(200).json({ success: true });
+        const retval=await reportPrayerEvents({ threadid});
+       // console.log("retval=",js(retval))
+        return res.status(200).json({ success: true,report:retval });
     }
     catch(x){
         console.log("Error in events/record:", x);
         return res.status(500).json({ success: false });
     }    
-    finally {  
+    finally {
+        
         dbEnd(threadid)
     }
 };

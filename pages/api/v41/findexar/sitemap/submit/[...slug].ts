@@ -61,8 +61,10 @@ export default async function handler(
                 await indexUrl(url);
                 await submitCurrentSitemap(sitemapName, domain,league);
                 try{
-                    const urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
+                    let urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
                     await fetch(urlCache);
+                    //urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
+                    //await fetch(urlCache);
                 }
                 catch(x){
                     console.log("Error in fetch-stories:", x);

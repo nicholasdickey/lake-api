@@ -1510,9 +1510,9 @@ export const reportEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where name not like '%bot%' and name not like '%ssr%' and  millis>? group by sid   order by millis desc `;
+    sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where name not like '%bot%' and name not like '%prayer%' and name not like '%ssr%' and  millis>? group by sid   order by millis desc `;
     if (process.env.event_env != 'DEV') {
-        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by millis desc `;
+        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by millis desc `;
     }
     let rows = await query(sql, [millis - 24 * 3600 * 1000]);
     // l(chalk.yellow(sql))
@@ -1526,7 +1526,79 @@ export const reportEvents = async ({
         retval[sessionid] = itemRetval;
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
-        sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%' order by millis desc`;
+        sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name not like '%prayer%'  order by millis desc`;
+        let rows2 = await query(sql, [sessionid]);
+        // l(js(rows2));
+        for (let j = 0; j < rows2.length; j++) {
+            let record: any = {}
+            const name = rows2[j]['name'];
+            let constRecord = false;
+            record['fbclid'] = rows2[j]['fbclid'];
+           // record['params'] = rows2[j]['params'];
+            record['name'] = rows2[j]['name'];
+            record['sessionid']=sessionid;
+            record['stamp'] = rows2[j]['stamp'];
+            l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
+            let params={"empty":""};
+            try{
+                params=JSON.parse(rows2[j]['params']);
+            }
+            catch(e){
+                l(chalk.redBright("error parsing params",e,rows2[j]['params']));
+            }
+
+            l(chalk.magentaBright("oarams",js( {name,...params})));
+           // record.add(...params);
+            for (const key in params) {
+                //@ts-ignore
+                record[key] = params[key];
+              }
+            l(chalk.greenBright("record",js(record)));  
+            itemRetval.items.push(record);
+         
+
+        }
+    }
+    l(chalk.greenBright("retval",js(retval)));
+    return retval;
+}
+export const reportPrayerEvents = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    const millis = microtime();
+    /* sql='select distinct sessionid, xid from wt.events order by millis desc';
+     let rows = await query(sql);
+     l(chalk.red(sql))
+     for(let i=0;i<rows.length;i++){
+         const sessionid=rows[i]['sessionid'];
+         const xid=rows[i]['xid'];
+         const sid=sessionid?.split(':')[1];
+         sql='update wt.events set sid=? where xid=?';
+         await query(sql,[sid,xid]);
+     }*/
+
+    sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where name not like '%bot%' and name  like '%prayer%' and name not like '%ssr%' and  millis>? group by sid   order by millis desc `;
+    if (process.env.event_env != 'DEV') {
+        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by millis desc `;
+    }
+    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
+    // l(chalk.yellow(sql))
+    //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
+   // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
+    let retval: any = {};
+    for (let i = 0; i < rows.length; i++) {
+        const sessionid = rows[i]['sid'];
+        let itemRetval: any = {};
+        itemRetval.sessionid = sessionid;
+        retval[sessionid] = itemRetval;
+        itemRetval.items = [];
+        //const filledSql = fillInParams(sql, [sessionid]);
+        sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name like '%prayer%'  order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
         // l(js(rows2));
         for (let j = 0; j < rows2.length; j++) {
