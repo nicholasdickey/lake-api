@@ -27,7 +27,7 @@ export default async function prayer(
             console.log("KEY=", configuration.apiKey)
             const messages: ChatCompletionRequestMessage[] = [{
                 "role": "user", "content":
-                    `Create Assemblies of God prayer under 600 characters for this request: ${req}`
+                    `Create Pentacostal prayer under 600 characters for this request: ${req}`
             },];
             let completion = await openai.createChatCompletion({
                 model: "gpt-3.5-turbo",
