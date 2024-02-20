@@ -14,26 +14,33 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     const redis = await getRedisClient({});
+    l(chalk.blueBright("BEGIN FETCH-STORIES"));
     try {
         const t1 = microtime();
 
         let { league, userid, api_key, page,force } = req.query;
-        userid = userid == 'null' ? '' : userid;
-
+        userid = userid == 'null' ? '' : userid||"";
+        force = force == 'true'||force=='1' ? "1" : "0";
         if (!page)
             page = '0';
         if (userid && (api_key != process.env.LAKE_API_KEY)) {
             return res.status(401).json({ success: false });
         }
         const key = `stories-${league}`;
+        console.log("fetch-stories inputs:", key, userid, page, force);
         let stories;
-        if (!userid && !page&&!force) {
+        if (!userid && !(+page)&&!(+force)) {
+            console.log("TRYING CACHE",key);
             let storiesJson = await redis?.get(key);
             stories = storiesJson ? JSON.parse(storiesJson) : null;
             if (!stories) {
                 console.log("NO CACHE");
                 stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" })
                 await redis?.setex(key, 3600, JSON.stringify(stories));
+            }
+            else {
+                console.log("CACHE!!!");
+            
             }
         }
         else {
