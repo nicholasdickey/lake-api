@@ -14,7 +14,10 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let {request} = req.query;
+        let {request,api_key} = req.query;
+        if(api_key!=process.env.LAKE_API_KEY){
+            return res.status(401).json({ success: false });
+        }
         request=request as string||"";
        // if(request){
         //    l(chalk.greenBright("get-story: sid",sid)  )
