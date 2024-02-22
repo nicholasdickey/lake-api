@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { getStory } from "../../../../lib/functions/dbservice";
+import { recordEvent } from "../../../../lib/functions/dbservice";
 import reqPrayer  from "../../../../lib/functions/prayer";
 import { dbEnd } from "../../../../lib/db"
 
@@ -14,14 +14,17 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let {request,api_key} = req.query;
+        let {request="",api_key="",sessionid=""} = req.query as {request:string,api_key:string,sessionid:string};
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        request=request as string||"";
+  
+
        // if(request){
         //    l(chalk.greenBright("get-story: sid",sid)  )
             let prayer=await reqPrayer(request);
+            await recordEvent({ threadid, sessionid: process.env.event_env + ":" + sessionid ,sid:sessionid , params: `{"request":"${request}","prayer":"${prayer}"}`, name: "prayer-api-request"});
+    
            // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
         //}
         return res.status(200).json({ success: true,prayer });
