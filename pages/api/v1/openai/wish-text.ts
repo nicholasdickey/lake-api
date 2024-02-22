@@ -118,8 +118,12 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
 
         return res.status(200).json({ result: "no completion possible" });
       }   
-      const content = `${completion.data.choices[0]?.message?.content}`;
+      let content = `${completion.data.choices[0]?.message?.content}`;
+      content=content.replace('```json\n','').replace('```','');
+      content=content.replaceAll('\n','');
       console.log("result:", js(content));
+     // const json=JSON.parse(content);
+     // console.log("json:", js(json));
       await recordEvent({ threadid, sessionid: "API=>"+process.env.event_env+":"+(sessionid as string || ""),sid:sessionid as string||'', params:""+ messages.map(m=>m.content).join('***') + '===>Completion:' + content, name: "createChatCompletion" });
       const params={ from, to, occasion, naive,reflections, instructions, inastyleof, language} ;
       const num=await recordSessionHistory({sessionid:sessionid as string,threadid,params:js(params),greeting:content,occasion:occasion as string});
