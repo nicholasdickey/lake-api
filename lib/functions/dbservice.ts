@@ -1595,6 +1595,7 @@ export const reportPrayerEvents = async ({
         const sessionid = rows[i]['sid'];
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
+        itemRetval.stamp=rows[i].stamp;
         retval[sessionid] = itemRetval;
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
