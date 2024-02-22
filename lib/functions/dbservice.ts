@@ -1582,7 +1582,7 @@ export const reportPrayerEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""} and  millis>? group by sid   order by stamp desc `;
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""} and  millis>? group by sid   order by stamp desc `;
     /*if (process.env.event_env != 'DEV') {
         sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where not name like '%bot%' and name like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
     }*/
