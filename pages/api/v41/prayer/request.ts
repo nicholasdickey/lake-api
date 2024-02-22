@@ -23,7 +23,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
        // if(request){
         //    l(chalk.greenBright("get-story: sid",sid)  )
             let prayer=await reqPrayer(request);
-            await recordEvent({ threadid, sessionid: process.env.event_env + ":" + sessionid ,sid:sessionid , params: `{"request":"${request}","prayer":"${prayer}"}`, name: "prayer-api-request"});
+            await recordEvent({ threadid, sessionid: process.env.event_env + ":" + sessionid ,sid:sessionid , params: `{"request":"${encodeURIComponent(request)}","prayer":"${encodeURIComponent(prayer||"")}"}`, name: "prayer-api-request"});
     
            // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
         //}
