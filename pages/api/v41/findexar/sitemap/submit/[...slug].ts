@@ -57,7 +57,7 @@ export default async function handler(
                 console.log("process league",domain,leagues,slug)
                 const url = `https://${domain}/pub/${league}?story=${slug}`;
                 const sitemapName = `${date}`
-                console.log("sitemap url", url, sitemapName,domain,league)
+                console.log("sitemap url", url, sitemapName,domain,league);
                 await indexUrl(url);
                 await submitCurrentSitemap(sitemapName, domain,league);
                 try{
