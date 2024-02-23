@@ -55,7 +55,7 @@ export default async function handler(
             console.log("process domain",domain,leagues,slug)
             leagues.forEach(async (league: string) => {
                 console.log("process league",domain,leagues,slug)
-                const url = `https://${domain}/pub/${league}?story=${slug}`;
+                const url = `https://${domain}/pub/league/${league}?story=${slug}`;
                 const sitemapName = `${date}`
                 console.log("sitemap url", url, sitemapName,domain,league);
                 await indexUrl(url);
