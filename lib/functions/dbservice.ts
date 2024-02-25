@@ -1620,7 +1620,7 @@ export const reportPrayerEvents = async ({
                 l(chalk.redBright("error parsing params",e,rows2[j]['params']));
             }
 
-            l(chalk.magentaBright("oarams",js( {name,...params})));
+            l(chalk.magentaBright("params",js( {name,...params})));
            // record.add(...params);
             for (const key in params) {
                 //@ts-ignore
