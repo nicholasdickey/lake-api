@@ -28,7 +28,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             }
             else {
                 story=await getSlugStory({ threadid,slug:slug as string});
-                await redis?.setex(key, 24*3600, JSON.stringify(story));
+                await redis?.setex(key, 7*24*3600, JSON.stringify(story));
             }
            // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
         }
