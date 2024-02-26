@@ -36,7 +36,7 @@ export default async function handler(
             return res.status(200).json({ success: true, sitemap: fullFile })
         }
         else {
-            const sitemap = slugs.map((m: any) => `https://www.${domain}.com/pub/${league}?story=${m.slug}`).join('\r\n');
+            const sitemap = slugs.map((m: any) => `https://www.${domain}.com/pub/league/${league}?story=${m.slug}`).join('\r\n');
             return res.status(200).json({ success: true, sitemap})
         }      
     }
