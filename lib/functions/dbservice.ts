@@ -1510,11 +1510,11 @@ export const reportEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where name not like '%bot%' and name not like '%prayer%' and name not like '%ssr%' and  millis>? group by sid   order by millis desc `;
-    if (process.env.event_env != 'DEV') {
-        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by millis desc `;
-    }
-    let rows = await query(sql, [millis - 24 * 3600 * 1000]);
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) as stamp from x41_events where name not like '%bot%' and name not like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and  millis>? group by sid   order by stamp desc `;
+   /* if (process.env.event_env != 'DEV') {
+        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
+    }*/
+    let rows = await query(sql, [millis - 6 * 3600 * 1000]);
     // l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
@@ -1523,7 +1523,9 @@ export const reportEvents = async ({
         const sessionid = rows[i]['sid'];
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
+        itemRetval.stamp=rows[i].stamp;
         retval[sessionid] = itemRetval;
+
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name not like '%prayer%'  order by millis desc`;
