@@ -1572,6 +1572,7 @@ export const reportEvents = async ({
     l(chalk.greenBright("retval",js(retval)));
     return retval;
 }
+
 export const reportPrayerEvents = async ({
     threadid,
     page,
@@ -1605,7 +1606,7 @@ export const reportPrayerEvents = async ({
     /*if (process.env.event_env != 'DEV') {
         sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where not name like '%bot%' and name like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
     }*/
-    let rows = await query(sql, [millis - 12 * 3600 * 1000]);
+    let rows = await query(sql, [millis - 24*30 * 3600 * 1000]);
     // l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
