@@ -1493,16 +1493,19 @@ export const fetchLeagueStorySlugs = async ({
 export const reportEvents = async ({
     threadid,
     page,
+    bot,
 }: {
     threadid: number,
-    page:string
+    page:string,
+    bot:string
 
 }): Promise<any> => {
     let sql, result;
     let query = await dbGetQuery("povdb", threadid);
     const millis = microtime();
     let pageNum = 0;
-
+    const b=+bot||0;
+    const bot1=false;
     if (!page)
         pageNum = 0;
     else
@@ -1518,12 +1521,16 @@ export const reportEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(max(millis)/1000) as stamp from x41_events where name not like '%bot%' and name not like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and  millis>? group by sid order by stamp desc limit ${pageNum * 10},10 `;
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) as stamp from x41_events where name not like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and  millis>? 
+    ${bot1?`and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')`:``}
+   
+    group by sid order by stamp desc limit ${pageNum * 10},10 `;
    /* if (process.env.event_env != 'DEV') {
         sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
     }*/
+    console.log("run query:",sql);
     let rows = await query(sql, [millis - 24 * 3600 * 1000]);
-    // l(chalk.yellow(sql))
+     l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
     let retval: any = {};
@@ -1576,16 +1583,20 @@ export const reportEvents = async ({
 export const reportPrayerEvents = async ({
     threadid,
     page,
+    bot,
 }: {
     threadid: number,
-    page:string
+    page:string,
+    bot:string
+
 
 }): Promise<any> => {
     let sql, result;
     let query = await dbGetQuery("povdb", threadid);
     const millis = microtime();
     let pageNum = 0;
-
+    const b=+bot||0;
+    const bot1=false;
     if (!page)
         pageNum = 0;
     else
@@ -1602,7 +1613,10 @@ export const reportPrayerEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""} and millis>? group by sid order by stamp desc  limit ${pageNum * 10},10 `;
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and millis>? 
+    ${bot1?`and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')`:``}
+    
+    group by sid order by stamp desc  limit ${pageNum * 10},10 `;
     /*if (process.env.event_env != 'DEV') {
         sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where not name like '%bot%' and name like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
     }*/

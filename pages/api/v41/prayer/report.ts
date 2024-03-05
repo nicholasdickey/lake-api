@@ -15,8 +15,8 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
        // console.log("events/record called");
 
-        let { sessionid, name, params,page="0" } = req.query as {sessionid:string, name:string, params:string,page:string};
-        const retval=await reportPrayerEvents({ threadid,page});
+        let { sessionid, name, params,page="0",bot='0' } = req.query as {sessionid:string, name:string, params:string,page:string,bot:string};
+        const retval=await reportPrayerEvents({ threadid,page,bot});
      
        // console.log("retval=",js(retval))
         return res.status(200).json({ success: true,report:retval });
