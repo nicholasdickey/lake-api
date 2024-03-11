@@ -399,7 +399,7 @@ export const recordEvent = async ({
         let query = await dbGetQuery("povdb", threadid);
         sql = `INSERT INTO x41_events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
         let rows = await query(`INSERT INTO x41_events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
-        const old = millis - 10 * 24 * 3600 * 1000;
+        const old = millis - 3*365 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
         await query(`DELETE FROM x41_events where millis<?`, [old]);
     } catch (e) {
