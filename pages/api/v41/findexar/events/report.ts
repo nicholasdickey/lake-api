@@ -14,9 +14,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-       // console.log("events/record called");
-        let { sessionid, name, params,page="0",bot="0" } = req.query as {sessionid:string, name:string, params:string,page:string,bot:string};
-        const retval=await reportEvents({ threadid,page,bot});
+        console.log("events/record called");
+        let { sessionid, name, params,page="0",bot="0",min="0" } = req.query as {sessionid:string, name:string, params:string,page:string,bot:string,min:string};
+        const retval=await reportEvents({ threadid,page,bot,min:+min});
        // console.log("retval=",js(retval))
         return res.status(200).json({ success: true,report:retval });
     }

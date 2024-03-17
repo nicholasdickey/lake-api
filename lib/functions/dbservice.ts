@@ -1494,10 +1494,12 @@ export const reportEvents = async ({
     threadid,
     page,
     bot,
+    min
 }: {
     threadid: number,
     page:string,
-    bot:string
+    bot:string,
+    min:number
 
 }): Promise<any> => {
     let sql, result;
@@ -1539,12 +1541,16 @@ export const reportEvents = async ({
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
         itemRetval.stamp=rows[i].stamp;
-        retval[sessionid] = itemRetval;
+
 
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name not like '%prayer%'  order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
+        if(rows2.length<min)
+            continue;
+        retval[sessionid] = itemRetval;
+
         // l(js(rows2));
         for (let j = 0; j < rows2.length; j++) {
             let record: any = {}
@@ -1584,10 +1590,12 @@ export const reportPrayerEvents = async ({
     threadid,
     page,
     bot,
+    min,
 }: {
     threadid: number,
     page:string,
-    bot:string
+    bot:string,
+    min:number
 
 
 }): Promise<any> => {
@@ -1630,11 +1638,14 @@ export const reportPrayerEvents = async ({
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
         itemRetval.stamp=rows[i].stamp;
-        retval[sessionid] = itemRetval;
+        
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name like '%prayer%'  order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
+        if(rows2.length<min)
+            continue;
+        retval[sessionid] = itemRetval;
         // l(js(rows2));
         for (let j = 0; j < rows2.length; j++) {
             let record: any = {}
