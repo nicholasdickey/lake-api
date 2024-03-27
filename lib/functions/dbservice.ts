@@ -1,6 +1,6 @@
 //./functions/dbservice.ts
 import { endOfISOWeek } from "date-fns";
-import { l, chalk, microtime, js, ds, uxToMySql,slugify } from "../common";
+import { l, chalk, microtime, js, ds, uxToMySql, slugify } from "../common";
 import { dbGetQuery, dbLog } from "../db";
 import { kMaxLength } from "buffer";
 export const getChannelItem = async ({
@@ -37,7 +37,7 @@ export const saveChannelItem = async ({
 }) => {
     digest = digest || "";
     body = body || "";
-    const slug=slugify(title);
+    const slug = slugify(title);
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from x40_channel_items where url=? and channel=?`;
@@ -46,11 +46,11 @@ export const saveChannelItem = async ({
         const xid = rows[0].xid;
         l("xid=", xid, rows[0]);
         sql = `UPDATE x40_channel_items set slug=?,channel=?,title=?,digest=?,body=?${digest && digest.length > 0 ? ',processedTime=now()' : ''} where xid=?`;
-        rows = await query(sql, [slug,channel, title, digest, body, xid]);
+        rows = await query(sql, [slug, channel, title, digest, body, xid]);
     }
     else {
         sql = `INSERT into x40_channel_items (slug,channel,url,title,digest,body${digest && digest.length > 0 ? ',processedTime' : ''},createdTime) VALUES  (?,?,?,?,?,?${digest && digest.length > 0 ? ',now()' : ''},now())`;
-        rows = await query(sql, [slug,channel, url, title, digest, body]);
+        rows = await query(sql, [slug, channel, url, title, digest, body]);
     }
     return rows && rows.length ? rows[0] : false
 }
@@ -399,7 +399,7 @@ export const recordEvent = async ({
         let query = await dbGetQuery("povdb", threadid);
         sql = `INSERT INTO x41_events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
         let rows = await query(`INSERT INTO x41_events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
-        const old = millis - 3*365 * 24 * 3600 * 1000;
+        const old = millis - 3 * 365 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
         await query(`DELETE FROM x41_events where millis<?`, [old]);
     } catch (e) {
@@ -603,7 +603,7 @@ export const getMetaLink = async ({
     long: boolean,
 }) => {
     let sql, rows;
-    long=false;
+    long = false;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
     sql = `SELECT i.slug,i.title, i.${long ? 'longdigest' : 'digest'} as digest, i.url, i.image,i.site_name,i.authors  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.xid=? and f.url=i.url`;
@@ -1026,7 +1026,7 @@ export const fetchMentions = async ({
                   
                 where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum * 25},25`;
             */
-           sql=`SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
            from x41_raw_findex i,
            x41_teams t
            where i.team=?  and t.id=i.team and i.name=t.name 
@@ -1038,9 +1038,9 @@ export const fetchMentions = async ({
 
            where i.team=?   and t.id=p.teamid and i.name=p.member  and i.team=t.id
            order by date desc limit ${pageNum * 25},25`;
-            
-                console.log("db12", sql)
-            rows = await query(sql, [teamid,teamid]);
+
+            console.log("db12", sql)
+            rows = await query(sql, [teamid, teamid]);
             return rows;
 
         }
@@ -1089,7 +1089,7 @@ export const fetchMentions = async ({
                       
                     where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum * 25},25`;
                 */
-                    sql=`SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
                     from x41_raw_findex i,
                     x41_teams t
                     where i.team=?  and t.id=i.team and i.name=t.name 
@@ -1101,8 +1101,8 @@ export const fetchMentions = async ({
          
                     where i.team=?   and t.id=p.teamid and i.name=p.member and i.team=t.id
                     order by date desc limit ${pageNum * 25},25`;
-                    console.log("db2", sql)
-                rows = await query(sql, [teamid,teamid]);
+                console.log("db2", sql)
+                rows = await query(sql, [teamid, teamid]);
                 if (rows && rows.length) {
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
@@ -1362,7 +1362,7 @@ export const getStory = async ({
     console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
     l(chalk.magenta("story===> rows.length:", rows.length))
-    
+
     story.mentions = rows;
     return story;
 }
@@ -1389,7 +1389,7 @@ export const removeStory = async ({
 
     sql = `DELETE FROM povdb.x41_raw_findex where url=?`;
     await query(sql, [story.url]);
-   
+
     return true;
 }
 
@@ -1419,7 +1419,7 @@ export const getSlugStory = async ({
     console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
     l(chalk.magenta("story===> rows.length:", rows.length))
-    
+
     story.mentions = rows;
     return story;
 }
@@ -1446,7 +1446,7 @@ export const removeSlugStory = async ({
 
     sql = `DELETE FROM povdb.x41_raw_findex where url=?`;
     await query(sql, [story.url]);
-   
+
     return true;
 }
 
@@ -1463,7 +1463,7 @@ export const getSlugLeagues = async ({
     const leagues = await query(sql, [slug]);
     return leagues.map((l: any) => l.league);
 }
-       
+
 export const fetchLeagueStorySlugs = async ({
     threadid,
     league,
@@ -1473,20 +1473,20 @@ export const fetchLeagueStorySlugs = async ({
 }: {
     threadid: number,
     league: string,
-    timeStart:number;
-    timeEnd:number;
+    timeStart: number;
+    timeEnd: number;
 
 }) => {
     let sql, rows;
-  
+
     league = league ? league.toUpperCase() : '';
     let query = await dbGetQuery("povdb", threadid);
     let stories;
 
     sql = `SELECT DISTINCT i.slug,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where i.slug is not null and f.url=i.url and f.league=? and unix_timestamp(i.createdTime)>? and unix_timestamp(i.createdTime)<=? order by createdTime desc limit 10000`;
-   
-    stories = await query(sql, [league,timeStart,timeEnd]);
-    console.log("fetchLeagueStorySlugs",sql,league,timeStart,timeEnd,stories.length)
+
+    stories = await query(sql, [league, timeStart, timeEnd]);
+    console.log("fetchLeagueStorySlugs", sql, league, timeStart, timeEnd, stories.length)
     return stories;
 }
 
@@ -1497,17 +1497,17 @@ export const reportEvents = async ({
     min
 }: {
     threadid: number,
-    page:string,
-    bot:string,
-    min:number
+    page: string,
+    bot: string,
+    min: number
 
 }): Promise<any> => {
     let sql, result;
     let query = await dbGetQuery("povdb", threadid);
     const millis = microtime();
     let pageNum = 0;
-    const b=+bot||0;
-    const bot1=false;
+    const b = +bot || 0;
+    const bot1 = false;
     if (!page)
         pageNum = 0;
     else
@@ -1523,31 +1523,31 @@ export const reportEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(max(millis)/1000) as stamp from x41_events where name not like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and  millis>? 
-    ${bot1?`and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')`:``}
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) as stamp from x41_events where name not like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV' ? "and sessionid not like '%dev%'" : ""}  and  millis>? 
+    ${bot1 ? `and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')` : ``}
    
     group by sid order by stamp desc limit ${pageNum * 10},10 `;
-   /* if (process.env.event_env != 'DEV') {
-        sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
-    }*/
-    console.log("run query:",sql);
+    /* if (process.env.event_env != 'DEV') {
+         sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
+     }*/
+    console.log("run query:", sql);
     let rows = await query(sql, [millis - 24 * 3600 * 1000]);
-     l(chalk.yellow(sql))
+    l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
-   // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
+    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
     let retval: any = {};
     for (let i = 0; i < rows.length; i++) {
         const sessionid = rows[i]['sid'];
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
-        itemRetval.stamp=rows[i].stamp;
+        itemRetval.stamp = rows[i].stamp;
 
 
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name not like '%prayer%'  order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
-        if(rows2.length<min)
+        if (rows2.length < min)
             continue;
         retval[sessionid] = itemRetval;
 
@@ -1557,32 +1557,32 @@ export const reportEvents = async ({
             const name = rows2[j]['name'];
             let constRecord = false;
             record['fbclid'] = rows2[j]['fbclid'];
-           // record['params'] = rows2[j]['params'];
+            // record['params'] = rows2[j]['params'];
             record['name'] = rows2[j]['name'];
-            record['sessionid']=sessionid;
+            record['sessionid'] = sessionid;
             record['stamp'] = rows2[j]['stamp'];
             l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
-            let params={"empty":""};
-            try{
-                params=JSON.parse(rows2[j]['params']);
+            let params = { "empty": "" };
+            try {
+                params = JSON.parse(rows2[j]['params']);
             }
-            catch(e){
-                l(chalk.redBright("error parsing params",e,rows2[j]['params']));
+            catch (e) {
+                l(chalk.redBright("error parsing params", e, rows2[j]['params']));
             }
 
-            l(chalk.magentaBright("oarams",js( {name,...params})));
-           // record.add(...params);
+            l(chalk.magentaBright("oarams", js({ name, ...params })));
+            // record.add(...params);
             for (const key in params) {
                 //@ts-ignore
                 record[key] = params[key];
-              }
-            l(chalk.greenBright("record",js(record)));  
+            }
+            l(chalk.greenBright("record", js(record)));
             itemRetval.items.push(record);
-         
+
 
         }
     }
-    l(chalk.greenBright("retval",js(retval)));
+    l(chalk.greenBright("retval", js(retval)));
     return retval;
 }
 
@@ -1593,9 +1593,9 @@ export const reportPrayerEvents = async ({
     min,
 }: {
     threadid: number,
-    page:string,
-    bot:string,
-    min:number
+    page: string,
+    bot: string,
+    min: number
 
 
 }): Promise<any> => {
@@ -1603,8 +1603,8 @@ export const reportPrayerEvents = async ({
     let query = await dbGetQuery("povdb", threadid);
     const millis = microtime();
     let pageNum = 0;
-    const b=+bot||0;
-    const bot1=false;
+    const b = +bot || 0;
+    const bot1 = false;
     if (!page)
         pageNum = 0;
     else
@@ -1621,29 +1621,29 @@ export const reportPrayerEvents = async ({
          await query(sql,[sid,xid]);
      }*/
 
-    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV'?"and sessionid not like '%dev%'":""}  and millis>? 
-    ${bot1?`and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')`:``}
+    sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where name  like '%prayer%' and name not like '%ssr%' ${process.env.event_env != 'DEV' ? "and sessionid not like '%dev%'" : ""}  and millis>? 
+    ${bot1 ? `and sid not in (select u.sid from x41_events u where u.sid = sid and name like '%bot%')` : ``}
     
     group by sid order by stamp desc  limit ${pageNum * 10},10 `;
     /*if (process.env.event_env != 'DEV') {
         sql = `select distinct sid,from_unixtime(max(millis)/1000) stamp from x41_events where not name like '%bot%' and name like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
     }*/
-    let rows = await query(sql, [millis - 24*30 * 3600 * 1000]);
+    let rows = await query(sql, [millis - 24 * 30 * 3600 * 1000]);
     // l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
-   // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
+    // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
     let retval: any = {};
     for (let i = 0; i < rows.length; i++) {
         const sessionid = rows[i]['sid'];
         let itemRetval: any = {};
         itemRetval.sessionid = sessionid;
-        itemRetval.stamp=rows[i].stamp;
-        
+        itemRetval.stamp = rows[i].stamp;
+
         itemRetval.items = [];
         //const filledSql = fillInParams(sql, [sessionid]);
         sql = `select distinct name,params,fbclid,ad,from_unixtime(millis/1000) stamp  from x41_events where sid =? and name not like '%auth%'  and name like '%prayer%'  order by millis desc`;
         let rows2 = await query(sql, [sessionid]);
-        if(rows2.length<min)
+        if (rows2.length < min)
             continue;
         retval[sessionid] = itemRetval;
         // l(js(rows2));
@@ -1652,32 +1652,32 @@ export const reportPrayerEvents = async ({
             const name = rows2[j]['name'];
             let constRecord = false;
             record['fbclid'] = rows2[j]['fbclid'];
-           // record['params'] = rows2[j]['params'];
+            // record['params'] = rows2[j]['params'];
             record['name'] = rows2[j]['name'];
-            record['sessionid']=sessionid;
+            record['sessionid'] = sessionid;
             record['stamp'] = rows2[j]['stamp'];
             l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
-            let params={"empty":""};
-            try{
-                params=JSON.parse(rows2[j]['params']);
+            let params = { "empty": "" };
+            try {
+                params = JSON.parse(rows2[j]['params']);
             }
-            catch(e){
-                l(chalk.redBright("error parsing params",e,rows2[j]['params']));
+            catch (e) {
+                l(chalk.redBright("error parsing params", e, rows2[j]['params']));
             }
 
-            l(chalk.magentaBright("params",js( {name,...params})));
-           // record.add(...params);
+            l(chalk.magentaBright("params", js({ name, ...params })));
+            // record.add(...params);
             for (const key in params) {
                 //@ts-ignore
                 record[key] = params[key];
-              }
-            l(chalk.greenBright("record",js(record)));  
+            }
+            l(chalk.greenBright("record", js(record)));
             itemRetval.items.push(record);
-         
+
 
         }
     }
-    l(chalk.greenBright("retval",js(retval)));
+    l(chalk.greenBright("retval", js(retval)));
     return retval;
 }
 
@@ -1710,13 +1710,13 @@ export const reportSessionEvents = async ({
         record['fbclid'] = rows2[j]['fbclid'];
         record['params'] = rows2[j]['params'];
         record['name'] = rows2[j]['name'];
-        record['sessionid']=sessionid;
+        record['sessionid'] = sessionid;
         record['stamp'] = rows2[j]['stamp'];
-        let params=JSON.parse(rows2[j]['params']);
-        l(chalk.magentaBright("oarams", name,params));
+        let params = JSON.parse(rows2[j]['params']);
+        l(chalk.magentaBright("oarams", name, params));
         for (const key in params) {
             record[key] = params[key];
-          }
+        }
         itemRetval.items.push(record);
         /*switch (name) {
             case 'ssr-pub':
@@ -1821,10 +1821,10 @@ export const reportSessionEvents = async ({
                 constRecord = true;
                 break;
         }*/
-       /* if (constRecord) {
-            itemRetval.items.push(record);
-            // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
-        }*/
+        /* if (constRecord) {
+             itemRetval.items.push(record);
+             // l(chalk.yellowBright("reportEventsInner", filledSql, js(record)));  
+         }*/
 
     }
 
@@ -1854,12 +1854,275 @@ export const reportsSessionids = async ({
 
     sql = `select sid,stamp from wt.events where millis>? group by millis,sid   order by millis desc `;
     if (process.env.event_env != 'DEV') {
-        sql = `select sid,stamp from wt.events where not name like '%bot%' and  millis>? group by millis,sid   order by millis desc `;
+        sql = `select sid,stamp from wt.events group by millis,sid   order by millis desc `;
     }
     let rows = await query(sql, [millis - 24 * 3600 * 1000]);
     // l(chalk.yellow(sql))
-   
+
     //l(chalk.greenBright("retval",js(retval)));
     return rows;
 }
 
+interface Interval {
+    firstMillis: number;
+    lastMillis: number;
+    events: any[];
+}
+interface Session {
+    sessionid: string;
+    event_count: number;
+    interval_count: number;
+    first_interval_millis: number;
+    last_interval_millis: number;
+    last_event_millis: number;
+    intervals: Interval[];
+}
+export const prepReport = async ({
+    threadid,
+}: {
+    threadid: number,
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    const millis = microtime();
+    let sessions: Session[] = new Array<Session>;
+    sql = `truncate table x41_report_sessions`;
+    await query(sql);
+    sql = `truncate table x41_report_intervals`;
+    await query(sql);
+    sql = `truncate table x41_report_events`;
+    await query(sql);
+    /**
+     * 1. Get all distinct sessionids (users)
+     * 
+     * 2. For each sessionid, get all events
+     * 
+     * 3. Calculate activity intervals, each interval starting with the first event in a group and ending with the last in the group such that no interval between the events in a group is greater than 30 minutes.
+     * 
+     * 4. Create an array of intervals for each sessionid with each interval containing the array of events in the interval plus aggregate fields: number of events, millis of the first event, millis of the last event.
+     * 
+     * 5. For each sessionid create object with the following fields: sessionid, number of intervals, number of events, millis of the first event, millis of the last overall in the last interval event, array of intervals.
+     * 
+     * 
+     */
+
+    //get unique sessionids in the order of their first event
+    l("getting unique sessionids");
+    sql = `select sessionid,from_unixtime(min(millis)/1000) as stamp from x41_events where sessionid not like '%DEV%' and name not like '%bot%' group by sessionid order by min(millis)`;
+    let rows = await query(sql);
+    //For each sessionid, get all events
+    l(chalk.yellow(sql, rows.length));
+    l("beginning the loop")
+
+    for (let i = 0; i < rows.length; i++) {
+        const sessionid = rows[i]['sessionid'];
+        l("processing sessionid", sessionid, i);
+        const stamp = rows[i]['stamp'];
+        sql = `select xid,name,params,fbclid,ad,from_unixtime(millis/1000) stamp,millis  from x41_events where sessionid =? order by millis `;
+        let rows2 = await query(sql, [sessionid]);
+        l("got events for sessionid", sessionid, rows2.length);
+        let interval: Interval = {
+            firstMillis: 0,
+            lastMillis: 0,
+            events: []
+        }
+        let intervals = [interval];
+        let curInterval = 0;
+        let eventsCount = 0;
+        for (let j = 0; j < rows2.length; j++) {
+            const name = rows2[j]['name'];
+            let record: any = {}
+            record['event_xid'] = rows2[j]['xid'];
+            eventsCount++;
+            let ci = intervals[curInterval];
+            if (!ci.firstMillis) {
+                ci.firstMillis = rows2[j].millis;
+                ci.lastMillis = rows2[j].millis;
+                ci.events.push(record);
+                l(chalk.greenBright("first event", ci.firstMillis))
+            }
+            else {
+                if (rows2[j].millis - ci.lastMillis > 30 * 60 * 1000) {
+                    curInterval++;
+                    intervals.push({
+                        firstMillis: rows2[j].millis,
+                        lastMillis: rows2[j].millis,
+                        events: [record]
+
+                    });
+                    l(chalk.greenBright("new interval", intervals.length, rows2[j].millis))
+                }
+                else {
+                    ci.lastMillis = rows2[j].millis;
+                    ci.events.push(record);
+                }
+            }
+        }
+        let session: Session = {
+            sessionid: sessionid,
+            event_count: eventsCount,
+            interval_count: intervals.length,
+            first_interval_millis: intervals[0].firstMillis,
+            last_interval_millis: intervals[intervals.length - 1].lastMillis,
+            last_event_millis: rows2[rows2.length - 1].millis,
+            intervals: intervals
+        }
+        sessions.push(session);
+        console.log("finished creating a session object", sessionid, i);
+    }
+    l(chalk.magentaBright("DONE WITH READ LOOP", sessions.length));
+    /**
+     * Now, given three empty tables:
+     * 
+     * 
+     * 
+     *  
+       CREATE TABLE `x41_report_sessions` (
+        `xid` bigint(19) NOT NULL AUTO_INCREMENT,
+        `sessionid` varchar(255) DEFAULT NULL,
+        `events_count` int(11) DEFAULT NULL,
+        `intervals_count` int(11) DEFAULT NULL,
+        `last_interval_millis` bigint(11) DEFAULT NULL,
+        `first_interval_millis` bigint(11) DEFAULT NULL,
+        `last_event_millis` bigint(11) DEFAULT NULL,
+        PRIMARY KEY (`xid`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+        and
+
+       CREATE TABLE `x41_report_intervals` (
+        `xid` bigint(19) NOT NULL AUTO_INCREMENT,
+        `sessionid` varchar(255) DEFAULT NULL,
+        `millis_start` bigint(11) DEFAULT NULL,
+        `millis_end` bigint(11) DEFAULT NULL,
+        `events_count` int(11) DEFAULT NULL,
+        PRIMARY KEY (`xid`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+       and 
+       
+      
+        CREATE TABLE `x41_report_events` (
+            `xid` bigint(19) NOT NULL AUTO_INCREMENT,
+            `sessionid` varchar(255) DEFAULT NULL,
+            `interval_xid` bigint(19) DEFAULT NULL,
+            `event_xid` bigint(19) DEFAULT NULL,
+            PRIMARY KEY (`xid`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+    fill out all three tables with the data from the sessions array    
+
+     */
+    //copilot: create a loop that fills out the three tables with the data from the sessions array - creates an entry to report_sessions using top object (sessionid), then creates entries for report_intervals, saves its xid as interval_xid, then creates entries for report_events, saving the xid of the interval as interval_xid and then creates entries for report events tying three together
+    for (let i = 0; i < sessions.length; i++) {
+        l(chalk.yellowBright("INSERT LOOP processing session", i));
+        const session = sessions[i];
+        sql = `insert into x41_report_sessions (sessionid,events_count,intervals_count,last_interval_millis,first_interval_millis,last_event_millis) values (?,?,?,?,?,?)`;
+        let result = await query(sql, [session.sessionid, session.event_count, session.interval_count, session.last_interval_millis, session.first_interval_millis, session.last_event_millis]);
+        const sessionXid = result.insertId;
+        for (let j = 0; j < session.intervals.length; j++) {
+            l(chalk.yellowBright("INSERT LOOP processing interval", j));
+
+            const interval = session.intervals[j];
+            sql = `insert into x41_report_intervals (sessionid,millis_start,millis_end,events_count) values (?,?,?,?)`;
+            let result = await query(sql, [session.sessionid, interval.firstMillis, interval.lastMillis, interval.events.length]);
+            const intervalXid = result.insertId;
+            for (let k = 0; k < interval.events.length; k++) {
+                const event = interval.events[k];
+                sql = `insert into x41_report_events (sessionid,interval_xid,event_xid) values (?,?,?)`;
+                await query(sql, [session.sessionid, intervalXid, event.event_xid]);
+            }
+        }
+    }
+}
+
+
+export const reportStats = async ({
+    threadid,
+    page,
+    min
+}: {
+    threadid: number,
+    page: string,
+    min: number
+
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    const millis = microtime();
+    let pageNum = 0;
+
+    const bot1 = false;
+    if (!page)
+        pageNum = 0;
+    else
+        pageNum = +page;
+
+
+    // select next page of report_session then add an array of intervals and for each interval events     
+    // the query should be order by count_events desc
+    sql = `select * from x41_report_sessions order by intervals_count desc, events_count desc, last_event_millis desc limit ${pageNum * 10},10 `;
+    if (min)
+        sql = `select * from x41_report_sessions where intervals_count>=${min} order by intervals_count desc, events_count desc, last_event_millis desc limit ${pageNum * 10},10 `;
+    let rows = await query(sql);
+    let retval: any = {};
+    for (let i = 0; i < rows.length; i++) {
+        const sessionid = rows[i]['sessionid'];
+        let itemRetval: any = {};
+        itemRetval.sessionid = sessionid;
+        // itemRetval.events = [];
+        itemRetval.intervals = [];
+        itemRetval.events_count = rows[i]['events_count'];
+        itemRetval.intervals_count = rows[i]['intervals_count'];
+        itemRetval.first_interval_millis = rows[i]['first_interval_millis'];
+        itemRetval.last_interval_millis = rows[i]['last_interval_millis'];
+        itemRetval.last_event_millis = rows[i]['last_event_millis'];
+        retval[sessionid] = itemRetval;
+        sql = `select * from x41_report_intervals where sessionid=? order by millis_start`;
+        let rows2 = await query(sql, [sessionid]);
+        for (let j = 0; j < rows2.length; j++) {
+
+
+            const interval = rows2[j];
+            let intervalRetval: any = {};
+            intervalRetval.millis_start = interval.millis_start;
+            intervalRetval.millis_end = interval.millis_end;
+            intervalRetval.events = [];
+            itemRetval.intervals.push(intervalRetval);
+
+
+
+
+            sql = `select e.* from x41_events e,x41_report_events r  where r.sessionid=? and r.interval_xid=? and e.xid=r.event_xid order by e.millis`;
+            let rows3 = await query(sql, [sessionid, interval.xid]);
+            for (let k = 0; k < rows3.length; k++) {
+                const event = rows3[k];
+                const name = rows3[k]['name'];
+                let constRecord = false;
+                event['fbclid'] = rows3[k]['fbclid'];
+                event['params'] = rows3[k]['params'];
+                event['name'] = rows3[k]['name'];
+                event['sessionid'] = sessionid;
+                event['stamp'] = rows3[k]['stamp'];
+                l(chalk.cyan("event", name, event['stamp'], rows3[k]['params']))
+                try {
+                    let params = JSON.parse(rows3[k]['params']);
+                    l(chalk.magentaBright("oarams", name, js(params)));
+                    for (const key in params) {
+                        event[key] = params[key];
+                    }
+                }
+                catch (x) {
+                    continue;
+                }
+
+                intervalRetval.events.push(event);
+            }
+        }
+    }
+    return retval;
+
+}
