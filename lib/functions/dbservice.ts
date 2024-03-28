@@ -1909,7 +1909,7 @@ export const prepReport = async ({
 
     //get unique sessionids in the order of their first event
     l("getting unique sessionids");
-    sql = `select sessionid,from_unixtime(min(millis)/1000) as stamp from x41_events where sessionid not like '%DEV%' and name not like '%bot%' group by sessionid order by min(millis)`;
+    sql = `select sessionid,from_unixtime(min(millis)/1000) as stamp from x41_events where sessionid not like '%DEV%' and name not like '%bot%' and name not like '%ssr%' group by sessionid order by min(millis)`;
     let rows = await query(sql);
     //For each sessionid, get all events
     l(chalk.yellow(sql, rows.length));
