@@ -2126,3 +2126,39 @@ export const reportStats = async ({
     return retval;
 
 }
+export const getSaunaAvailabilities = async ({
+    threadid,
+    resource
+}: {
+    threadid: number,
+    resource: string,
+ 
+}): Promise<any> => {
+    let sql, result;
+    let query = await dbGetQuery("povdb", threadid);
+    // select next page of report_session then add an array of intervals and for each interval events     
+    // the query should be order by count_events desc
+    sql = `SELECT * from x42_sauna_resources where name=?`;
+    let rows = await query(sql,[resource]);
+    let numDays=rows[0]['numdaysahead'];
+    let rxid=rows[0]['xid'];
+    sql=`SELECT * from x42_sauna_timeslots where resourceid=?  and \`type\`='all' order by ordinal`;
+    let rowsAll = await query(sql,[rxid]);
+    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and  type='wk' order by ordinal `;
+    let rowsWk = await query(sql,[rxid]);
+    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='wd'  order by ordinal `;
+    let rowsWd = await query(sql,[rxid]);
+    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='date' order by date, ordinal `;
+    let rowsDate = await query(sql,[rxid]);
+    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='range'  order by startdate,ordinal `;
+    let rowsRange = await query(sql,[rxid]);
+    const ret={
+        days:numDays,
+        all:rowsAll,
+        wk:rowsWk,
+        wd:rowsWd,
+        date:rowsDate,
+        range:rowsRange
+    }
+    return ret;
+}

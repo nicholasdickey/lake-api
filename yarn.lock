@@ -5960,6 +5960,11 @@ type-is@^1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
+typescript-calendar-date@^1.3.4:
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/typescript-calendar-date/-/typescript-calendar-date-1.3.4.tgz#cfa91f23da4b310fa94f0a23926f13d33e297a79"
+  integrity sha512-pHaXWsAfV+/w22aojB4G5s2TTTKaMIyxdTFSZFkFOeFuHDJKd27GLp+z/ZePjYrTTWA7eRxdXgRyT76MecrAcg==
+
 typescript@4.9.4:
   version "4.9.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.4.tgz#a2a3d2756c079abda241d75f149df9d561091e78"
