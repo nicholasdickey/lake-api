@@ -2132,33 +2132,702 @@ export const getSaunaAvailabilities = async ({
 }: {
     threadid: number,
     resource: string,
- 
+
 }): Promise<any> => {
     let sql, result;
     let query = await dbGetQuery("povdb", threadid);
     // select next page of report_session then add an array of intervals and for each interval events     
     // the query should be order by count_events desc
     sql = `SELECT * from x42_sauna_resources where name=?`;
-    let rows = await query(sql,[resource]);
-    let numDays=rows[0]['numdaysahead'];
-    let rxid=rows[0]['xid'];
-    sql=`SELECT * from x42_sauna_timeslots where resourceid=?  and \`type\`='all' order by ordinal`;
-    let rowsAll = await query(sql,[rxid]);
-    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and  type='wk' order by ordinal `;
-    let rowsWk = await query(sql,[rxid]);
-    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='wd'  order by ordinal `;
-    let rowsWd = await query(sql,[rxid]);
-    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='date' order by date, ordinal `;
-    let rowsDate = await query(sql,[rxid]);
-    sql=`SELECT * from x42_sauna_timeslots where resourceid=? and type='range'  order by startdate,ordinal `;
-    let rowsRange = await query(sql,[rxid]);
-    const ret={
-        days:numDays,
-        all:rowsAll,
-        wk:rowsWk,
-        wd:rowsWd,
-        date:rowsDate,
-        range:rowsRange
+    let rows = await query(sql, [resource]);
+    let numDays = rows[0]['numdaysahead'];
+    let rxid = rows[0]['xid'];
+    sql = `SELECT * from x42_sauna_timeslots where resourceid=?  and \`type\`='all' order by ordinal`;
+    let rowsAll = await query(sql, [rxid]);
+    sql = `SELECT * from x42_sauna_timeslots where resourceid=? and  type='wk' order by ordinal `;
+    let rowsWk = await query(sql, [rxid]);
+    sql = `SELECT * from x42_sauna_timeslots where resourceid=? and type='wd'  order by ordinal `;
+    let rowsWd = await query(sql, [rxid]);
+    sql = `SELECT * from x42_sauna_timeslots where resourceid=? and type='date' order by date, ordinal `;
+    let rowsDate = await query(sql, [rxid]);
+    sql = `SELECT * from x42_sauna_timeslots where resourceid=? and type='range'  order by startdate,ordinal `;
+    let rowsRange = await query(sql, [rxid]);
+    const ret = {
+        days: numDays,
+        all: rowsAll,
+        wk: rowsWk,
+        wd: rowsWd,
+        date: rowsDate,
+        range: rowsRange
     }
     return ret;
+}
+//---------------------------------------------------------- Qwiket refactor April 2024
+//favoites feed
+export const getUserSessionFavorites = async ({
+    threadid,
+    userid,
+    sessionid,
+    league,
+
+}: {
+    threadid: number,
+    userid: string,
+    sessionid: string,
+    league: string,
+
+}) => {
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    if (userid) {
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
+        from x41_user_favorites f, 
+        x41_raw_findex i
+        where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc limit 1000`;
+        rows = await query(sql, [userid]);
+        if (!rows || !rows.length) { //one time initialization of the user from session
+            if (sessionid) {
+                sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
+                from x41_user_favorites f, 
+                x41_raw_findex i     
+                where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc limit 1000`;
+                rows = await query(sql, [sessionid]);
+                sql = 'SELECT * from x41_favorites where userid=?';
+                const rows2 = await query(sql, [sessionid]);
+                if (rows2 && rows2.length) {
+                    sql = 'INSERT INTO x_41_user_favorites (userid,findexarxid) values (?,?)';
+                    for (let i = 0; i < rows2.length; i++) {
+                        await query(sql, [userid, rows2[i].teamid]);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
+            from x41_user_favorites f, 
+            x41_raw_findex i
+            where f.findexarxid=i.xid and f.userid='user_2aMwz0s7fp5y5QhzKxWbqv8frqW' order by f.xid desc limit 1000`;
+        rows = await query(sql, [sessionid]);
+    }
+    //console.log("getUserSessionFavorites", sql, rows)
+    return rows;
+}
+
+//myfeed root level
+export const getFilteredAllSessionMentions = async ({  //my feed
+    threadid,
+    userid,
+    sessionid,
+}: {
+    threadid: number;
+    userid: string;
+    sessionid: string;
+}) => {
+    if (!userid && !sessionid)
+        return getAllMentions({ threadid });
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+    // Get current findex, findex history, and mentions
+    if (userid) {
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav
+    FROM povdb.x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+    povdb.x41_list_members m
+    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `
+        rows = await query(sql, [userid, userid]);
+        if (!rows || !rows.length) {
+
+            rows = await query(sql, [sessionid, sessionid]);
+            if (rows && rows.length) {
+                sql = 'SELECT * from x41_list_members where userid=?';
+                let rows2 = await query(sql, [sessionid]);
+                sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+
+                if (rows2 && rows2.length) {
+                    for (let i = 0; i < rows2.length; i++) {
+                        await query(sql, [rows2[i].member, rows2[i].teamid, userid]);
+                    }
+                }
+                sql = 'SELECT * from x41_favorites where userid=?';
+                rows2 = await query(sql, [sessionid]);
+                if (rows2 && rows2.length) {
+                    sql = 'INSERT INTO x_41_user_favorites (userid,findexarxid) values (?,?)';
+
+                    for (let i = 0; i < rows2.length; i++) {
+                        await query(sql, [userid, rows2[i].teamid]);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        rows = await query(sql, [sessionid, sessionid]);
+    }
+    return rows;
+}
+
+// myfeed league level
+export const getFilteredLeagueSessionMentions = async ({ //my feed for the league
+    threadid,
+    league,
+    userid,
+    sessionid,
+}: {
+    threadid: number,
+    league: string,
+    userid: string,
+    sessionid: string,
+}) => {
+    if (!userid && !sessionid) {
+        return getLeagueMentions({ threadid, league });
+    }
+    let sql, rows;
+    let query = await dbGetQuery("povdb", threadid);
+
+
+    // Get current findex, findex history, and mentions
+    if (userid)
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary ,not f.xid is null as fav
+    FROM povdb.x41_raw_findex i
+        LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
+    povdb.x41_list_members m 
+    where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
+    rows = await query(sql, [userid, league, userid]);
+    if (!rows || !rows.length) {
+        if (!rows || !rows.length) { //one time initialization of the user from session
+            if (sessionid) {
+                rows = await query(sql, [sessionid]);
+                if (rows && rows.length) {
+                    sql = 'SELECT * from x41_list_members where userid=?';
+                    let rows2 = await query(sql, [sessionid]);
+                    sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+
+                    if (rows2 && rows2.length) {
+                        for (let i = 0; i < rows2.length; i++) {
+                            await query(sql, [rows2[i].member, rows2[i].teamid, userid]);
+                        }
+                    }
+                    sql = 'SELECT * from x41_favorites where userid=?';
+                    rows2 = await query(sql, [sessionid]);
+                    if (rows2 && rows2.length) {
+                        sql = 'INSERT INTO x_41_user_favorites (userid,findexarxid) values (?,?)';
+
+                        for (let i = 0; i < rows2.length; i++) {
+                            await query(sql, [userid, rows2[i].teamid]);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            rows = await query(sql, [sessionid, league, sessionid]);
+        }
+    }
+    return rows;
+}
+
+
+// team & player mentions
+export const fetchSessionMentions = async ({
+    threadid,
+    teamid,
+    name,
+    userid,
+    sessionid,
+    page,
+    league,
+    myteam
+}: {
+    threadid: number,
+    teamid: string,
+    name: string,
+    userid: string,
+    sessionid: string,
+    page: string,
+    league: string,
+    myteam: string,
+}) => {
+    let sql, rows;
+    const pageNum = page ? +page : 0;
+    const filterNum = myteam ? +myteam : 0;
+    if (teamid) {
+        teamid = teamid.toLowerCase();
+    }
+    console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
+    let query = await dbGetQuery("povdb", threadid);
+
+    if (!filterNum) {
+        if (teamid && name) { //aka details
+            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                    from x41_raw_findex i
+                    where i.team=? and i.name=? order by i.date desc limit ${pageNum * 25},25`;
+            //  console.log("db2", sql)
+            rows = await query(sql, [/*userid,*/ teamid, name]);
+            if (rows && rows.length) {
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                    let favRows;
+                    if (userid) {
+                        favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        if (!favRows || !favRows.length) {
+                            favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                            if (favRows && favRows.length) {
+                                sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                                await query(sql, [userid, rows[0].findexarxid])
+                            }
+                        }
+                    }
+                    else {
+                        favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                    }
+                    row.fav = favRows && favRows.length ? true : false;
+                }
+
+            }
+            return rows;
+        }
+        else if (teamid) { // team mentions TBD mixup with player feeds
+            /*sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary  
+                from x41_raw_findex i,
+                x41_teams t
+                  
+                where i.team=?  and t.id=i.team and i.name=t.name order by date desc limit ${pageNum * 25},25`;
+            */
+            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+                    from x41_raw_findex i,
+                    x41_teams t
+                    where i.team=?  and t.id=i.team and i.name=t.name 
+                     UNION DISTINCT
+                     SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,summary,0 as fav  
+                    from x41_raw_findex i,
+                    x41_teams t,
+                    x41_team_players p
+         
+                    where i.team=?   and t.id=p.teamid and i.name=p.member and i.team=t.id
+                    order by date desc limit ${pageNum * 25},25`;
+            console.log("db2", sql)
+            rows = await query(sql, [teamid, teamid]);
+            if (rows && rows.length) {
+                for (let i = 0; i < rows.length; i++) {
+                    const row = rows[i];
+                    sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                    let favRows;
+                    if (userid) {
+                        favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        if (!favRows || !favRows.length) {
+                            favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                            if (favRows && favRows.length) {
+                                sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                                await query(sql, [userid, rows[0].findexarxid])
+                            }
+                        }
+                    }
+                    else {
+                        favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                    }
+                    row.fav = favRows && favRows.length ? true : false;
+                }
+            }
+            return rows;
+        }
+        else { //aka mentions
+            if (league) {
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i
+                            
+                        where i.league=?  order by i.date desc limit ${pageNum * 25},25`;
+                console.log("db3", sql)
+                rows = await query(sql, [league]);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        let favRows;
+                        if (userid) {
+                            favRows = await query(sql, [userid, rows[0].findexarxid]);
+                            if (!favRows || !favRows.length) {
+                                favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                                if (favRows && favRows.length) {
+                                    sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                                    await query(sql, [userid, rows[0].findexarxid])
+                                }
+                            }
+                        }
+                        else {
+                            favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                        }
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                return rows;
+            }
+            else {
+                sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i
+                        order by i.date desc limit ${pageNum * 25},25`;
+                console.log("db4", sql)
+                rows = await query(sql, []);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        let favRows;
+                        if (userid) {
+                            favRows = await query(sql, [userid, rows[0].findexarxid]);
+                            if (!favRows || !favRows.length) {
+                                favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                                if (favRows && favRows.length) {
+                                    sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                                    await query(sql, [userid, rows[0].findexarxid])
+                                }
+                            }
+                        }
+                        else {
+                            favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                        }
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                return rows;
+            }
+        }
+    }
+    else { // filter to my team (tracker list) only
+        if (!league) {
+            sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.teamName,i.url, i.findex,i.summary 
+                    FROM povdb.x41_raw_findex i,
+                    povdb.x41_list_members m
+                    
+                    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit ${pageNum * 25},25`;
+            console.log("db5", sql)
+            if (userid) {
+                rows = await query(sql, [userid]);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                else {
+                    rows = await query(sql, [sessionid]);
+                    if (rows && rows.length) {
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i];
+                            sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                            const favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                            row.fav = favRows && favRows.length ? true : false;
+                        }
+                    }
+                    if (rows && rows.length) {
+                        sql = 'SELECT * from x41_list_members where userid=?';
+                        let rows2 = await query(sql, [sessionid]);
+                        sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+
+                        if (rows2 && rows2.length) {
+                            for (let i = 0; i < rows2.length; i++) {
+                                await query(sql, [rows2[i].member, rows2[i].teamid, userid]);
+                            }
+                        }
+                        sql = 'SELECT * from x41_favorites where userid=?';
+                        rows2 = await query(sql, [sessionid]);
+                        if (rows2 && rows2.length) {
+                            sql = 'INSERT INTO x_41_user_favorites (userid,findexarxid) values (?,?)';
+
+                            for (let i = 0; i < rows2.length; i++) {
+                                await query(sql, [userid, rows2[i].teamid]);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                rows = await query(sql, [sessionid]);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+            }
+            return rows;
+        }
+        else {
+            sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.teamName, i.url, i.findex,i.summary 
+                    FROM povdb.x41_raw_findex i,                  
+                    povdb.x41_list_members m
+                    where m.teamid=i.team and m.member=i.name  and i.league=? and m.userid=? order by i.date desc limit ${pageNum * 25},25`;
+            //  console.log("db6", sql)
+            if (userid) {
+                rows = await query(sql, [league, userid]);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+                else {
+                    rows = await query(sql, [league, sessionid]);
+                    if (rows && rows.length) {
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i];
+                            sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                            const favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                            row.fav = favRows && favRows.length ? true : false;
+                        }
+                    }
+                    if (rows && rows.length) {
+                        sql = 'SELECT * from x41_list_members where userid=?';
+                        let rows2 = await query(sql, [sessionid]);
+                        sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+
+                        if (rows2 && rows2.length) {
+                            for (let i = 0; i < rows2.length; i++) {
+                                await query(sql, [rows2[i].member, rows2[i].teamid, userid]);
+                            }
+                        }
+                        sql = 'SELECT * from x41_favorites where userid=?';
+                        rows2 = await query(sql, [sessionid]);
+                        if (rows2 && rows2.length) {
+                            sql = 'INSERT INTO x_41_user_favorites (userid,findexarxid) values (?,?)';
+
+                            for (let i = 0; i < rows2.length; i++) {
+                                await query(sql, [userid, rows2[i].teamid]);
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                rows = await query(sql, [league, sessionid]);
+                if (rows && rows.length) {
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        sql = `SELECT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                        const favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                        row.fav = favRows && favRows.length ? true : false;
+                    }
+                }
+            }
+            return rows;
+        }
+    }
+}
+// stories root, league
+export const fetchSessionStories = async ({
+    threadid,
+    userid,
+    sessionid,
+    page,
+    league,
+
+}: {
+    threadid: number,
+    userid: string,
+    sessionid: string,
+    page: string,
+    league: string,
+
+}) => {
+    let sql, rows;
+    const pageNum = page ? +page : 0;
+    league = league ? league.toUpperCase() : '';
+    console.log("dbservice, fetchStories", { userid, page, league, pageNum })
+    let query = await dbGetQuery("povdb", threadid);
+
+    let stories;
+    if (!league) {
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
+        stories = await query(sql, []);
+    }
+    else {
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
+        stories = await query(sql, [league]);
+    }
+    l(chalk.greenBright("stories", stories));
+    for (let i = 0; i < stories.length; i++) {
+        let mentions;
+        l(chalk.yellow("story", i, stories[i].url))
+
+        l(chalk.magenta("story", i, stories[i].url, 'user'));
+        if (league) {
+            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l
+                            
+                        where i.league=? and l.url=i.url and l.url=?
+                        order by i.name`;
+            console.log("stories b3", sql)
+            rows = await query(sql, [league, stories[i].url]);
+            if (rows && rows.length) {
+                for (let j = 0; j < rows.length; j++) {
+                    const row = rows[j];
+                    sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                    let favRows;
+                    if (userid) {
+                        favRows = await query(sql, [userid, rows[0].findexarxid]);
+                        if (!favRows || !favRows.length) {
+                            favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                            if (favRows && favRows.length) {
+                                sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                                await query(sql, [userid, rows[0].findexarxid])
+                            }
+                        }
+                    }
+                    else {
+                        favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+
+                    }
+                    row.fav = favRows && favRows.length ? true : false;
+                }
+            }
+            stories[i].mentions = rows;
+        }
+        else {
+            l(chalk.magenta("story", i, stories[i].url, 'no league'));
+            sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
+                        from x41_raw_findex i,
+                        x41_league_items l      
+                        where l.url=i.url
+                        and l.url=?
+                        order by i.name`;
+
+            console.log("stories db4", sql)
+            rows = await query(sql, [stories[i].url]);
+            l(chalk.magenta("story===> rows.length:", rows.length))
+            if (rows && rows.length) {
+                for (let j = 0; j < rows.length; j++) {
+                    l(chalk.cyanBright("getting fav mentions"))
+                    const row = rows[j];
+                    sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
+                    let favRows;
+                    favRows = await query(sql, [userid, rows[0].findexarxid]);
+                    if (!favRows || !favRows.length) {
+                        favRows = await query(sql, [sessionid, rows[0].findexarxid]);
+                        if (favRows && favRows.length) {
+                            sql = 'INSERT INTO x41_user_favorites (userid,findexarxid) values (?,?)';
+                            await query(sql, [userid, rows[0].findexarxid])
+                        }
+                    }
+                    l(chalk.cyanBright("mention " + j))
+                    row.fav = favRows && favRows.length ? true : false;
+                }
+            }
+            stories[i].mentions = rows;
+        }
+    }
+    return stories;
+}
+// my team roster
+export const getTrackerSessionList = async ({
+    threadid,
+    userid,
+    sessionid,
+    league,
+}: {
+    threadid: number,
+    userid: string,
+    sessionid: string,
+    league: string,
+}) => {
+    let sql, rows;
+    league = league ? league.toUpperCase() : "";
+    let query = await dbGetQuery("povdb", threadid);
+    if (league && league.length > 1) {
+        sql = `SELECT l.member,l.teamid, t.league from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
+        if (userid) {
+            rows = await query(sql, [userid, league]);
+            if (!rows || !rows.length) {
+                rows = await query(sql, [sessionid, league]);
+                if (rows && rows.length) {
+                    sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+                    for (let i = 0; i < rows.length; i++) {
+                        await query(sql, [rows[i].member, rows[i].teamid, userid]);
+                    }
+                }
+            }
+        }
+        else {
+            rows = await query(sql, [sessionid, league]);
+        }
+    }
+    else {
+        console.log("get tracking list with no league")
+        sql = `SELECT m.member,m.teamid,t.league from x41_list_members m, x41_teams t where t.id=m.teamid and userid=? limit 1000`;
+        if (userid) {
+            rows = await query(sql, [userid]);
+            if (!rows || !rows.length) {
+                rows = await query(sql, [sessionid]);
+                if (rows && rows.length) {
+                    sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+                    for (let i = 0; i < rows.length; i++) {
+                        await query(sql, [rows[i].member, rows[i].teamid, userid]);
+                    }
+                }
+            }
+        }
+        else {
+            rows = await query(sql, [sessionid]);
+        }
+    }
+    return rows;
+}
+// team players
+export const getTeamSessionPlayers = async ({
+    threadid,
+    teamid,
+    userid,
+    sessionid,
+}: {
+    threadid: number,
+    teamid: string,
+    userid?: string,
+    sessionid: string,
+}) => {
+    let sql, rows;
+    userid = userid || "";
+
+    teamid = teamid.toLowerCase();
+    let query = await dbGetQuery("povdb", threadid);
+
+    sql = `SELECT DISTINCT member as name from x41_team_players where teamid=?`;
+    rows = await query(sql, [teamid]);
+
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const { name } = row;
+        sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, SUM(findex)/count(*) as avg_findex,team,league FROM povdb.x41_raw_findex
+        where  team=? and name =?
+        group by name`
+        const currentFindexRows = await query(sql, [teamid, name]);
+        const currentFindex = currentFindexRows && currentFindexRows.length ? currentFindexRows[0] : [];
+        row.mentions = currentFindex.mentions;
+        row.findex = currentFindex.avg_findex;
+        row.tracked = false;
+        sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
+
+        if (userid) {
+            let listRows = await query(sql, [userid, name, teamid]);
+            if (!listRows || !listRows.length) {
+                listRows = await query(sql, [sessionid, name, teamid]);
+                if (listRows && listRows.length) {
+                    sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
+                    await query(sql, [name, teamid, userid]);
+                }
+            }
+            row.tracked = listRows && listRows.length ? true : false;
+        }
+        else {
+            let listRows = await query(sql, [sessionid, name, teamid]);
+            row.tracked = listRows && listRows.length ? true : false;
+        }
+    }
+    return rows;
 }
