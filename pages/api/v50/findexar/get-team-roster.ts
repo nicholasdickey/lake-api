@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../lib/common";
-import { recordEvent } from "../../../../lib/functions/dbservice";
-import { dbEnd } from "../../../../lib/db";
+import { getTeamPlayers } from "../../../../lib/functions/dbservice";
+import { dbEnd } from "../../../../lib/db"
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     await NextCors(req, res, {
@@ -14,17 +14,17 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     let threadid = Math.floor(Math.random() * 100000000);
     try {
         const t1=Date.now();
-        let { sessionid,userid="", name, params } = req.query as {sessionid:string;userid:string;name:string;params:string};
-       console.log("events/record:", { sessionid, userid, name, params });
-        await recordEvent({ threadid, sessionid: process.env.event_env + ":" + sessionid ,userid,sid:sessionid , params, name});
-      //  console.log("record-event:", { time: Date.now() - t1 });
-        return res.status(200).json({ success: true });
+        let {teamid,userid} = req.query;
+        const players=await getTeamPlayers({ threadid,teamid:teamid as string,userid:userid as string||""});
+       // l(chalk.magentaBright("API get team players called",teamid,userid,players.length,players));
+       l("get-team-players",js({time:Date.now()-t1}));
+       return res.status(200).json({ success: true,players });
     }
     catch(x){
         console.log("Error in events/record:", x);
         return res.status(500).json({ success: false });
     }    
-    finally {  
+    finally {   
         dbEnd(threadid)
     }
 };

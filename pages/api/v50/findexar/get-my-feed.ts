@@ -20,12 +20,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         let mentions;
       
         if(league){
-            l(chalk.greenBright("get-filtered-mentions: league",league)  )
+            l(chalk.greenBright("get-my-feed: league",league)  )
             mentions=await getFilteredLeagueSessionMentions({ threadid,league,userid,sessionid});
            // l(chalk.greenBright("get-filtered-mentions: mentions",js(mentions))  )
         }
-        else 
-            mentions=await getFilteredAllSessionMentions({ threadid,userid,sessionid});   
+        else {
+            l(chalk.yellowBright("get-my-feed: all",userid,sessionid ))
+            mentions=await getFilteredAllSessionMentions({ threadid,userid,sessionid});
+        }   
         
         return res.status(200).json({ success: true,mentions });
     }

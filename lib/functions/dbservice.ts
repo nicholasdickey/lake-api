@@ -381,12 +381,14 @@ export const recordEvent = async ({
     threadid,
     name,
     sessionid,
+    userid,
     sid,
     params
 }: {
     threadid: number,
     name: string,
     sessionid: string,
+    userid: string,
     sid: string,
     params: string
 }) => {
@@ -397,8 +399,8 @@ export const recordEvent = async ({
         let sql, result;
         const millis = microtime();
         let query = await dbGetQuery("povdb", threadid);
-        sql = `INSERT INTO x41_events (name,sessionid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${sid}','${params}','${millis}',now())`;
-        let rows = await query(`INSERT INTO x41_events (name,sessionid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,now(),?,?)`, [name, sessionid, sid, params, millis, fbclid, utm_content]);
+        sql = `INSERT INTO x41_events (name,sessionid,userid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${userid}','${sid}','${params}','${millis}',now())`;
+        let rows = await query(`INSERT INTO x41_events (name,sessionid,userid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,?,now(),?,?)`, [name, sessionid, userid, sid, params, millis, fbclid, utm_content]);
         const old = millis - 3 * 365 * 24 * 3600 * 1000;
         sql = `DELETE FROM events where millis<${old}`;
         await query(`DELETE FROM x41_events where millis<?`, [old]);
@@ -883,7 +885,8 @@ export const getTrackerList = async ({
     league = league ? league.toUpperCase() : "";
     let query = await dbGetQuery("povdb", threadid);
     if (league && league.length > 1) {
-        sql = `SELECT l.member,l.teamid, t.league from x41_list_members l,x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
+        sql = `SELECT l.member,l.teamid, t.league from x41_list_members l,
+        x41_teams t where t.id=l.teamid and userid=? and t.league=? limit 1000`;
         rows = await query(sql, [userid, league]);
     }
     else {
@@ -2229,19 +2232,24 @@ export const getFilteredAllSessionMentions = async ({  //my feed
     let sql, rows;
     let query = await dbGetQuery("povdb", threadid);
     // Get current findex, findex history, and mentions
-    if (userid) {
-        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav
+    if (userid || sessionid) {
+
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,i.summary,not f.xid is null as fav
     FROM povdb.x41_raw_findex i
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
     povdb.x41_list_members m
-    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `
-        rows = await query(sql, [userid, userid]);
+    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `;
+        if (userid) {
+            rows = await query(sql, [userid, userid]);
+        }
         if (!rows || !rows.length) {
-
+            console.log("calling sessionid q", sql, sessionid);
             rows = await query(sql, [sessionid, sessionid]);
-            if (rows && rows.length) {
+            console.log("res", rows)
+            if (rows && rows.length && userid) {
                 sql = 'SELECT * from x41_list_members where userid=?';
                 let rows2 = await query(sql, [sessionid]);
+
                 sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';
 
                 if (rows2 && rows2.length) {
@@ -2287,18 +2295,20 @@ export const getFilteredLeagueSessionMentions = async ({ //my feed for the leagu
 
 
     // Get current findex, findex history, and mentions
-    if (userid)
-        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.type, i.name, i.url, i.findex,i.summary ,not f.xid is null as fav
+    if (userid || sessionid) {
+        sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team, i.teamName, i.type, i.name, i.url, i.findex,i.summary ,not f.xid is null as fav
     FROM povdb.x41_raw_findex i
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
     povdb.x41_list_members m 
     where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
-    rows = await query(sql, [userid, league, userid]);
-    if (!rows || !rows.length) {
+        if (userid) {
+            rows = await query(sql, [userid, league, userid]);
+        }
+
         if (!rows || !rows.length) { //one time initialization of the user from session
             if (sessionid) {
-                rows = await query(sql, [sessionid]);
-                if (rows && rows.length) {
+                rows = await query(sql, [sessionid, league, sessionid]);
+                if (rows && rows.length && userid) {
                     sql = 'SELECT * from x41_list_members where userid=?';
                     let rows2 = await query(sql, [sessionid]);
                     sql = 'INSERT INTO x41_list_members (member,teamid,userid) values (?,?,?)';

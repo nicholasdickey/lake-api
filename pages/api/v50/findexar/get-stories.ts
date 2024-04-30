@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep, microtime } from "../../../../lib/common";
-import { fetchStories } from "../../../../lib/functions/dbservice";
+import { fetchSessionStories } from "../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../lib/db"
 import { getRedisClient } from "../../../../lib/redis";
 
@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         const t1 = microtime();
 
-        let { league, userid, api_key, page,force } = req.query;
+        let { league,sessionid, userid, api_key, page,force } = req.query as {league:string,sessionid:string,userid:string,api_key:string,page:string,force:string};
         userid = userid == 'null' ? '' : userid||"";
         force = force == 'true'||force=='1' ? "1" : "0";
         if (!page)
@@ -35,7 +35,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             stories = storiesJson ? JSON.parse(storiesJson) : null;
             if (!stories) {
                 console.log("NO CACHE");
-                stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" })
+                stories = await fetchSessionStories({ threadid, league, userid,sessionid, page})
                 await redis?.setex(key, 3600, JSON.stringify(stories));
             }
             else {
@@ -43,7 +43,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             }
         }
         else {
-            stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" });
+            stories = await fetchSessionStories({ threadid, league, userid,sessionid, page });
             if(!userid&&!page)
                 await redis?.setex(key, 3600, JSON.stringify(stories));
         }

@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        l(chalk.yellowBright("API remove tracker list member called",userid,member,teamid));
+        l(chalk.yellowBright("API add tracker list member called",userid,member,teamid));
         await addTrackerListMember({ threadid,userid:userid as string||"",member:member as string||"",teamid:teamid as string||""});
         return res.status(200).json({ success: true });
     }
