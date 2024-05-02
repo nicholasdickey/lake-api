@@ -17,7 +17,9 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         let {slug} = req.query;
         let story=null;
-        
+        if(slug=='undefined'){
+            return res.status(200).json({ success: false,msg:"slug is undefined" });
+        }
         if(slug){
             l(chalk.greenBright("get-story: slug",slug)  )
             const key = `findexar-story-${slug}`;

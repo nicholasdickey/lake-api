@@ -3,7 +3,7 @@ import NextCors from "nextjs-cors";
 import { l, chalk, js, sleep } from "../../../../../../lib/common";
 import { addTrackerListMember } from "../../../../../../lib/functions/dbservice";
 import { dbEnd } from "../../../../../../lib/db"
-
+import {initTeamRostersCache} from "@/lib/functions/qwiket-cache" 
 
 const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     await NextCors(req, res, {
@@ -14,13 +14,15 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userid,api_key,member,teamid} = req.query;
+        let { userid="", api_key, member='', teamid="" } = req.query as { userid: string, api_key: string, member: string, teamid: string };
+        
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
         l(chalk.yellowBright("API add tracker list member called",userid,member,teamid));
-        await addTrackerListMember({ threadid,userid:userid as string||"",member:member as string||"",teamid:teamid as string||""});
-        return res.status(200).json({ success: true });
+        await addTrackerListMember({ threadid, userid, member: member || "", teamid});
+        await initTeamRostersCache(threadid, userid , teamid );
+        res.status(200).json({ success: true });
     }
     catch(x){
         console.log("Error in addTrackerListMember:", x);
