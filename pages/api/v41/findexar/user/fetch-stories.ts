@@ -31,12 +31,12 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         let stories;
         if (!userid && !(+page)&&!(+force)) {
             console.log("TRYING CACHE",key);
-            let storiesJson = await redis?.get(key);
-            stories = storiesJson ? JSON.parse(storiesJson) : null;
+           // let storiesJson = await redis?.get(key);
+           // stories = storiesJson ? JSON.parse(storiesJson) : null;
             if (!stories) {
                 console.log("NO CACHE");
                 stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" })
-                await redis?.setex(key, 3600, JSON.stringify(stories));
+               // await redis?.setex(key, 3600, JSON.stringify(stories));
             }
             else {
                 console.log("CACHE!!!");
@@ -45,8 +45,8 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         }
         else {
             stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" });
-            if(!userid&&!page)
-                await redis?.setex(key, 3600, JSON.stringify(stories));
+           // if(!userid&&!page)
+            //    await redis?.setex(key, 3600, JSON.stringify(stories));
         }
 
         /*const stories=await fetchStories({ threadid,league:league as string,userid:userid as string||"",page:page as string||""})*/
