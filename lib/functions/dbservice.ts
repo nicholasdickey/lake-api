@@ -360,7 +360,7 @@ export const getTeamPlayers = async ({
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const { name } = row;
-        l(chalk.yellow("PLAYER ITER",i,name));
+      //  l(chalk.yellow("PLAYER ITER",i,name));
         sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, team,league FROM povdb.x41_raw_findex
         where  team=? and name =?
         group by name`;
@@ -373,7 +373,7 @@ export const getTeamPlayers = async ({
             sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
             const listRows = await query(sql, [userid, name, teamid]);
             row.tracked = listRows && listRows.length ? 1 : 0;
-            l(chalk.yellow("TRACKED",row.tracked));
+           // l(chalk.yellow("TRACKED",row.tracked));
         }
     }
     return rows;
@@ -402,10 +402,10 @@ export const recordEvent = async ({
         const millis = microtime();
         let query = await dbGetQuery("povdb", threadid);
         sql = `INSERT INTO x41_events (name,sessionid,userid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${userid}','${sid}','${params}','${millis}',now())`;
-        l(chalk.yellowBright("recordEvent",sql))
+       // l(chalk.yellowBright("recordEvent",sql))
         let rows = await query(`INSERT INTO x41_events (name,sessionid,userid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,?,now(),?,?)`, [name, sessionid, userid, sid, params, millis, fbclid, utm_content]);
         const old = millis - 3 * 365 * 24 * 3600 * 1000;
-        l(chalk.yellowBright("recordEvent done1"))
+      //  l(chalk.yellowBright("recordEvent done1"))
      
        /* sql = `DELETE FROM events where millis<${old}`;
         l(chalk.greenBright("calling clean",sql))
@@ -2372,7 +2372,7 @@ export const fetchSessionMentions = async ({
     if (teamid) {
         teamid = teamid.toLowerCase();
     }
-    console.log("dbservice, fetchMentions", { teamid, name, userid, page, league, myteam, pageNum, filterNum })
+    console.log("dbservice, *** fetchMentions ***", { teamid, name, userid, sessionid,page, league, myteam, pageNum, filterNum })
     let query = await dbGetQuery("povdb", threadid);
 
     if (!filterNum) {
@@ -2451,6 +2451,10 @@ export const fetchSessionMentions = async ({
                         favRows = await query(sql, [sessionid, rows[0].findexarxid]);
                     }
                     row.fav = favRows && favRows.length ? true : false;
+                    sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
+                    console.log("TRACKED:",{userid,name:row['name'],teamid},sql)
+                    const listRows = await query(sql, [userid||sessionid, row['name'], teamid]);
+                    row.tracked = listRows && listRows.length ? true : false;
                 }
             }
             return rows;

@@ -40,7 +40,6 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             }
             else {
                 console.log("CACHE!!!");
-            
             }
         }
         else {
