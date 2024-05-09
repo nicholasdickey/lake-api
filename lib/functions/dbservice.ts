@@ -2671,11 +2671,11 @@ export const fetchSessionStories = async ({
 
     let stories;
     if (!league) {
-        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, []);
     }
     else {
-        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_raw_findex f where f.url=i.url and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
+        sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_teams f where f.id=i.channel and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, [league]);
     }
     l(chalk.greenBright("stories", stories));
