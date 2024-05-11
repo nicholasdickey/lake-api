@@ -360,7 +360,7 @@ export const getTeamPlayers = async ({
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         const { name } = row;
-      //  l(chalk.yellow("PLAYER ITER",i,name));
+        //  l(chalk.yellow("PLAYER ITER",i,name));
         sql = `SELECT name,  GROUP_CONCAT(DISTINCT team SEPARATOR ', ') team_menions,count(*) as mentions, team,league FROM povdb.x41_raw_findex
         where  team=? and name =?
         group by name`;
@@ -373,7 +373,7 @@ export const getTeamPlayers = async ({
             sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
             const listRows = await query(sql, [userid, name, teamid]);
             row.tracked = listRows && listRows.length ? 1 : 0;
-           // l(chalk.yellow("TRACKED",row.tracked));
+            // l(chalk.yellow("TRACKED",row.tracked));
         }
     }
     return rows;
@@ -402,15 +402,15 @@ export const recordEvent = async ({
         const millis = microtime();
         let query = await dbGetQuery("povdb", threadid);
         sql = `INSERT INTO x41_events (name,sessionid,userid,sid.params,millis,stamp) VALUES('${name}','${sessionid}','${userid}','${sid}','${params}','${millis}',now())`;
-       // l(chalk.yellowBright("recordEvent",sql))
+        // l(chalk.yellowBright("recordEvent",sql))
         let rows = await query(`INSERT INTO x41_events (name,sessionid,userid,sid,params,millis,stamp,fbclid,ad) VALUES(?,?,?,?,?,?,now(),?,?)`, [name, sessionid, userid, sid, params, millis, fbclid, utm_content]);
         const old = millis - 3 * 365 * 24 * 3600 * 1000;
-      //  l(chalk.yellowBright("recordEvent done1"))
-     
-       /* sql = `DELETE FROM events where millis<${old}`;
-        l(chalk.greenBright("calling clean",sql))
-        await query(`DELETE FROM x41_events where millis<?`, [old]);
-        l(chalk.yellowBright("recordEvent done2"))*/
+        //  l(chalk.yellowBright("recordEvent done1"))
+
+        /* sql = `DELETE FROM events where millis<${old}`;
+         l(chalk.greenBright("calling clean",sql))
+         await query(`DELETE FROM x41_events where millis<?`, [old]);
+         l(chalk.yellowBright("recordEvent done2"))*/
     } catch (e) {
         console.log(chalk.redBright("ERROR", e));
     }
@@ -2179,12 +2179,14 @@ export const getUserSessionFavorites = async ({
     userid,
     sessionid,
     league,
+    page,
 
 }: {
     threadid: number,
     userid: string,
     sessionid: string,
     league: string,
+    page: number
 
 }) => {
     let sql, rows;
@@ -2193,14 +2195,14 @@ export const getUserSessionFavorites = async ({
         sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
         from x41_user_favorites f, 
         x41_raw_findex i
-        where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc limit 1000`;
+        where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc  limit ${page * 25},25`;
         rows = await query(sql, [userid]);
         if (!rows || !rows.length) { //one time initialization of the user from session
             if (sessionid) {
                 sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
                 from x41_user_favorites f, 
                 x41_raw_findex i     
-                where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc limit 1000`;
+                where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc limit 100000`;
                 rows = await query(sql, [sessionid]);
                 sql = 'SELECT * from x41_favorites where userid=?';
                 const rows2 = await query(sql, [sessionid]);
@@ -2214,11 +2216,13 @@ export const getUserSessionFavorites = async ({
         }
     }
     else {
+        console.log("getUserSessionFavorites sessionid:", sessionid);
         sql = `SELECT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,i.summary,1 as fav  
             from x41_user_favorites f, 
             x41_raw_findex i
-            where f.findexarxid=i.xid and f.userid='user_2aMwz0s7fp5y5QhzKxWbqv8frqW' order by f.xid desc limit 1000`;
+            where f.findexarxid=i.xid ${league ? `and i.league='${league}' ` : ''}and f.userid=? order by f.xid desc  limit ${page * 25},25`;
         rows = await query(sql, [sessionid]);
+        console.log("getUserSessionFavorites rows:", rows);
     }
     //console.log("getUserSessionFavorites", sql, rows)
     return rows;
@@ -2229,10 +2233,12 @@ export const getFilteredAllSessionMentions = async ({  //my feed
     threadid,
     userid,
     sessionid,
+    page,
 }: {
     threadid: number;
     userid: string;
     sessionid: string;
+    page: number;
 }) => {
     if (!userid && !sessionid)
         return getAllMentions({ threadid });
@@ -2245,7 +2251,7 @@ export const getFilteredAllSessionMentions = async ({  //my feed
     FROM povdb.x41_raw_findex i
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
     povdb.x41_list_members m
-    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc limit 100 `;
+    where m.teamid=i.team and m.member=i.name and m.userid=? order by i.date desc  limit ${page * 25},25`;
         if (userid) {
             rows = await query(sql, [userid, userid]);
         }
@@ -2273,7 +2279,7 @@ export const getFilteredAllSessionMentions = async ({  //my feed
                         await query(sql, [userid, rows2[i].teamid]);
                     }
                 }
-               
+
             }
         }
     }
@@ -2289,11 +2295,13 @@ export const getFilteredLeagueSessionMentions = async ({ //my feed for the leagu
     league,
     userid,
     sessionid,
+    page,
 }: {
     threadid: number,
     league: string,
     userid: string,
     sessionid: string,
+    page: number,
 }) => {
     if (!userid && !sessionid) {
         return getLeagueMentions({ threadid, league });
@@ -2308,7 +2316,7 @@ export const getFilteredLeagueSessionMentions = async ({ //my feed for the leagu
     FROM povdb.x41_raw_findex i
         LEFT OUTER JOIN x41_user_favorites f on i.XID=f.findexarxid and f.userid=?,
     povdb.x41_list_members m 
-    where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc limit 25`;
+    where m.teamid=i.team and m.member=i.name and i.league=? and m.userid=? order by i.date desc  limit ${page * 25},25`;
         if (userid) {
             rows = await query(sql, [userid, league, userid]);
         }
@@ -2372,7 +2380,7 @@ export const fetchSessionMentions = async ({
     if (teamid) {
         teamid = teamid.toLowerCase();
     }
-    console.log("dbservice, *** fetchMentions ***", { teamid, name, userid, sessionid,page, league, myteam, pageNum, filterNum })
+    console.log("dbservice, *** fetchMentions ***", { teamid, name, userid, sessionid, page, league, myteam, pageNum, filterNum })
     let query = await dbGetQuery("povdb", threadid);
 
     if (!filterNum) {
@@ -2403,8 +2411,8 @@ export const fetchSessionMentions = async ({
                     row.fav = favRows && favRows.length ? true : false;
 
                     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
-                    console.log("TRACKED:",{userid,name,teamid},sql)
-                    const listRows = await query(sql, [userid||sessionid, name, teamid]);
+                    console.log("TRACKED:", { userid, name, teamid }, sql)
+                    const listRows = await query(sql, [userid || sessionid, name, teamid]);
                     row.tracked = listRows && listRows.length ? true : false;
                 }
 
@@ -2452,8 +2460,8 @@ export const fetchSessionMentions = async ({
                     }
                     row.fav = favRows && favRows.length ? true : false;
                     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
-                    console.log("TRACKED:",{userid,name:row['name'],teamid},sql)
-                    const listRows = await query(sql, [userid||sessionid, row['name'], teamid]);
+                    console.log("TRACKED:", { userid, name: row['name'], teamid }, sql)
+                    const listRows = await query(sql, [userid || sessionid, row['name'], teamid]);
                     row.tracked = listRows && listRows.length ? true : false;
                 }
             }

@@ -13,14 +13,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let {league="",userid="",sessionid="",api_key=""} = req.query as {league:string,userid:string,sessionid:string,api_key:string};
+        let {league="",userid="",sessionid="",api_key="",page='0' } = req.query as {league:string,userid:string,sessionid:string,api_key:string,page:string};
         if (api_key != process.env.LAKE_API_KEY) {
             return res.status(401).json({ success: false });
         }
         
         let mentions;
-            l(chalk.greenBright("get-mentions: league",league)  )
-            mentions=await getUserSessionFavorites({ threadid,league,userid,sessionid});
+            l(chalk.greenBright("get-favorites: league",js({league,userid,sessionid}))  )
+            mentions=await getUserSessionFavorites({ threadid,league,userid,sessionid,page:+page});
            // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )
           return res.status(200).json({ success: true,mentions });
     }

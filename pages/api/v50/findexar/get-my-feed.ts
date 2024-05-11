@@ -13,7 +13,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let {league="",userid="",api_key="",sessionid=""} = req.query as {league:string,userid:string,api_key:string,sessionid:string};
+        let {league="",userid="",api_key="",sessionid="",page="0"} = req.query as {league:string,userid:string,api_key:string,sessionid:string,page:string};
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
@@ -21,12 +21,12 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
       
         if(league){
             l(chalk.greenBright("get-my-feed: league",league)  )
-            mentions=await getFilteredLeagueSessionMentions({ threadid,league,userid,sessionid});
+            mentions=await getFilteredLeagueSessionMentions({ threadid,league,userid,sessionid,page:Number(page)});
            // l(chalk.greenBright("get-filtered-mentions: mentions",js(mentions))  )
         }
         else {
             l(chalk.yellowBright("get-my-feed: all",userid,sessionid ))
-            mentions=await getFilteredAllSessionMentions({ threadid,userid,sessionid});
+            mentions=await getFilteredAllSessionMentions({ threadid,userid,sessionid,page:Number(page)});
         }   
         
         return res.status(200).json({ success: true,mentions });
