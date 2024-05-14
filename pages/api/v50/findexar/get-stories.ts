@@ -14,7 +14,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     const redis = await getRedisClient({});
-    l(chalk.blueBright("BEGIN FETCH-STORIES"));
+   // l(chalk.blueBright("BEGIN FETCH-STORIES"));
     try {
         const t1 = microtime();
 
@@ -27,14 +27,14 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(401).json({ success: false });
         }
         const key = `stories-${league}`;
-        console.log("fetch-stories inputs:", key, userid, page, force);
+       // console.log("fetch-stories inputs:", key, userid, page, force);
         let stories;
         if (!userid && !(+page)&&!(+force)) {
-            console.log("TRYING CACHE",key);
+           // console.log("TRYING CACHE",key);
             //let storiesJson = await redis?.get(key);
             //stories = storiesJson ? JSON.parse(storiesJson) : null;
             if (true/*!stories*/) {
-                console.log("NO CACHE");
+               // console.log("NO CACHE");
                 stories = await fetchSessionStories({ threadid, league, userid,sessionid, page})
                // await redis?.setex(key, 3600, JSON.stringify(stories));
             }
@@ -50,7 +50,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
 
         /*const stories=await fetchStories({ threadid,league:league as string,userid:userid as string||"",page:page as string||""})*/
         const t2 = microtime();
-        console.log("fetch-stories:", t2 - t1);
+       // console.log("fetch-stories:", t2 - t1);
         return res.status(200).json({ success: true, stories });
     }
     catch (x) {

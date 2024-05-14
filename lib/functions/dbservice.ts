@@ -1331,11 +1331,11 @@ export const fetchStories = async ({
                 l(chalk.magenta("story===> rows.length:", rows.length))
                 if (rows && rows.length) {
                     for (let j = 0; j < rows.length; j++) {
-                        l(chalk.cyanBright("getting fav mentions"))
+                       //l(chalk.cyanBright("getting fav mentions"))
                         const row = rows[j];
                         sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
                         const favRows = await query(sql, [userid, rows[0].findexarxid]);
-                        l(chalk.cyanBright("mention " + j))
+                       // l(chalk.cyanBright("mention " + j))
                         row.fav = favRows && favRows.length ? true : false;
                     }
                 }
@@ -1540,9 +1540,9 @@ export const reportEvents = async ({
     /* if (process.env.event_env != 'DEV') {
          sql = `select distinct sid,from_unixtime(millis/1000) stamp from x41_events where not name like '%bot%' and name not like '%ssr%' and name not like '%prayer%' and params not like '%test%' and sessionid not like '%dev%' and  millis>? group by sid   order by stamp desc `;
      }*/
-    console.log("run query:", sql);
+  //  console.log("run query:", sql);
     let rows = await query(sql, [millis - 24 * 3600 * 1000]);
-    l(chalk.yellow(sql))
+   // l(chalk.yellow(sql))
     //const filledSql = fillInParams(sql, [millis - 24 * 3600 * 1000]);
     // l(chalk.blueBright("reportEvents", filledSql, js(rows)));
     let retval: any = {};
@@ -1571,7 +1571,7 @@ export const reportEvents = async ({
             record['name'] = rows2[j]['name'];
             record['sessionid'] = sessionid;
             record['stamp'] = rows2[j]['stamp'];
-            l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
+          //  l(chalk.yellowBright("params", record['name'], rows2[j]['params']));
             let params = { "empty": "" };
             try {
                 params = JSON.parse(rows2[j]['params']);
@@ -1580,19 +1580,19 @@ export const reportEvents = async ({
                 l(chalk.redBright("error parsing params", e, rows2[j]['params']));
             }
 
-            l(chalk.magentaBright("oarams", js({ name, ...params })));
+          //  l(chalk.magentaBright("oarams", js({ name, ...params })));
             // record.add(...params);
             for (const key in params) {
                 //@ts-ignore
                 record[key] = params[key];
             }
-            l(chalk.greenBright("record", js(record)));
+          //  l(chalk.greenBright("record", js(record)));
             itemRetval.items.push(record);
 
 
         }
     }
-    l(chalk.greenBright("retval", js(retval)));
+  //  l(chalk.greenBright("retval", js(retval)));
     return retval;
 }
 
@@ -2674,7 +2674,7 @@ export const fetchSessionStories = async ({
     let sql, rows;
     const pageNum = page ? +page : 0;
     league = league ? league.toUpperCase() : '';
-    console.log("dbservice, fetchStories", { userid, page, league, pageNum })
+    //console.log("dbservice, fetchStories", { userid, page, league, pageNum })
     let query = await dbGetQuery("povdb", threadid);
 
     let stories;
@@ -2686,12 +2686,12 @@ export const fetchSessionStories = async ({
         sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_teams f where f.id=i.channel and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, [league]);
     }
-    l(chalk.greenBright("stories", stories));
+  //  l(chalk.greenBright("stories", stories));
     for (let i = 0; i < stories.length; i++) {
         let mentions;
-        l(chalk.yellow("story", i, stories[i].url))
+      //  l(chalk.yellow("story", i, stories[i].url))
 
-        l(chalk.magenta("story", i, stories[i].url, 'user'));
+      //  l(chalk.magenta("story", i, stories[i].url, 'user'));
         if (league) {
             sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i,
@@ -2699,7 +2699,7 @@ export const fetchSessionStories = async ({
                             
                         where i.league=? and l.url=i.url and l.url=?
                         order by i.name`;
-            console.log("stories b3", sql)
+          // console.log("stories b3", sql)
             rows = await query(sql, [league, stories[i].url]);
             if (rows && rows.length) {
                 for (let j = 0; j < rows.length; j++) {
@@ -2726,7 +2726,7 @@ export const fetchSessionStories = async ({
             stories[i].mentions = rows;
         }
         else {
-            l(chalk.magenta("story", i, stories[i].url, 'no league'));
+           // l(chalk.magenta("story", i, stories[i].url, 'no league'));
             sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i,
                         x41_league_items l      
@@ -2739,7 +2739,7 @@ export const fetchSessionStories = async ({
             l(chalk.magenta("story===> rows.length:", rows.length))
             if (rows && rows.length) {
                 for (let j = 0; j < rows.length; j++) {
-                    l(chalk.cyanBright("getting fav mentions"))
+                   // l(chalk.cyanBright("getting fav mentions"))
                     const row = rows[j];
                     sql = `SELECT DISTINCT xid from x41_user_favorites where userid=? and findexarxid=? limit 1`;
                     let favRows;
@@ -2751,7 +2751,7 @@ export const fetchSessionStories = async ({
                             await query(sql, [userid, rows[0].findexarxid])
                         }
                     }
-                    l(chalk.cyanBright("mention " + j))
+                  //  l(chalk.cyanBright("mention " + j))
                     row.fav = favRows && favRows.length ? true : false;
                 }
             }
@@ -2794,7 +2794,7 @@ export const getTrackerSessionList = async ({
         }
     }
     else {
-        console.log("get tracking list with no league")
+       // console.log("get tracking list with no league")
         sql = `SELECT m.member,m.teamid,t.league from x41_list_members m, x41_teams t where t.id=m.teamid and userid=? limit 1000`;
         if (userid) {
             rows = await query(sql, [userid]);

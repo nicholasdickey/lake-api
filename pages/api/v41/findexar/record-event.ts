@@ -15,7 +15,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         const t1=Date.now();
         let { sessionid,userid="", name, params } = req.query as {sessionid:string;userid:string;name:string;params:string};
-       console.log("events/record:", { sessionid, userid, name, params });
+      // console.log("events/record:", { sessionid, userid, name, params });
         await recordEvent({ threadid, sessionid: process.env.event_env + ":" + sessionid ,userid,sid:sessionid , params, name});
       //  console.log("record-event:", { time: Date.now() - t1 });
         return res.status(200).json({ success: true });

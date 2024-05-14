@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
-        l(chalk.yellowBright("API get list members called",userId,listxid));
+       // l(chalk.yellowBright("API get list members called",userId,listxid));
         const members=await getUserListMembers({ threadid,userId:userId as string||"",listxid:listxid as string||""});
         return res.status(200).json({ success: true,members });
     }
