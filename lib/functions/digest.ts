@@ -32,7 +32,7 @@ export default async function digest(
         messages: messages,
       })
       const content = `<p>${completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>')}</p>`;
-      console.log("result:", js(content))
+     // console.log("result:", js(content))
       return content;
     }
     catch (e) {

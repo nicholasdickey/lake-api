@@ -1328,7 +1328,7 @@ export const fetchStories = async ({
 
                // console.log("stories db4", sql)
                 rows = await query(sql, [stories[i].url]);
-                l(chalk.magenta("story===> rows.length:", rows.length))
+               // l(chalk.magenta("story===> rows.length:", rows.length))
                 if (rows && rows.length) {
                     for (let j = 0; j < rows.length; j++) {
                        //l(chalk.cyanBright("getting fav mentions"))
@@ -1371,7 +1371,7 @@ export const getStory = async ({
 
   //  console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
-    l(chalk.magenta("story===> rows.length:", rows.length))
+    //l(chalk.magenta("story===> rows.length:", rows.length))
 
     story.mentions = rows;
     return story;
@@ -1428,7 +1428,7 @@ export const getSlugStory = async ({
 
   //  console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
-    l(chalk.magenta("story===> rows.length:", rows.length))
+   // l(chalk.magenta("story===> rows.length:", rows.length))
 
     story.mentions = rows;
     return story;
@@ -2258,7 +2258,7 @@ export const getFilteredAllSessionMentions = async ({  //my feed
         if (!rows || !rows.length) {
             console.log("calling sessionid q", sql, sessionid);
             rows = await query(sql, [sessionid, sessionid]);
-            console.log("res", rows)
+            //console.log("res", rows)
             if (rows && rows.length && userid) {
                 sql = 'SELECT * from x41_list_members where userid=?';
                 let rows2 = await query(sql, [sessionid]);
@@ -2736,7 +2736,7 @@ export const fetchSessionStories = async ({
 
            // console.log("stories db4", sql)
             rows = await query(sql, [stories[i].url]);
-            l(chalk.magenta("story===> rows.length:", rows.length))
+           // l(chalk.magenta("story===> rows.length:", rows.length))
             if (rows && rows.length) {
                 for (let j = 0; j < rows.length; j++) {
                    // l(chalk.cyanBright("getting fav mentions"))
