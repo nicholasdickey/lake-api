@@ -12,6 +12,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         origin: "*",
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
     });
+    const t1=Date.now();
     let threadid = Math.floor(Math.random() * 100000000);
     const redis = await getRedisClient({});
     try {
@@ -26,10 +27,18 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             const storyJson = await redis?.get(key);
             console.log("storyJson",storyJson)
             if(storyJson){
+                console.log("cache storyJson found",key)
                 story=JSON.parse(storyJson);
+                const t2=Date.now();
+                console.log("timing of getSlugStory=",t2-t1);
+             
             }
             else {
+               
                 story=await getSlugStory({ threadid,slug:slug as string});
+                const t2=Date.now();
+                console.log("timing of getSlugStory=",t2-t1);
+                l(chalk.greenBright("get-story: slug",slug,"took",t2-t1,"ms")  )
                 await redis?.setex(key, 7*24*3600, JSON.stringify(story));
             }
            // l(chalk.greenBright("get-mentions: mentions",js(mentions))  )

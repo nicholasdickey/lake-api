@@ -1111,7 +1111,7 @@ export const fetchMentions = async ({
          
                     where i.team=?   and t.id=p.teamid and i.name=p.member and i.team=t.id
                     order by date desc limit ${pageNum * 25},25`;
-                console.log("db2", sql)
+                //console.log("db2", sql)
                 rows = await query(sql, [teamid, teamid]);
                 if (rows && rows.length) {
                     for (let i = 0; i < rows.length; i++) {
@@ -1145,7 +1145,7 @@ export const fetchMentions = async ({
                     sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i
                         order by i.date desc limit ${pageNum * 25},25`;
-                    console.log("db4", sql)
+                   // console.log("db4", sql)
                     rows = await query(sql, []);
                     if (rows && rows.length) {
                         for (let i = 0; i < rows.length; i++) {
@@ -1251,7 +1251,7 @@ export const fetchStories = async ({
     let sql, rows;
     const pageNum = page ? +page : 0;
     league = league ? league.toUpperCase() : '';
-    console.log("dbservice, fetchStories", { userid, page, league, pageNum })
+   // console.log("dbservice, fetchStories", { userid, page, league, pageNum })
     let query = await dbGetQuery("povdb", threadid);
 
     let stories;
@@ -1263,10 +1263,10 @@ export const fetchStories = async ({
         sql = `SELECT DISTINCT i.slug,i.xid,i.title, i.digest as digest, i.url, i.image,i.site_name,i.authors,i.createdTime  FROM povdb.x41_league_items i, povdb.x41_teams f where f.id=i.channel and f.league=? order by createdTime desc limit ${pageNum * 5},5`;
         stories = await query(sql, [league]);
     }
-    l(chalk.greenBright("stories", stories));
+  //  l(chalk.greenBright("stories", stories));
     for (let i = 0; i < stories.length; i++) {
         let mentions;
-        l(chalk.yellow("story", i, stories[i].url))
+       // l(chalk.yellow("story", i, stories[i].url))
         if (!userid) {
             if (!league) {
                 l(chalk.magenta("no user, no league"))
@@ -1277,7 +1277,7 @@ export const fetchStories = async ({
                     where l.url=i.url
                     and l.url=?
                     order by i.name`
-                console.log("stories db1", sql)
+               // console.log("stories db1", sql)
                 mentions = await query(sql, [stories[i].url]);
                 console.log("after query")
             }
@@ -1289,15 +1289,15 @@ export const fetchStories = async ({
                     and l.url=? 
                     and i.league=? 
                     order by i.name`;
-                console.log("stories db2", sql)
+               // console.log("stories db2", sql)
                 mentions = await query(sql, [stories[i].url, league]);
             }
             stories[i].mentions = mentions;
-            l(chalk.cyanBright("story", i, stories[i].url, mentions))
+          //  l(chalk.cyanBright("story", i, stories[i].url, mentions))
 
         }
         else {
-            l(chalk.magenta("story", i, stories[i].url, 'user'));
+           // l(chalk.magenta("story", i, stories[i].url, 'user'));
             if (league) {
                 sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team,i.teamName, i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i,
@@ -1318,7 +1318,7 @@ export const fetchStories = async ({
                 stories[i].mentions = rows;
             }
             else {
-                l(chalk.magenta("story", i, stories[i].url, 'no league'));
+              //  l(chalk.magenta("story", i, stories[i].url, 'no league'));
                 sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i,
                         x41_league_items l      
@@ -1326,7 +1326,7 @@ export const fetchStories = async ({
                         and l.url=?
                         order by i.name`;
 
-                console.log("stories db4", sql)
+               // console.log("stories db4", sql)
                 rows = await query(sql, [stories[i].url]);
                 l(chalk.magenta("story===> rows.length:", rows.length))
                 if (rows && rows.length) {
@@ -1369,7 +1369,7 @@ export const getStory = async ({
                         and l.url=?
                         order by i.name`;
 
-    console.log("stories db4", sql)
+  //  console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
     l(chalk.magenta("story===> rows.length:", rows.length))
 
@@ -1426,7 +1426,7 @@ export const getSlugStory = async ({
                         and l.url=?
                         order by i.name`;
 
-    console.log("stories db4", sql)
+  //  console.log("stories db4", sql)
     rows = await query(sql, [story.url]);
     l(chalk.magenta("story===> rows.length:", rows.length))
 
@@ -2380,7 +2380,7 @@ export const fetchSessionMentions = async ({
     if (teamid) {
         teamid = teamid.toLowerCase();
     }
-    console.log("dbservice, *** fetchMentions ***", { teamid, name, userid, sessionid, page, league, myteam, pageNum, filterNum })
+    //console.log("dbservice, *** fetchMentions ***", { teamid, name, userid, sessionid, page, league, myteam, pageNum, filterNum })
     let query = await dbGetQuery("povdb", threadid);
 
     if (!filterNum) {
@@ -2411,7 +2411,7 @@ export const fetchSessionMentions = async ({
                     row.fav = favRows && favRows.length ? true : false;
 
                     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
-                    console.log("TRACKED:", { userid, name, teamid }, sql)
+                   // console.log("TRACKED:", { userid, name, teamid }, sql)
                     const listRows = await query(sql, [userid || sessionid, name, teamid]);
                     row.tracked = listRows && listRows.length ? true : false;
                 }
@@ -2438,7 +2438,7 @@ export const fetchSessionMentions = async ({
          
                     where i.team=?   and t.id=p.teamid and i.name=p.member and i.team=t.id
                     order by date desc limit ${pageNum * 25},25`;
-            console.log("db2", sql)
+           // console.log("db2", sql)
             rows = await query(sql, [teamid, teamid]);
             if (rows && rows.length) {
                 for (let i = 0; i < rows.length; i++) {
@@ -2460,7 +2460,7 @@ export const fetchSessionMentions = async ({
                     }
                     row.fav = favRows && favRows.length ? true : false;
                     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
-                    console.log("TRACKED:", { userid, name: row['name'], teamid }, sql)
+                   // console.log("TRACKED:", { userid, name: row['name'], teamid }, sql)
                     const listRows = await query(sql, [userid || sessionid, row['name'], teamid]);
                     row.tracked = listRows && listRows.length ? true : false;
                 }
@@ -2502,7 +2502,7 @@ export const fetchSessionMentions = async ({
                 sql = `SELECT DISTINCT i.xid as findexarxid,i.date, i.league, i.team, i.teamName,i.type, i.name, i.url, i.findex,summary 
                         from x41_raw_findex i
                         order by i.date desc limit ${pageNum * 25},25`;
-                console.log("db4", sql)
+             //  console.log("db4", sql)
                 rows = await query(sql, []);
                 if (rows && rows.length) {
                     for (let i = 0; i < rows.length; i++) {
@@ -2734,7 +2734,7 @@ export const fetchSessionStories = async ({
                         and l.url=?
                         order by i.name`;
 
-            console.log("stories db4", sql)
+           // console.log("stories db4", sql)
             rows = await query(sql, [stories[i].url]);
             l(chalk.magenta("story===> rows.length:", rows.length))
             if (rows && rows.length) {
