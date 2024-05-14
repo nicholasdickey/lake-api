@@ -2256,7 +2256,7 @@ export const getFilteredAllSessionMentions = async ({  //my feed
             rows = await query(sql, [userid, userid]);
         }
         if (!rows || !rows.length) {
-            console.log("calling sessionid q", sql, sessionid);
+           // console.log("calling sessionid q", sql, sessionid);
             rows = await query(sql, [sessionid, sessionid]);
             //console.log("res", rows)
             if (rows && rows.length && userid) {
