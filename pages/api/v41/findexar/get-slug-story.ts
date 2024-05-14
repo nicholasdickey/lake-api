@@ -50,7 +50,8 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(500).json({ success: false });
     }    
     finally {       
-        dbEnd(threadid)
+        dbEnd(threadid);
+        redis?.quit();
     }
 };
 export default handleRequest;
