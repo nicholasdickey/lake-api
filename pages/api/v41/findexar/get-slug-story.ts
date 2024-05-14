@@ -25,7 +25,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             l(chalk.greenBright("get-story: slug",slug)  )
             const key = `findexar-story-${slug}`;
             const storyJson = await redis?.get(key);
-            console.log("storyJson",storyJson)
+           // console.log("storyJson",storyJson)
             if(storyJson){
                 console.log("cache storyJson found",key)
                 story=JSON.parse(storyJson);
