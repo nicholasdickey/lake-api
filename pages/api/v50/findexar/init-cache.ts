@@ -18,7 +18,7 @@ const handleInitCache = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(400).json({ success: false, message: "Missing userid" });
         }
 
-        l(chalk.green("Initializing cache for rosters"));
+      //  l(chalk.green("Initializing cache for rosters"));
         await initRostersCache(threadid, userid, false);
         res.status(200).json({ success: true, message: "Cache initialization successful" });
     } catch (error) {
