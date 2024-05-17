@@ -36,7 +36,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             if (!stories) {
                 console.log("NO CACHE");
                 stories = await fetchStories({ threadid, league: league as string, userid: userid as string || "", page: page as string || "" })
-               // await redis?.setex(key, 3600, JSON.stringify(stories));
+                await redis?.setex(key, 3600, JSON.stringify(stories));
             }
             else {
                 console.log("CACHE!!!");

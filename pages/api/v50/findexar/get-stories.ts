@@ -18,7 +18,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
         const t1 = microtime();
 
-        let { league,sessionid, userid, api_key, page,force } = req.query as {league:string,sessionid:string,userid:string,api_key:string,page:string,force:string};
+        let { league,sessionid, userid, api_key, page='0',force='0' } = req.query as {league:string,sessionid:string,userid:string,api_key:string,page:string,force:string};
         userid = userid == 'null' ? '' : userid||"";
         force = force == 'true'||force=='1' ? "1" : "0";
         if (!page)
@@ -27,16 +27,17 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(401).json({ success: false });
         }
         const key = `stories-${league}`;
-       // console.log("fetch-stories inputs:", key, userid, page, force);
+        console.log("fetch-stories inputs:", key, userid, page, force);
         let stories;
-        if (!userid && !(+page)&&!(+force)) {
-           // console.log("TRYING CACHE",key);
-            //let storiesJson = await redis?.get(key);
-            //stories = storiesJson ? JSON.parse(storiesJson) : null;
-            if (true/*!stories*/) {
-               // console.log("NO CACHE");
+        if (!userid && !(+page)) {
+            console.log("TRYING CACHE",key);
+            
+            let storiesJson = !(+force)?await redis?.get(key):null;
+            stories = storiesJson ? JSON.parse(storiesJson) : null;
+            if (!stories) {
+                console.log("NO CACHE");
                 stories = await fetchSessionStories({ threadid, league, userid,sessionid, page})
-               // await redis?.setex(key, 3600, JSON.stringify(stories));
+                await redis?.setex(key, 3600, JSON.stringify(stories));
             }
             else {
                 console.log("CACHE!!!");       
@@ -50,7 +51,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
 
         /*const stories=await fetchStories({ threadid,league:league as string,userid:userid as string||"",page:page as string||""})*/
         const t2 = microtime();
-       // console.log("fetch-stories:", t2 - t1);
+        console.log("fetch-stories:", t2 - t1);
         return res.status(200).json({ success: true, stories });
     }
     catch (x) {

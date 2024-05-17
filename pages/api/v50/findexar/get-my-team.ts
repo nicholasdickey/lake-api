@@ -19,6 +19,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(401).json({ success: false });
         }
        // l(chalk.yellowBright("API get tracker list members called",userid,league));
+     //  l(chalk.yellowBright("API get myteam members called",userid,league,sessionid));
         const t1=microtime();
         const members=await getTrackerSessionList({ threadid,userid,sessionid,league});
         const t2=microtime();
