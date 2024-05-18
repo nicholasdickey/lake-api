@@ -71,7 +71,7 @@ export default async function handler(
             let urlCache = `https://lake-api.qwiket.com/api/v41/findexar/get-slug-story?slug=${slug}`;
             //urlCache = `https://lake-api.qwiket.com/api/v41/findexar/user/fetch-stories?league=${league}&force=1`;
             await fetch(urlCache);
-            urlCache = `https://lake-api.qwiket.com/api/v50/findexar/fetch-stories?force=1`;
+            urlCache = `https://lake-api.qwiket.com/api/v50/findexar/get-stories?force=1`;
             try {
                 await fetch(urlCache);
             }
