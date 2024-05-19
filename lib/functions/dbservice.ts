@@ -224,16 +224,17 @@ export const getLeagueItems = async ({
     league = league.toUpperCase();
     let query = await dbGetQuery("povdb", threadid);
 
-    sql = `SELECT DISTINCT id from x41_teams where league=?`;
+   /* sql = `SELECT DISTINCT id from x41_teams where league=?`;
     const channels = await query(sql, [league]);
     let chans: string[] = [];
     for (let j = 0; j < channels.length; j++) {
         chans.push(`'${channels[j].id}'`);
     }
     let channelString = chans.join(",");
-
-    sql = `SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
-    const items = await query(sql, []);
+*/
+   // sql = `SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
+   sql=`SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c, x41_teams t  where i.channel=t.id and t.league=?  and i.channel=c.id order by i.createdTime desc limit 100`;
+   const items = await query(sql, [league]);
 
     return items;
 }
