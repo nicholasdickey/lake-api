@@ -233,7 +233,7 @@ export const getLeagueItems = async ({
     let channelString = chans.join(",");
 */
    // sql = `SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c where i.channel in (${channelString}) and i.channel=c.id order by i.createdTime desc limit 100`;
-   sql=`SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c, x41_teams t  where i.channel=t.id and t.league=?  and i.channel=c.id order by i.createdTime desc limit 100`;
+   sql=`SELECT DISTINCT i.slug,i.xid,i.digest,i.digest as longdigest,i.title,i.url,i.createdTime,c.hashtag from x41_league_items i, x41_hashtags c, x41_teams t  where i.channel=t.id and t.league=?  and i.channel=c.id order by i.createdTime desc limit 10`;
    const items = await query(sql, [league]);
 
     return items;
