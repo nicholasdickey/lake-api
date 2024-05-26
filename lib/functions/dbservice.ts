@@ -846,22 +846,46 @@ export const addTrackerListMember = async ({
     threadid,
     userid,
     member,
+    subscrLevel,
     teamid
 }: {
     threadid: number,
     userid: string,
     member: string,
     teamid: string,
+    subscrLevel?: string,
 }) => {
     let sql, rows;
+    const sLevel=subscrLevel ? +subscrLevel : 0;
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
     rows = await query(sql, [userid, member, teamid]);
     if (rows && rows.length)
         return false;
+    const isUser = userid.indexOf('user_') >= 0 ? true : false;
+    let maxUser=false;
+    let maxSubscription=false;
+    if(!isUser){
+        sql = `SELECT xid from x41_list_members where userid=?`;
+        rows = await query(sql, [userid]);
+        if (rows && rows.length>=10){
+            maxUser=true;
+            return {success:false,maxUser,maxSubscription};
+        }
+    }
+    else {
+        sql = `SELECT xid from x41_list_member l, x41_teams t where userid=? and l.teamid=t.id and t.league=(SELECT league from x41_teams where id=?)`;
+        rows = await query(sql, [userid,teamid]);
+        if (rows && rows.length>=10+sLevel*10){
+            maxSubscription=true;
+            return {success:false,maxSubscription,maxUser};
+        }
+    }
+
+
     sql = `INSERT INTO x41_list_members (userid,member,teamid) VALUES (?,?,?)`;
     await query(sql, [userid, member, teamid]);
-    return true;
+    return {success:true,maxUser,maxSubscription};
 }
 export const removeTrackerListMember = async ({
     threadid,

@@ -14,19 +14,19 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     let threadid = Math.floor(Math.random() * 100000000);
     try {
-        let { userid="", api_key, member='', teamid="" } = req.query as { userid: string, api_key: string, member: string, teamid: string };
-        
+        let { userid="", api_key, member='', teamid="",subscrLevel="0" } = req.query as { userid: string, api_key: string, member: string, teamid: string,subscrLevel:string };
+       
         if(api_key!=process.env.LAKE_API_KEY){
             return res.status(401).json({ success: false });
         }
         l(chalk.yellowBright("API add tracker list member called",userid,member,teamid));
-        await addTrackerListMember({ threadid, userid, member: member || "", teamid});
+        const ret= await addTrackerListMember({ threadid, userid, member: member || "", teamid,subscrLevel});
         await initTeamRostersCache(threadid, userid , teamid );
-        res.status(200).json({ success: true });
+        res.status(200).json(ret);
     }
     catch(x){
         console.log("Error in addTrackerListMember:", x);
-        return res.status(500).json({ success: false });
+        return res.status(500).json({ success: false ,error:x});
     }    
     finally {    
         dbEnd(threadid)
