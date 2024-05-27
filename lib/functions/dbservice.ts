@@ -863,6 +863,7 @@ export const addTrackerListMember = async ({
     if (rows && rows.length)
         return false;
     const isUser = userid.indexOf('user_') >= 0 ? true : false;
+    console.log("isUser",isUser)
     let maxUser=false;
     let maxSubscription=false;
     if(!isUser){
@@ -874,12 +875,14 @@ export const addTrackerListMember = async ({
         }
     }
     else {
-        sql = `SELECT xid from x41_list_member l, x41_teams t where userid=? and l.teamid=t.id and t.league=(SELECT league from x41_teams where id=?)`;
+        sql = `SELECT l.xid from x41_list_members l, x41_teams t where userid=? and l.teamid=t.id and t.league=(SELECT league from x41_teams where id=?)`;
         rows = await query(sql, [userid,teamid]);
         if (rows && rows.length>=10+sLevel*10){
+            console.log("MAX SUBSCRIPTION:",rows.length,10+sLevel*10)
             maxSubscription=true;
             return {success:false,maxSubscription,maxUser};
         }
+        console.log("NO MAX SUBSCRIPTION:",rows.length,10+sLevel*10)
     }
 
 
