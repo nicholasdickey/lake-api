@@ -2894,3 +2894,51 @@ export const getTeamSessionPlayers = async ({
     }
     return rows;
 }
+export const updateUserSubscription = async ({
+    threadid,
+    userId,
+    subscriptionId,
+    email,
+    level,
+}: {
+    threadid: number,
+    userId: string,
+    subscriptionId: string,
+    email: string,
+    level: string,
+}) => {
+    let sql, rows;
+    const l=level?+level:0;
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `UPDATE x41_users set subscriberId=?, subscrLevel=?, email=? where userId=? limit 1`;
+    rows = await query(sql, [subscriptionId, l, email, userId]);
+
+}
+export const getUserSubscription = async ({
+    threadid,
+    userId,
+    email,
+}: {
+    threadid: number,
+    userId: string,
+    email: string,
+}) => {
+    let sql, rows;
+
+    let query = await dbGetQuery("povdb", threadid);
+    sql = `SELECT * from x41_user where userId=? limit 1`;
+    rows = await query(sql, [ userId]);
+    if(rows && rows.length){
+        const {subscrLevel,email:currentEmail} = rows[0];
+        if(!currentEmail&&email){
+            sql = `UPDATE x41_user set email=? where userId=? limit 1`;
+            await query(sql, [email, userId]);
+        }
+        return {subscrLevel};
+    }
+    else{
+        return {subscrLevel:0};
+    }
+
+}
+
