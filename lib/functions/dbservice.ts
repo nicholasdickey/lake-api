@@ -877,12 +877,12 @@ export const addTrackerListMember = async ({
     else {
         sql = `SELECT l.xid from x41_list_members l, x41_teams t where userid=? and l.teamid=t.id and t.league=(SELECT league from x41_teams where id=?)`;
         rows = await query(sql, [userid,teamid]);
-        if (rows && rows.length>=10+sLevel*10){
-            console.log("MAX SUBSCRIPTION:",rows.length,10+sLevel*10)
+        if (rows && rows.length>=10+(sLevel+1)*10){
+            console.log("MAX SUBSCRIPTION:",rows.length,10+(sLevel+1)*10)
             maxSubscription=true;
             return {success:false,maxSubscription,maxUser};
         }
-        console.log("NO MAX SUBSCRIPTION:",rows.length,10+sLevel*10)
+        console.log("NO MAX SUBSCRIPTION:",rows.length,10+(sLevel+1)*10)
     }
 
 
@@ -2926,12 +2926,13 @@ export const getUserSubscription = async ({
     let sql, rows;
 
     let query = await dbGetQuery("povdb", threadid);
-    sql = `SELECT * from x41_user where userId=? limit 1`;
+    sql = `SELECT * from x41_users where userId=? limit 1`;
     rows = await query(sql, [ userId]);
+    console.log("===>GET USER SUBSCRIPTION",sql,userId,rows);
     if(rows && rows.length){
         const {subscrLevel,email:currentEmail} = rows[0];
         if(!currentEmail&&email){
-            sql = `UPDATE x41_user set email=? where userId=? limit 1`;
+            sql = `UPDATE x41_users set email=? where userId=? limit 1`;
             await query(sql, [email, userId]);
         }
         return {subscrLevel};

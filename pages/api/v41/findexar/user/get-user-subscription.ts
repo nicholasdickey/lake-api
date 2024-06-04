@@ -19,7 +19,7 @@ const handleRequest = async (req: NextApiRequest, res: NextApiResponse) => {
             return res.status(401).json({ success: false });
         }
         let {subscrLevel} = await  getUserSubscription ({ threadid,userId:userId as string||"",email:email as string||""});
-        return res.status(200).json({ success: true,subscrLevel});
+        return res.status(200).json({ success: true,subscription:{subscrLevel}});
     }
     catch(x){
         console.log("Error in getDetails:", x);
