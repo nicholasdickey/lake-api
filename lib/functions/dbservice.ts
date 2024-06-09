@@ -856,7 +856,9 @@ export const addTrackerListMember = async ({
     subscrLevel?: string,
 }) => {
     let sql, rows;
-    const sLevel=subscrLevel ? +subscrLevel : 0;
+    let sLevel=subscrLevel ? +subscrLevel : 0;
+    if(sLevel==4)
+        sLevel=3; // the only difference is monthly vs yearly, otherwise same level
     let query = await dbGetQuery("povdb", threadid);
     sql = `SELECT xid from x41_list_members where userid=? and member=? and teamid=? limit 1`;
     rows = await query(sql, [userid, member, teamid]);
