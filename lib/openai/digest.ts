@@ -189,7 +189,7 @@ export default async function handler(
                 try {
                     if (qwikets.length > 17||!hasSummary) {
                         const completion = await openai.createChatCompletion({
-                            model: "gpt-3.5-turbo",
+                            model: "gpt-4o-mini-2024-07-18",
                             messages: qwiketMessages,
                             max_tokens: 200,
                         })
@@ -689,7 +689,7 @@ export default async function handler(
         try {
             //@ts-ignore
             completion = await openai.createChatCompletion({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4o-mini-2024-07-18",
                 messages: messages,
             })
             l(chalk.cyan.bold("AI RESULT", i), completion.data.choices[0]?.message?.conten)

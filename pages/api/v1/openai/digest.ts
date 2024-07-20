@@ -155,7 +155,7 @@ export default async function handler(
                     text = text.substring(0, 14000);
                 let qwiketMessages: ChatCompletionRequestMessage[] = [{ role: 'user', content: `Please summarize in under 140 characters and select only one appropriate hash tag from this list (#immigration,#politics, #social, #ukraine, #israel, #economy, #foreignaffairs,#military,#culture,#history,#health,#education,#criminal):${text}` }];
                 const completion = await openai.createChatCompletion({
-                    model: "gpt-3.5-turbo",
+                    model: "gpt-4o-mini-2024-07-18",
                     messages: qwiketMessages,
                     max_tokens: 200,
 
@@ -351,7 +351,7 @@ export default async function handler(
             try {
                 //@ts-ignore
                 completion = await openai.createChatCompletion({
-                    model: "gpt-3.5-turbo",
+                    model: "gpt-4o-mini-2024-07-18",
                     messages: messages,
 
 

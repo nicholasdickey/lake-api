@@ -47,7 +47,7 @@ export default async function handler(
       console.log("req.body", configuration.apiKey, messages)
       //await sleep(10000);
       let completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini-2024-07-18",
         messages: messages,
       })
       const content = `<p>${completion.data.choices[0]?.message?.content.replace('\n\n', '</p><p>')}</p>`;

@@ -31,7 +31,7 @@ export default async function prayer(
                     Attach an appropriate scripture to the prayer. Do not say "Scripture:" just attach it. `
             },];
             let completion = await openai.createChatCompletion({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4o-mini-2024-07-18",
                 messages: messages,
             })
             console.log("messages:", js(messages));

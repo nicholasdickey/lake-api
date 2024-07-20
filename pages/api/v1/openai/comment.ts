@@ -148,7 +148,7 @@ export default async function handler(
     l(chalk.cyan.bold("CALLING AI", i))
     try {
       completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini-2024-07-18",
         messages: messages,
       })
       if (completion) {
